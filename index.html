@@ -7,19 +7,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0a0c0f;
-    --surface: #111418;
-    --card: #161b22;
-    --border: #21272f;
-    --green: #00e87a;
-    --green-dim: #00e87a22;
-    --yellow: #f5c518;
-    --yellow-dim: #f5c51822;
-    --blue: #3d9eff;
-    --blue-dim: #3d9eff22;
-    --red: #ff4757;
-    --text: #e8edf3;
-    --muted: #6b7280;
+    --bg: #0a0c0f; --surface: #111418; --card: #161b22; --border: #21272f;
+    --green: #00e87a; --green-dim: #00e87a22; --yellow: #f5c518; --yellow-dim: #f5c51822;
+    --blue: #3d9eff; --blue-dim: #3d9eff22; --red: #ff4757; --text: #e8edf3; --muted: #6b7280;
   }
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   body { background:var(--bg); color:var(--text); font-family:'Syne',sans-serif; min-height:100vh; overflow-x:hidden; }
@@ -60,14 +50,14 @@
   .results { padding:0 20px 120px; display:flex; flex-direction:column; gap:10px; }
   .section-label { font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin:10px 0 4px; }
 
-  .spot-card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:14px; display:flex; align-items:center; gap:12px; cursor:pointer; transition:transform 0.12s, border-color 0.12s; animation:slideUp 0.35s ease both; }
+  .spot-card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:14px; display:flex; align-items:center; gap:12px; cursor:pointer; transition:transform 0.12s; animation:slideUp 0.35s ease both; }
   .spot-card:active { transform:scale(0.98); }
   @keyframes slideUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
 
   .spot-icon-wrap { width:48px; height:48px; border-radius:13px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
-  .spot-icon-wrap.parking_garage, .spot-icon-wrap.parking_lot { background:var(--green-dim); }
-  .spot-icon-wrap.street { background:var(--blue-dim); }
-  .spot-icon-wrap.private { background:var(--yellow-dim); }
+  .spot-icon-wrap.garage { background:var(--green-dim); }
+  .spot-icon-wrap.lot { background:var(--blue-dim); }
+  .spot-icon-wrap.street { background:var(--yellow-dim); }
 
   .spot-info { flex:1; min-width:0; }
   .spot-name { font-size:14px; font-weight:700; margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -77,11 +67,11 @@
   .spot-right { text-align:right; flex-shrink:0; }
   .avail-badge { display:inline-flex; align-items:center; gap:4px; padding:4px 9px; border-radius:100px; font-size:11px; font-weight:700; }
   .avail-badge.open { background:var(--green-dim); color:var(--green); }
+  .avail-badge.closed { background:rgba(255,71,87,0.15); color:var(--red); }
   .avail-badge.unknown { background:#ffffff11; color:var(--muted); }
   .avail-badge::before { content:''; width:5px; height:5px; border-radius:50%; background:currentColor; }
   .walk-time { font-family:'Space Mono',monospace; font-size:11px; color:var(--muted); margin-top:3px; }
 
-  /* Sheet */
   .sheet-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:100; opacity:0; pointer-events:none; transition:opacity 0.3s; backdrop-filter:blur(4px); }
   .sheet-overlay.open { opacity:1; pointer-events:all; }
   .sheet { position:fixed; bottom:0; left:0; right:0; background:var(--surface); border-radius:24px 24px 0 0; border-top:1px solid var(--border); padding:12px 24px 44px; z-index:101; transform:translateY(100%); transition:transform 0.35s cubic-bezier(0.32,0.72,0,1); max-height:85vh; overflow-y:auto; }
@@ -105,11 +95,6 @@
   .empty.show { display:block; }
   .empty-icon { font-size:44px; margin-bottom:10px; }
   .empty h3 { font-size:17px; margin-bottom:6px; color:var(--text); }
-
-  /* API key setup notice */
-  .api-notice { margin:0 20px 16px; padding:14px 16px; background:#f5c51811; border:1px solid #f5c51844; border-radius:12px; font-size:13px; color:var(--yellow); line-height:1.5; display:none; }
-  .api-notice.show { display:block; }
-  .api-notice a { color:var(--yellow); }
 </style>
 </head>
 <body>
@@ -126,24 +111,18 @@
       <div class="find-label" id="btnLabel">Tap to Find</div>
     </div>
   </button>
-  <div class="tagline">Real parking spots near you → Google Maps nav</div>
+  <div class="tagline">Real parking spots → Google Maps navigation</div>
 </div>
 
 <div class="filters">
   <div class="pill active" onclick="toggleFilter(this,'all')">All</div>
-  <div class="pill" onclick="toggleFilter(this,'parking_garage')">🏢 Garages</div>
-  <div class="pill" onclick="toggleFilter(this,'parking_lot')">🅿️ Lots</div>
-  <div class="pill" onclick="toggleFilter(this,'street')">🛣️ Street</div>
+  <div class="pill" onclick="toggleFilter(this,'garage')">🏢 Garages</div>
+  <div class="pill" onclick="toggleFilter(this,'lot')">🅿️ Lots</div>
 </div>
 
 <div class="status-bar">
   <div class="status-dot" id="statusDot"></div>
   <span id="statusText">Tap the button to find parking near you</span>
-</div>
-
-<div class="api-notice" id="apiNotice">
-  ⚠️ <strong>To show real nearby parking spots</strong>, this app needs a free Google Places API key.
-  <br>See the setup instructions below the app — takes about 5 minutes.
 </div>
 
 <div class="results" id="results"></div>
@@ -153,7 +132,6 @@
   <p>Try moving to a more urban area or check your location permissions</p>
 </div>
 
-<!-- Detail Sheet -->
 <div class="sheet-overlay" id="overlay" onclick="closeSheet()"></div>
 <div class="sheet" id="sheet">
   <div class="sheet-handle"></div>
@@ -161,318 +139,220 @@
 </div>
 
 <script>
-// ─────────────────────────────────────────────
-// CONFIGURATION — paste your Google Places API key here
-// Get one free at: https://console.cloud.google.com
-// Enable: "Places API" and "Maps JavaScript API"
-// ─────────────────────────────────────────────
-const GOOGLE_API_KEY = 'YOUR_API_KEY_HERE';
-// ─────────────────────────────────────────────
+  // !! IMPORTANT: After deploying to Vercel, replace this URL with your actual Vercel URL
+  // It will look like: https://parktap-abc123.vercel.app
+  const BACKEND_URL = 'https://one-touch-parking-finder-backend.vercel.app';
 
-let activeFilter = 'all';
-let allSpots = [];
-let userLat = null;
-let userLon = null;
+  let activeFilter = 'all';
+  let allSpots = [];
 
-// Clock
-function updateTime() {
-  const now = new Date();
-  document.getElementById('timeDisplay').textContent =
-    now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-}
-updateTime();
-setInterval(updateTime, 1000);
+  function updateTime() {
+    const now = new Date();
+    document.getElementById('timeDisplay').textContent =
+      now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  }
+  updateTime();
+  setInterval(updateTime, 1000);
 
-function toggleFilter(el, type) {
-  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
-  el.classList.add('active');
-  activeFilter = type;
-  renderSpots();
-}
-
-function setStatus(msg, type) {
-  document.getElementById('statusText').textContent = msg;
-  const dot = document.getElementById('statusDot');
-  dot.className = 'status-dot' + (type ? ' ' + type : '');
-}
-
-// ── MAIN ENTRY POINT ──────────────────────────
-function findParking() {
-  const btn = document.getElementById('findBtn');
-  document.getElementById('btnLabel').textContent = 'Locating…';
-  btn.classList.add('loading');
-  setStatus('Getting your location…');
-
-  if (!navigator.geolocation) {
-    setStatus('Geolocation not supported on this device', 'red');
-    btn.classList.remove('loading');
-    document.getElementById('btnLabel').textContent = 'Tap to Find';
-    return;
+  function toggleFilter(el, type) {
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    activeFilter = type;
+    renderSpots();
   }
 
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      userLat = pos.coords.latitude;
-      userLon = pos.coords.longitude;
-      setStatus('Found you! Searching for parking…', 'green');
-      searchRealParking(userLat, userLon);
-    },
-    err => {
+  function setStatus(msg, type) {
+    document.getElementById('statusText').textContent = msg;
+    const dot = document.getElementById('statusDot');
+    dot.className = 'status-dot' + (type ? ' ' + type : '');
+  }
+
+  function findParking() {
+    const btn = document.getElementById('findBtn');
+    document.getElementById('btnLabel').textContent = 'Locating…';
+    btn.classList.add('loading');
+    setStatus('Getting your location…');
+
+    if (!navigator.geolocation) {
+      setStatus('Geolocation not supported on this device', 'red');
       btn.classList.remove('loading');
       document.getElementById('btnLabel').textContent = 'Tap to Find';
-      if (err.code === 1) {
-        setStatus('Location blocked — please allow location access in your browser settings', 'red');
-      } else {
-        setStatus('Could not get location. Check your connection and try again.', 'red');
-      }
-    },
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-  );
-}
-
-// ── GOOGLE PLACES NEARBY SEARCH ──────────────
-function searchRealParking(lat, lon) {
-  if (GOOGLE_API_KEY === 'YOUR_API_KEY_HERE') {
-    // No API key — show demo mode with clear label
-    document.getElementById('apiNotice').classList.add('show');
-    loadDemoSpots(lat, lon);
-    return;
-  }
-
-  // Search for parking garages and lots using Google Places
-  const radius = 800; // metres
-  const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lon}&radius=${radius}&type=parking&key=${GOOGLE_API_KEY}`;
-
-  // Note: Direct fetch to Google Places is blocked by CORS in browser.
-  // We use the Maps JS API callback approach instead.
-  loadGoogleMapsScript(lat, lon);
-}
-
-function loadGoogleMapsScript(lat, lon) {
-  if (window.google && window.google.maps) {
-    doPlacesSearch(lat, lon);
-    return;
-  }
-  const script = document.createElement('script');
-  script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=places&callback=googleMapsReady`;
-  script.async = true;
-  script.defer = true;
-  document.head.appendChild(script);
-  window._pendingLat = lat;
-  window._pendingLon = lon;
-}
-
-window.googleMapsReady = function() {
-  doPlacesSearch(window._pendingLat, window._pendingLon);
-};
-
-function doPlacesSearch(lat, lon) {
-  const location = new google.maps.LatLng(lat, lon);
-  const request = {
-    location,
-    radius: 800,
-    type: ['parking']
-  };
-
-  // We need a hidden map element for PlacesService
-  let mapDiv = document.getElementById('_hiddenMap');
-  if (!mapDiv) {
-    mapDiv = document.createElement('div');
-    mapDiv.id = '_hiddenMap';
-    mapDiv.style.display = 'none';
-    document.body.appendChild(mapDiv);
-  }
-  const map = new google.maps.Map(mapDiv, { center: location, zoom: 15 });
-  const service = new google.maps.places.PlacesService(map);
-
-  service.nearbySearch(request, (results, status) => {
-    const btn = document.getElementById('findBtn');
-    btn.classList.remove('loading');
-    document.getElementById('btnLabel').textContent = 'Tap to Refresh';
-
-    if (status === google.maps.places.PlacesServiceStatus.OK && results.length > 0) {
-      allSpots = results.map(place => {
-        const spotLat = place.geometry.location.lat();
-        const spotLon = place.geometry.location.lng();
-        const dist = getDistanceMiles(lat, lon, spotLat, spotLon);
-        return {
-          id: place.place_id,
-          name: place.name,
-          address: place.vicinity || 'See on map',
-          lat: spotLat,
-          lon: spotLon,
-          dist: dist.toFixed(2),
-          walk: Math.round(dist * 1609 / 80), // ~80m/min walking
-          type: inferType(place),
-          open: place.opening_hours ? place.opening_hours.open_now : null,
-          rating: place.rating || null,
-          priceLevel: place.price_level || null,
-        };
-      }).sort((a, b) => parseFloat(a.dist) - parseFloat(b.dist));
-
-      setStatus(`Found ${allSpots.length} real spots near you`, 'green');
-      renderSpots();
-    } else {
-      setStatus('No parking found nearby — try a different area', 'red');
-      document.getElementById('emptyState').classList.add('show');
+      return;
     }
-  });
-}
 
-function inferType(place) {
-  const name = (place.name || '').toLowerCase();
-  if (name.includes('garage') || name.includes('parkade')) return 'parking_garage';
-  if (name.includes('lot') || name.includes('surface')) return 'parking_lot';
-  return 'parking_lot'; // default
-}
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        setStatus('Found you! Searching for parking…', 'green');
+        fetchParkingFromBackend(lat, lon);
+      },
+      err => {
+        const btn = document.getElementById('findBtn');
+        btn.classList.remove('loading');
+        document.getElementById('btnLabel').textContent = 'Tap to Find';
+        if (err.code === 1) {
+          setStatus('Location blocked — tap here to allow location in browser settings', 'red');
+        } else {
+          setStatus('Could not get location. Check connection and try again.', 'red');
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  }
 
-function getDistanceMiles(lat1, lon1, lat2, lon2) {
-  const R = 3958.8; // Earth radius miles
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-}
+  async function fetchParkingFromBackend(lat, lon) {
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/parking?lat=${lat}&lon=${lon}`);
+      const data = await res.json();
 
-// ── DEMO MODE (no API key) ────────────────────
-function loadDemoSpots(lat, lon) {
-  const names = [
-    {name:'City Parking Garage A', type:'parking_garage'},
-    {name:'Civic Centre Lot', type:'parking_lot'},
-    {name:'Main St & Oak Ave', type:'street'},
-    {name:'Downtown Parkade', type:'parking_garage'},
-    {name:'Riverside Surface Lot', type:'parking_lot'},
-    {name:'Market St Meters', type:'street'},
-    {name:'Central Parking Deck', type:'parking_garage'},
-  ];
+      const btn = document.getElementById('findBtn');
+      btn.classList.remove('loading');
+      document.getElementById('btnLabel').textContent = 'Tap to Refresh';
 
-  allSpots = names.map((n, i) => {
-    const angle = (i / names.length) * 2 * Math.PI;
-    const distMiles = 0.08 + i * 0.07;
-    const distDeg = distMiles * 0.0145;
-    return {
-      id: 'demo_' + i,
-      name: n.name + ' (DEMO)',
-      address: 'Demo data — add API key for real spots',
-      lat: lat + distDeg * Math.sin(angle),
-      lon: lon + distDeg * Math.cos(angle),
-      dist: distMiles.toFixed(2),
-      walk: Math.round(distMiles * 1609 / 80),
-      type: n.type,
-      open: true,
-      rating: (3.5 + Math.random()).toFixed(1),
-      isDemo: true,
-    };
-  });
+      if (data.results && data.results.length > 0) {
+        allSpots = data.results.map(place => {
+          const pLat = place.geometry.location.lat;
+          const pLon = place.geometry.location.lng;
+          const dist = getDistanceMiles(lat, lon, pLat, pLon);
+          return {
+            id: place.place_id,
+            name: place.name,
+            address: place.vicinity || '',
+            lat: pLat,
+            lon: pLon,
+            dist: dist.toFixed(2),
+            walk: Math.round(dist * 1609 / 80),
+            type: inferType(place.name),
+            open: place.opening_hours ? place.opening_hours.open_now : null,
+            rating: place.rating || null,
+          };
+        }).sort((a, b) => parseFloat(a.dist) - parseFloat(b.dist));
 
-  const btn = document.getElementById('findBtn');
-  btn.classList.remove('loading');
-  document.getElementById('btnLabel').textContent = 'Tap to Refresh';
-  setStatus(`Showing ${allSpots.length} demo spots — add API key for real data`, 'green');
-  renderSpots();
-}
+        setStatus(`Found ${allSpots.length} real parking spots near you`, 'green');
+        renderSpots();
+      } else {
+        setStatus('No parking found nearby — try a busier area', 'red');
+        document.getElementById('emptyState').classList.add('show');
+      }
+    } catch (err) {
+      const btn = document.getElementById('findBtn');
+      btn.classList.remove('loading');
+      document.getElementById('btnLabel').textContent = 'Tap to Find';
+      setStatus('Could not reach server. Check your connection.', 'red');
+    }
+  }
 
-// ── RENDER SPOTS ──────────────────────────────
-function typeIcon(type) {
-  return { parking_garage:'🏢', parking_lot:'🅿️', street:'🛣️', private:'🔑' }[type] || '🅿️';
-}
-function typeName(type) {
-  return { parking_garage:'Parking Garage', parking_lot:'Parking Lot', street:'Street Parking', private:'Private Spot' }[type] || 'Parking';
-}
+  function inferType(name) {
+    const n = (name || '').toLowerCase();
+    if (n.includes('garage') || n.includes('parkade') || n.includes('deck')) return 'garage';
+    return 'lot';
+  }
 
-function renderSpots() {
-  const container = document.getElementById('results');
-  container.innerHTML = '';
-  const empty = document.getElementById('emptyState');
+  function getDistanceMiles(lat1, lon1, lat2, lon2) {
+    const R = 3958.8;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
 
-  let filtered = allSpots;
-  if (activeFilter !== 'all') filtered = allSpots.filter(s => s.type === activeFilter);
+  function typeIcon(type) {
+    return { garage:'🏢', lot:'🅿️', street:'🛣️' }[type] || '🅿️';
+  }
+  function typeName(type) {
+    return { garage:'Parking Garage', lot:'Parking Lot', street:'Street Parking' }[type] || 'Parking';
+  }
 
-  if (filtered.length === 0) { empty.classList.add('show'); return; }
-  empty.classList.remove('show');
+  function renderSpots() {
+    const container = document.getElementById('results');
+    container.innerHTML = '';
+    const empty = document.getElementById('emptyState');
 
-  let delay = 0;
-  filtered.forEach(spot => {
-    const card = document.createElement('div');
-    card.className = 'spot-card';
-    card.style.animationDelay = delay * 55 + 'ms';
+    let filtered = allSpots;
+    if (activeFilter !== 'all') filtered = allSpots.filter(s => s.type === activeFilter);
+    if (filtered.length === 0) { empty.classList.add('show'); return; }
+    empty.classList.remove('show');
 
-    const openStatus = spot.open === true
-      ? `<div class="avail-badge open">Open</div>`
+    filtered.forEach((spot, i) => {
+      const card = document.createElement('div');
+      card.className = 'spot-card';
+      card.style.animationDelay = i * 55 + 'ms';
+
+      const badge = spot.open === true
+        ? `<div class="avail-badge open">Open Now</div>`
+        : spot.open === false
+          ? `<div class="avail-badge closed">Closed</div>`
+          : `<div class="avail-badge unknown">Check Hours</div>`;
+
+      card.innerHTML = `
+        <div class="spot-icon-wrap ${spot.type}">${typeIcon(spot.type)}</div>
+        <div class="spot-info">
+          <div class="spot-name">${spot.name}</div>
+          <div class="spot-meta">
+            <span class="dist">${spot.dist} mi</span>
+            <span>·</span>
+            <span>${typeName(spot.type)}</span>
+            ${spot.rating ? `<span>·</span><span>⭐ ${spot.rating}</span>` : ''}
+          </div>
+        </div>
+        <div class="spot-right">
+          ${badge}
+          <div class="walk-time">~${spot.walk} min walk</div>
+        </div>
+      `;
+      card.onclick = () => openSheet(spot);
+      container.appendChild(card);
+    });
+  }
+
+  function openSheet(spot) {
+    const c = document.getElementById('sheetContent');
+    const badge = spot.open === true
+      ? `<div class="feature-tag" style="color:var(--green)">✅ Open Now</div>`
       : spot.open === false
-        ? `<div class="avail-badge unknown" style="color:var(--red)">Closed</div>`
-        : `<div class="avail-badge unknown">Unknown</div>`;
+        ? `<div class="feature-tag" style="color:var(--red)">❌ Currently Closed</div>`
+        : `<div class="feature-tag">🕐 Hours Unknown</div>`;
 
-    card.innerHTML = `
-      <div class="spot-icon-wrap ${spot.type}">${typeIcon(spot.type)}</div>
-      <div class="spot-info">
-        <div class="spot-name">${spot.name}</div>
-        <div class="spot-meta">
-          <span class="dist">${spot.dist} mi</span>
-          <span>·</span>
-          <span>${typeName(spot.type)}</span>
-          ${spot.rating ? `<span>·</span><span>⭐ ${spot.rating}</span>` : ''}
+    c.innerHTML = `
+      <div class="sheet-icon-big">${typeIcon(spot.type)}</div>
+      <div class="sheet-name">${spot.name}</div>
+      <div class="sheet-addr">📍 ${spot.address}</div>
+      <div class="sheet-stats">
+        <div class="sheet-stat">
+          <div class="sheet-stat-val" style="color:var(--blue)">${spot.dist} mi</div>
+          <div class="sheet-stat-lbl">Distance</div>
+        </div>
+        <div class="sheet-stat">
+          <div class="sheet-stat-val" style="color:var(--green)">${spot.walk} min</div>
+          <div class="sheet-stat-lbl">Walk Time</div>
         </div>
       </div>
-      <div class="spot-right">
-        ${openStatus}
-        <div class="walk-time">~${spot.walk} min walk</div>
+      <div class="sheet-features">
+        <div class="feature-tag">${typeName(spot.type)}</div>
+        ${spot.rating ? `<div class="feature-tag">⭐ ${spot.rating} rating</div>` : ''}
+        ${badge}
+      </div>
+      <div class="sheet-actions">
+        <button class="btn-primary" onclick="navigateToSpot(${spot.lat}, ${spot.lon})">
+          🧭 Open in Google Maps
+        </button>
+        <button class="btn-secondary" onclick="closeSheet()">✕</button>
       </div>
     `;
-    card.onclick = () => openSheet(spot);
-    container.appendChild(card);
-    delay++;
-  });
-}
+    document.getElementById('overlay').classList.add('open');
+    document.getElementById('sheet').classList.add('open');
+  }
 
-// ── DETAIL SHEET ──────────────────────────────
-function openSheet(spot) {
-  const c = document.getElementById('sheetContent');
-  c.innerHTML = `
-    <div class="sheet-icon-big">${typeIcon(spot.type)}</div>
-    <div class="sheet-name">${spot.name}</div>
-    <div class="sheet-addr">📍 ${spot.address}</div>
-    <div class="sheet-stats">
-      <div class="sheet-stat">
-        <div class="sheet-stat-val" style="color:var(--blue)">${spot.dist} mi</div>
-        <div class="sheet-stat-lbl">Distance</div>
-      </div>
-      <div class="sheet-stat">
-        <div class="sheet-stat-val" style="color:var(--green)">${spot.walk} min</div>
-        <div class="sheet-stat-lbl">Walk Time</div>
-      </div>
-    </div>
-    <div class="sheet-features">
-      <div class="feature-tag">${typeName(spot.type)}</div>
-      ${spot.rating ? `<div class="feature-tag">⭐ ${spot.rating} rating</div>` : ''}
-      ${spot.open === true ? `<div class="feature-tag" style="color:var(--green)">Currently Open</div>` : ''}
-      ${spot.open === false ? `<div class="feature-tag" style="color:var(--red)">Currently Closed</div>` : ''}
-    </div>
-    <div class="sheet-actions">
-      <button class="btn-primary" onclick="navigateToSpot(${spot.lat}, ${spot.lon}, '${spot.name.replace(/'/g,"\\'")}')">
-        🧭 Open in Google Maps
-      </button>
-      <button class="btn-secondary" onclick="closeSheet()">✕</button>
-    </div>
-  `;
-  document.getElementById('overlay').classList.add('open');
-  document.getElementById('sheet').classList.add('open');
-}
+  function closeSheet() {
+    document.getElementById('overlay').classList.remove('open');
+    document.getElementById('sheet').classList.remove('open');
+  }
 
-function closeSheet() {
-  document.getElementById('overlay').classList.remove('open');
-  document.getElementById('sheet').classList.remove('open');
-}
-
-// ── GOOGLE MAPS NAVIGATION ────────────────────
-function navigateToSpot(lat, lon, name) {
-  closeSheet();
-  // This URL opens Google Maps app on mobile, or Google Maps website on desktop
-  // It shows directions from current location to the exact parking spot coordinates
-  const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}&travelmode=driving`;
-  window.open(url, '_blank');
-}
+  function navigateToSpot(lat, lon) {
+    closeSheet();
+    window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}&travelmode=driving`, '_blank');
+  }
 </script>
-
 </body>
 </html>
