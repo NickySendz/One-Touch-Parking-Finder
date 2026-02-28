@@ -7,117 +7,240 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0a0c0f; --surface: #111418; --card: #161b22; --border: #21272f;
-    --green: #00e87a; --green-dim: #00e87a22; --yellow: #f5c518; --yellow-dim: #f5c51822;
-    --blue: #3d9eff; --blue-dim: #3d9eff22; --red: #ff4757; --text: #e8edf3; --muted: #6b7280;
+    --bg:#0a0c0f; --surface:#111418; --card:#161b22; --border:#21272f;
+    --green:#00e87a; --green-dim:#00e87a22; --yellow:#f5c518; --yellow-dim:#f5c51822;
+    --blue:#3d9eff; --blue-dim:#3d9eff22; --red:#ff4757; --text:#e8edf3; --muted:#6b7280;
+    --orange:#ff9500; --purple:#bf5af2;
   }
-  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  body { background:var(--bg); color:var(--text); font-family:'Syne',sans-serif; min-height:100vh; overflow-x:hidden; }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden;}
 
-  .header { padding:20px 20px 0; display:flex; justify-content:space-between; align-items:center; }
-  .logo { font-size:22px; font-weight:800; letter-spacing:-1px; }
-  .logo span { color:var(--green); }
-  .time { font-family:'Space Mono',monospace; font-size:12px; color:var(--muted); }
+  /* LOW BATTERY MODE */
+  body.low-battery{--bg:#000;--card:#0a0a0a;--border:#1a1a1a;--surface:#050505;}
+  body.low-battery .find-btn{background:#00e87a;box-shadow:none;animation:none!important;}
+  body.low-battery .find-btn.loading{animation:none!important;opacity:0.7;}
 
-  .hero { padding:36px 20px 20px; display:flex; flex-direction:column; align-items:center; gap:14px; }
-  .find-btn {
-    width:190px; height:190px; border-radius:50%; border:none;
-    background:conic-gradient(from 180deg, #00e87a, #00c4ff, #00e87a);
-    cursor:pointer; position:relative; display:flex; align-items:center; justify-content:center;
-    transition:transform 0.15s, box-shadow 0.15s;
-    box-shadow:0 0 60px #00e87a44, 0 0 120px #00e87a22;
-  }
-  .find-btn::before { content:''; position:absolute; inset:3px; border-radius:50%; background:var(--bg); }
-  .find-btn:active { transform:scale(0.94); }
-  .find-btn.loading { animation:spin-glow 1s linear infinite; }
-  @keyframes spin-glow { 0%{filter:hue-rotate(0deg)} 100%{filter:hue-rotate(360deg)} }
-  .find-btn-inner { position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:6px; }
-  .find-icon { font-size:42px; line-height:1; }
-  .find-label { font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase; }
-  .tagline { font-size:13px; color:var(--muted); }
+  /* HEADER */
+  .header{padding:16px 16px 0;display:flex;justify-content:space-between;align-items:center;gap:8px;}
+  .logo{font-size:20px;font-weight:800;letter-spacing:-1px;flex-shrink:0;}
+  .logo span{color:var(--green);}
+  .header-right{display:flex;align-items:center;gap:8px;}
+  .icon-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;flex-shrink:0;transition:background 0.15s;}
+  .icon-btn:active{background:var(--border);}
+  .icon-btn.active{background:var(--green-dim);border-color:var(--green);}
+  .battery-indicator{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px;}
+  .battery-low{color:var(--red);}
 
-  .filters { display:flex; gap:8px; padding:0 20px; overflow-x:auto; scrollbar-width:none; }
-  .filters::-webkit-scrollbar { display:none; }
-  .pill { flex-shrink:0; padding:7px 16px; border-radius:100px; border:1px solid var(--border); background:var(--card); font-size:13px; font-weight:600; color:var(--muted); cursor:pointer; transition:all 0.15s; }
-  .pill.active { background:var(--green-dim); border-color:var(--green); color:var(--green); }
+  /* HERO */
+  .hero{padding:24px 20px 16px;display:flex;flex-direction:column;align-items:center;gap:12px;}
+  .find-btn{width:170px;height:170px;border-radius:50%;border:none;background:conic-gradient(from 180deg,#00e87a,#00c4ff,#00e87a);cursor:pointer;position:relative;display:flex;align-items:center;justify-content:center;transition:transform 0.15s,box-shadow 0.15s;box-shadow:0 0 50px #00e87a44,0 0 100px #00e87a22;}
+  .find-btn::before{content:'';position:absolute;inset:3px;border-radius:50%;background:var(--bg);}
+  .find-btn:active{transform:scale(0.94);}
+  .find-btn.loading{animation:spin-glow 1s linear infinite;}
+  @keyframes spin-glow{0%{filter:hue-rotate(0deg)}100%{filter:hue-rotate(360deg)}}
+  .find-btn-inner{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:5px;}
+  .find-icon{font-size:38px;line-height:1;}
+  .find-label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
 
-  .status-bar { margin:16px 20px 10px; padding:12px 16px; background:var(--card); border-radius:12px; border:1px solid var(--border); display:flex; align-items:center; gap:10px; font-size:13px; color:var(--muted); min-height:46px; }
-  .status-dot { width:8px; height:8px; border-radius:50%; background:var(--muted); flex-shrink:0; }
-  .status-dot.green { background:var(--green); box-shadow:0 0 8px var(--green); animation:pulse 2s ease-in-out infinite; }
-  .status-dot.red { background:var(--red); }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  /* VOICE BTN */
+  .voice-btn{width:48px;height:48px;border-radius:50%;border:1px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;transition:all 0.15s;position:absolute;right:20px;}
+  .voice-btn.listening{background:rgba(255,71,87,0.2);border-color:var(--red);animation:voice-pulse 1s ease-in-out infinite;}
+  @keyframes voice-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,71,87,0.4)}50%{box-shadow:0 0 0 12px rgba(255,71,87,0);}}
+  .hero-row{display:flex;align-items:center;justify-content:center;width:100%;position:relative;}
 
-  .results { padding:0 20px 120px; display:flex; flex-direction:column; gap:10px; }
-  .section-label { font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin:10px 0 4px; }
+  /* UNIT TOGGLE */
+  .unit-toggle{display:flex;background:var(--card);border:1px solid var(--border);border-radius:100px;padding:3px;gap:2px;}
+  .unit-btn{padding:4px 12px;border-radius:100px;border:none;background:transparent;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;transition:all 0.15s;}
+  .unit-btn.active{background:var(--green);color:#000;}
 
-  .spot-card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:14px; display:flex; align-items:center; gap:12px; cursor:pointer; transition:transform 0.12s; animation:slideUp 0.35s ease both; }
-  .spot-card:active { transform:scale(0.98); }
-  @keyframes slideUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+  /* FILTERS */
+  .filter-row{display:flex;gap:8px;padding:0 16px;overflow-x:auto;scrollbar-width:none;align-items:center;}
+  .filter-row::-webkit-scrollbar{display:none;}
+  .pill{flex-shrink:0;padding:6px 14px;border-radius:100px;border:1px solid var(--border);background:var(--card);font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:all 0.15s;}
+  .pill.active{background:var(--green-dim);border-color:var(--green);color:var(--green);}
+  .pill.winter.active{background:rgba(100,180,255,0.15);border-color:#64b4ff;color:#64b4ff;}
 
-  .spot-icon-wrap { width:48px; height:48px; border-radius:13px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
-  .spot-icon-wrap.garage { background:var(--green-dim); }
-  .spot-icon-wrap.lot { background:var(--blue-dim); }
-  .spot-icon-wrap.street { background:var(--yellow-dim); }
+  /* VIEW TOGGLE */
+  .view-toggle{display:flex;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;flex-shrink:0;}
+  .view-btn{padding:6px 10px;border:none;background:transparent;color:var(--muted);font-size:15px;cursor:pointer;transition:background 0.15s;}
+  .view-btn.active{background:var(--green-dim);color:var(--green);}
 
-  .spot-info { flex:1; min-width:0; }
-  .spot-name { font-size:14px; font-weight:700; margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .spot-meta { display:flex; align-items:center; gap:6px; font-family:'Space Mono',monospace; font-size:11px; color:var(--muted); flex-wrap:wrap; }
-  .spot-meta .dist { color:var(--blue); }
+  /* STATUS */
+  .status-bar{margin:12px 16px 8px;padding:10px 14px;background:var(--card);border-radius:12px;border:1px solid var(--border);display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);min-height:42px;}
+  .status-dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex-shrink:0;}
+  .status-dot.green{background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s ease-in-out infinite;}
+  .status-dot.red{background:var(--red);}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 
-  .spot-right { text-align:right; flex-shrink:0; }
-  .avail-badge { display:inline-flex; align-items:center; gap:4px; padding:4px 9px; border-radius:100px; font-size:11px; font-weight:700; }
-  .avail-badge.open { background:var(--green-dim); color:var(--green); }
-  .avail-badge.closed { background:rgba(255,71,87,0.15); color:var(--red); }
-  .avail-badge.unknown { background:#ffffff11; color:var(--muted); }
-  .avail-badge::before { content:''; width:5px; height:5px; border-radius:50%; background:currentColor; }
-  .walk-time { font-family:'Space Mono',monospace; font-size:11px; color:var(--muted); margin-top:3px; }
+  /* MAP VIEW */
+  .map-view{display:none;margin:0 16px;border-radius:16px;overflow:hidden;border:1px solid var(--border);background:var(--card);height:340px;position:relative;}
+  .map-view.show{display:block;}
+  #mapCanvas{width:100%;height:100%;display:block;}
+  .map-legend{position:absolute;bottom:10px;left:10px;display:flex;flex-direction:column;gap:4px;}
+  .map-legend-item{display:flex;align-items:center;gap:5px;font-size:10px;background:rgba(0,0,0,0.8);padding:3px 8px;border-radius:100px;}
+  .map-dot{width:8px;height:8px;border-radius:50%;}
+  .heat-toggle{position:absolute;top:10px;right:10px;padding:5px 10px;background:rgba(0,0,0,0.8);border:1px solid var(--border);border-radius:8px;font-size:11px;font-weight:700;color:var(--text);cursor:pointer;}
 
-  .sheet-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:100; opacity:0; pointer-events:none; transition:opacity 0.3s; backdrop-filter:blur(4px); }
-  .sheet-overlay.open { opacity:1; pointer-events:all; }
-  .sheet { position:fixed; bottom:0; left:0; right:0; background:var(--surface); border-radius:24px 24px 0 0; border-top:1px solid var(--border); padding:12px 24px 44px; z-index:101; transform:translateY(100%); transition:transform 0.35s cubic-bezier(0.32,0.72,0,1); max-height:85vh; overflow-y:auto; }
-  .sheet.open { transform:translateY(0); }
-  .sheet-handle { width:40px; height:4px; background:var(--border); border-radius:2px; margin:0 auto 20px; }
-  .sheet-icon-big { font-size:44px; margin-bottom:10px; }
-  .sheet-name { font-size:22px; font-weight:800; margin-bottom:5px; line-height:1.2; }
-  .sheet-addr { font-size:13px; color:var(--muted); margin-bottom:18px; }
-  .sheet-stats { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:18px; }
-  .sheet-stat { background:var(--card); border-radius:12px; border:1px solid var(--border); padding:14px 10px; text-align:center; }
-  .sheet-stat-val { font-size:18px; font-weight:800; margin-bottom:2px; }
-  .sheet-stat-lbl { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; }
-  .sheet-features { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:22px; }
-  .feature-tag { padding:5px 12px; background:var(--card); border:1px solid var(--border); border-radius:100px; font-size:12px; color:var(--muted); }
-  .sheet-actions { display:flex; gap:10px; }
-  .btn-primary { flex:1; padding:16px; background:var(--green); color:#000; border:none; border-radius:14px; font-family:'Syne',sans-serif; font-size:15px; font-weight:800; cursor:pointer; transition:opacity 0.15s, transform 0.15s; }
-  .btn-primary:active { opacity:0.85; transform:scale(0.98); }
-  .btn-secondary { padding:16px 18px; background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:14px; font-size:20px; cursor:pointer; }
+  /* RESULTS */
+  .results{padding:0 16px 120px;display:flex;flex-direction:column;gap:9px;}
+  .spot-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:13px;display:flex;align-items:center;gap:11px;cursor:pointer;transition:transform 0.12s;animation:slideUp 0.35s ease both;position:relative;}
+  .spot-card:active{transform:scale(0.98);}
+  .spot-card.favourite{border-color:#f5c51855;}
+  @keyframes slideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  .fav-star{position:absolute;top:10px;right:10px;font-size:14px;cursor:pointer;z-index:2;}
 
-  .empty { text-align:center; padding:50px 20px; color:var(--muted); display:none; }
-  .empty.show { display:block; }
-  .empty-icon { font-size:44px; margin-bottom:10px; }
-  .empty h3 { font-size:17px; margin-bottom:6px; color:var(--text); }
+  .spot-icon-wrap{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+  .spot-icon-wrap.garage{background:var(--green-dim);}
+  .spot-icon-wrap.lot{background:var(--blue-dim);}
+  .spot-icon-wrap.street{background:var(--yellow-dim);}
+  .spot-icon-wrap.saved{background:rgba(245,197,24,0.15);}
+
+  .spot-info{flex:1;min-width:0;padding-right:20px;}
+  .spot-name{font-size:13px;font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .spot-meta{display:flex;align-items:center;gap:5px;font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);flex-wrap:wrap;}
+  .spot-meta .dist{color:var(--blue);}
+  .spot-meta .price-free{color:var(--green);}
+  .spot-meta .price-paid{color:var(--yellow);}
+  .winter-tag{display:inline-flex;align-items:center;gap:3px;font-size:9px;padding:2px 6px;background:rgba(100,180,255,0.1);border:1px solid rgba(100,180,255,0.3);border-radius:100px;color:#64b4ff;margin-top:3px;}
+
+  .spot-right{text-align:right;flex-shrink:0;}
+  .avail-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:100px;font-size:10px;font-weight:700;}
+  .avail-badge.open{background:var(--green-dim);color:var(--green);}
+  .avail-badge.closed{background:rgba(255,71,87,0.15);color:var(--red);}
+  .avail-badge.unknown{background:#ffffff11;color:var(--muted);}
+  .avail-badge::before{content:'';width:4px;height:4px;border-radius:50%;background:currentColor;}
+  .walk-time{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-top:2px;}
+  .heat-bar{height:3px;border-radius:2px;margin-top:4px;width:50px;margin-left:auto;}
+
+  /* SHEET */
+  .sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:100;opacity:0;pointer-events:none;transition:opacity 0.3s;backdrop-filter:blur(4px);}
+  .sheet-overlay.open{opacity:1;pointer-events:all;}
+  .sheet{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-radius:24px 24px 0 0;border-top:1px solid var(--border);padding:12px 22px 44px;z-index:101;transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);max-height:88vh;overflow-y:auto;}
+  .sheet.open{transform:translateY(0);}
+  .sheet-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 18px;}
+  .sheet-icon-big{font-size:40px;margin-bottom:8px;}
+  .sheet-name{font-size:20px;font-weight:800;margin-bottom:4px;line-height:1.2;}
+  .sheet-addr{font-size:12px;color:var(--muted);margin-bottom:16px;}
+  .sheet-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+  .sheet-stat{background:var(--card);border-radius:10px;border:1px solid var(--border);padding:12px 8px;text-align:center;}
+  .sheet-stat-val{font-size:16px;font-weight:800;margin-bottom:2px;}
+  .sheet-stat-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+  .sheet-features{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+  .feature-tag{padding:4px 10px;background:var(--card);border:1px solid var(--border);border-radius:100px;font-size:11px;color:var(--muted);}
+  .sheet-actions{display:flex;gap:8px;flex-wrap:wrap;}
+  .btn-primary{flex:1;min-width:140px;padding:14px;background:var(--green);color:#000;border:none;border-radius:12px;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;cursor:pointer;transition:opacity 0.15s,transform 0.15s;}
+  .btn-primary:active{opacity:0.85;transform:scale(0.98);}
+  .btn-secondary{padding:14px 16px;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:12px;font-size:18px;cursor:pointer;}
+  .btn-walk{flex:1;min-width:120px;padding:14px;background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue);border-radius:12px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;}
+  .btn-save{padding:14px 16px;background:var(--yellow-dim);color:var(--yellow);border:1px solid #f5c51844;border-radius:12px;font-size:18px;cursor:pointer;}
+
+  /* SAVED SPOTS PANEL */
+  .saved-panel{display:none;padding:0 16px 12px;}
+  .saved-panel.show{display:block;}
+  .saved-header{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+  .saved-card{background:var(--card);border:1px solid #f5c51833;border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:7px;transition:transform 0.12s;}
+  .saved-card:active{transform:scale(0.98);}
+
+  /* WINTER PANEL */
+  .winter-panel{display:none;margin:0 16px 10px;padding:14px;background:rgba(100,180,255,0.05);border:1px solid rgba(100,180,255,0.2);border-radius:14px;}
+  .winter-panel.show{display:block;}
+  .winter-title{font-size:12px;font-weight:700;color:#64b4ff;margin-bottom:8px;}
+  .winter-alert{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--muted);margin-bottom:6px;padding:8px;background:rgba(0,0,0,0.3);border-radius:8px;}
+
+  /* TUTORIAL OVERLAY */
+  .tutorial-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:200;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
+  .tutorial-overlay.show{display:flex;}
+  .tutorial-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px;max-width:340px;width:100%;text-align:center;}
+  .tutorial-icon{font-size:52px;margin-bottom:14px;}
+  .tutorial-title{font-size:20px;font-weight:800;margin-bottom:8px;}
+  .tutorial-text{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:20px;}
+  .tutorial-dots{display:flex;justify-content:center;gap:6px;margin-bottom:20px;}
+  .tutorial-dot{width:6px;height:6px;border-radius:50%;background:var(--border);}
+  .tutorial-dot.active{background:var(--green);width:18px;}
+  .tutorial-next{width:100%;padding:14px;background:var(--green);color:#000;border:none;border-radius:12px;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;cursor:pointer;}
+  .tutorial-skip{margin-top:12px;font-size:12px;color:var(--muted);cursor:pointer;text-decoration:underline;}
+
+  /* VOICE TRANSCRIPT */
+  .voice-toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:100px;padding:10px 20px;font-size:13px;color:var(--text);z-index:150;opacity:0;transition:opacity 0.3s;white-space:nowrap;pointer-events:none;}
+  .voice-toast.show{opacity:1;}
+
+  /* EMPTY */
+  .empty{text-align:center;padding:40px 20px;color:var(--muted);display:none;}
+  .empty.show{display:block;}
+  .empty-icon{font-size:40px;margin-bottom:8px;}
+  .empty h3{font-size:16px;margin-bottom:5px;color:var(--text);}
+
+  /* SECTION LABEL */
+  .section-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:8px 0 4px;}
 </style>
 </head>
 <body>
 
+<!-- TUTORIAL OVERLAY -->
+<div class="tutorial-overlay" id="tutorialOverlay">
+  <div class="tutorial-card">
+    <div class="tutorial-icon" id="tutIcon">🅿️</div>
+    <div class="tutorial-title" id="tutTitle">Welcome to ParkTap</div>
+    <div class="tutorial-text" id="tutText">Find real parking spots near you in one tap. Works on any street, in any city.</div>
+    <div class="tutorial-dots" id="tutDots"></div>
+    <button class="tutorial-next" id="tutNext" onclick="nextTutorial()">Get Started</button>
+    <div class="tutorial-skip" onclick="closeTutorial()">Skip tutorial</div>
+  </div>
+</div>
+
+<!-- VOICE TOAST -->
+<div class="voice-toast" id="voiceToast">🎙️ Listening…</div>
+
 <div class="header">
   <div class="logo">Park<span>Tap</span></div>
-  <div class="time" id="timeDisplay">--:--</div>
+  <div class="header-right">
+    <div class="unit-toggle">
+      <button class="unit-btn" id="kmBtn" onclick="setUnit('km')">KM</button>
+      <button class="unit-btn" id="miBtn" onclick="setUnit('mi')">MI</button>
+    </div>
+    <div class="icon-btn" id="favBtn" onclick="toggleFavPanel()" title="Saved spots">⭐</div>
+    <div class="icon-btn" id="winterBtn" onclick="toggleWinterPanel()" title="Winter alerts">❄️</div>
+    <div class="icon-btn" onclick="showTutorial()" title="Help">❓</div>
+    <div class="battery-indicator" id="batteryDisplay"></div>
+  </div>
+</div>
+
+<!-- SAVED SPOTS PANEL -->
+<div class="saved-panel" id="savedPanel">
+  <div class="saved-header">⭐ Saved Spots</div>
+  <div id="savedList"><div style="font-size:13px;color:var(--muted);padding:8px 0;">No saved spots yet. Tap ⭐ on any spot to save it.</div></div>
+</div>
+
+<!-- WINTER PANEL -->
+<div class="winter-panel" id="winterPanel">
+  <div class="winter-title">❄️ Winter Parking Restrictions</div>
+  <div class="winter-alert">⚠️ <span id="winterText">Loading winter restriction info for your area…</span></div>
+  <div style="font-size:11px;color:var(--muted);margin-top:4px;">Always check local signage. Restrictions vary by street and date.</div>
 </div>
 
 <div class="hero">
-  <button class="find-btn" id="findBtn" onclick="findParking()">
-    <div class="find-btn-inner">
-      <div class="find-icon">🅿️</div>
-      <div class="find-label" id="btnLabel">Tap to Find</div>
-    </div>
-  </button>
-  <div class="tagline">Real parking spots → Google Maps navigation</div>
+  <div class="hero-row">
+    <button class="find-btn" id="findBtn" onclick="findParking()">
+      <div class="find-btn-inner">
+        <div class="find-icon">🅿️</div>
+        <div class="find-label" id="btnLabel">Tap to Find</div>
+      </div>
+    </button>
+    <button class="voice-btn" id="voiceBtn" onclick="startVoice()" title="Voice command">🎙️</button>
+  </div>
 </div>
 
-<div class="filters">
+<div class="filter-row">
   <div class="pill active" onclick="toggleFilter(this,'all')">All</div>
   <div class="pill" onclick="toggleFilter(this,'garage')">🏢 Garages</div>
   <div class="pill" onclick="toggleFilter(this,'lot')">🅿️ Lots</div>
+  <div class="pill" onclick="toggleFilter(this,'free')">💚 Free</div>
+  <div class="pill" onclick="toggleFilter(this,'paid')">💳 Paid</div>
+  <div class="pill winter" onclick="toggleFilter(this,'winter')">❄️ No Restrictions</div>
+  <div class="view-toggle">
+    <button class="view-btn active" id="listViewBtn" onclick="setView('list')" title="List view">☰</button>
+    <button class="view-btn" id="mapViewBtn" onclick="setView('map')" title="Map view">🗺</button>
+  </div>
 </div>
 
 <div class="status-bar">
@@ -125,13 +248,25 @@
   <span id="statusText">Tap the button to find parking near you</span>
 </div>
 
+<!-- MAP VIEW -->
+<div class="map-view" id="mapView">
+  <canvas id="mapCanvas"></canvas>
+  <div class="map-legend">
+    <div class="map-legend-item"><div class="map-dot" style="background:var(--green)"></div>Low traffic</div>
+    <div class="map-legend-item"><div class="map-dot" style="background:var(--yellow)"></div>Moderate</div>
+    <div class="map-legend-item"><div class="map-dot" style="background:var(--red)"></div>Busy</div>
+  </div>
+  <button class="heat-toggle" id="heatToggle" onclick="toggleHeatmap()">🌡 Heatmap: ON</button>
+</div>
+
 <div class="results" id="results"></div>
 <div class="empty" id="emptyState">
   <div class="empty-icon">🔍</div>
   <h3>No spots found nearby</h3>
-  <p>Try moving to a more urban area or check your location permissions</p>
+  <p>Try a different filter or check location permissions</p>
 </div>
 
+<!-- DETAIL SHEET -->
 <div class="sheet-overlay" id="overlay" onclick="closeSheet()"></div>
 <div class="sheet" id="sheet">
   <div class="sheet-handle"></div>
@@ -139,220 +274,587 @@
 </div>
 
 <script>
-  // !! IMPORTANT: After deploying to Vercel, replace this URL with your actual Vercel URL
-  // It will look like: https://parktap-abc123.vercel.app
-  const BACKEND_URL = 'https://one-touch-parking-finder-backend.vercel.app';
+const BACKEND_URL = 'https://one-touch-parking-finder-backend.vercel.app';
 
-  let activeFilter = 'all';
-  let allSpots = [];
+// ── STATE ──────────────────────────────────────
+let activeFilter = 'all';
+let allSpots = [];
+let userLat = null, userLon = null;
+let useKm = true; // default km (Canada)
+let currentView = 'list';
+let showHeatmap = true;
+let savedSpots = JSON.parse(localStorage.getItem('parktap_saved') || '[]');
+let lowBattery = false;
+let tutStep = 0;
+let recognition = null;
 
-  function updateTime() {
-    const now = new Date();
-    document.getElementById('timeDisplay').textContent =
-      now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+// ── TUTORIAL ──────────────────────────────────
+const tutSteps = [
+  { icon:'🅿️', title:'Welcome to ParkTap', text:'Find real parking spots near you in one tap. Works on any street, in any city.' },
+  { icon:'📍', title:'One-Tap Location', text:'Tap the big button and ParkTap will instantly find your location and show nearby parking.' },
+  { icon:'🧭', title:'Google Maps Navigation', text:'Tap any spot then hit "Navigate" to open Google Maps with turn-by-turn directions.' },
+  { icon:'⭐', title:'Save Your Favourites', text:'Tap the star on any spot to save it. Your saved spots appear at the top for quick access.' },
+  { icon:'🎙️', title:'Voice Commands', text:'Tap the mic and say "find parking", "show free spots", "navigate to first spot", or "show map".' },
+  { icon:'❄️', title:'Winter Restrictions', text:'Tap ❄️ to see snow plow routes and winter parking restrictions in your area.' },
+  { icon:'🌡', title:'Heatmap View', text:'Switch to map view to see a heatmap showing how busy each area is — green is easy, red is busy.' },
+];
+
+function showTutorial() {
+  tutStep = 0;
+  renderTutStep();
+  document.getElementById('tutorialOverlay').classList.add('show');
+}
+function renderTutStep() {
+  const s = tutSteps[tutStep];
+  document.getElementById('tutIcon').textContent = s.icon;
+  document.getElementById('tutTitle').textContent = s.title;
+  document.getElementById('tutText').textContent = s.text;
+  document.getElementById('tutNext').textContent = tutStep < tutSteps.length - 1 ? 'Next →' : 'Let\'s Go!';
+  const dots = document.getElementById('tutDots');
+  dots.innerHTML = tutSteps.map((_, i) => `<div class="tutorial-dot ${i===tutStep?'active':''}"></div>`).join('');
+}
+function nextTutorial() {
+  tutStep++;
+  if (tutStep >= tutSteps.length) { closeTutorial(); return; }
+  renderTutStep();
+}
+function closeTutorial() {
+  document.getElementById('tutorialOverlay').classList.remove('show');
+  localStorage.setItem('parktap_seen_tutorial', '1');
+}
+// Show tutorial on first visit
+if (!localStorage.getItem('parktap_seen_tutorial')) setTimeout(showTutorial, 600);
+
+// ── UNIT TOGGLE ────────────────────────────────
+function detectCanada(lat, lon) {
+  // Canada roughly: lat 42-83, lon -141 to -52
+  return lat > 41.7 && lat < 83.2 && lon > -141.1 && lon < -52.3;
+}
+function setUnit(unit) {
+  useKm = unit === 'km';
+  document.getElementById('kmBtn').classList.toggle('active', useKm);
+  document.getElementById('miBtn').classList.toggle('active', !useKm);
+  localStorage.setItem('parktap_unit', unit);
+  renderSpots();
+}
+// Load saved unit preference
+const savedUnit = localStorage.getItem('parktap_unit');
+if (savedUnit) setUnit(savedUnit);
+else setUnit('km'); // default km
+
+// ── BATTERY ────────────────────────────────────
+async function checkBattery() {
+  if ('getBattery' in navigator) {
+    const b = await navigator.getBattery();
+    updateBattery(b);
+    b.addEventListener('levelchange', () => updateBattery(b));
+    b.addEventListener('chargingchange', () => updateBattery(b));
   }
-  updateTime();
-  setInterval(updateTime, 1000);
-
-  function toggleFilter(el, type) {
-    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
-    el.classList.add('active');
-    activeFilter = type;
-    renderSpots();
+}
+function updateBattery(b) {
+  const pct = Math.round(b.level * 100);
+  const display = document.getElementById('batteryDisplay');
+  const wasLow = lowBattery;
+  lowBattery = pct <= 20 && !b.charging;
+  if (lowBattery) {
+    display.innerHTML = `<span class="battery-low">🪫 ${pct}%</span>`;
+    document.body.classList.add('low-battery');
+    if (!wasLow) setStatus('Low battery mode: simplified interface active', 'green');
+  } else {
+    display.innerHTML = pct <= 40 ? `🔋 ${pct}%` : '';
+    document.body.classList.remove('low-battery');
   }
+}
+checkBattery();
 
-  function setStatus(msg, type) {
-    document.getElementById('statusText').textContent = msg;
-    const dot = document.getElementById('statusDot');
-    dot.className = 'status-dot' + (type ? ' ' + type : '');
+// ── CLOCK ──────────────────────────────────────
+function updateTime() {
+  // Time shown in battery display area when no battery API
+}
+setInterval(updateTime, 1000);
+
+// ── STATUS ─────────────────────────────────────
+function setStatus(msg, type) {
+  document.getElementById('statusText').textContent = msg;
+  const dot = document.getElementById('statusDot');
+  dot.className = 'status-dot' + (type ? ' ' + type : '');
+}
+
+// ── FILTER ─────────────────────────────────────
+function toggleFilter(el, type) {
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  activeFilter = type;
+  renderSpots();
+}
+
+// ── VIEW TOGGLE ────────────────────────────────
+function setView(v) {
+  currentView = v;
+  document.getElementById('listViewBtn').classList.toggle('active', v === 'list');
+  document.getElementById('mapViewBtn').classList.toggle('active', v === 'map');
+  document.getElementById('mapView').classList.toggle('show', v === 'map');
+  if (v === 'map' && allSpots.length > 0) setTimeout(() => drawMap(allSpots), 50);
+}
+
+// ── PANELS ─────────────────────────────────────
+function toggleFavPanel() {
+  const p = document.getElementById('savedPanel');
+  const open = p.classList.toggle('show');
+  document.getElementById('favBtn').classList.toggle('active', open);
+  if (open) renderSavedSpots();
+}
+function toggleWinterPanel() {
+  const p = document.getElementById('winterPanel');
+  const open = p.classList.toggle('show');
+  document.getElementById('winterBtn').classList.toggle('active', open);
+  if (open && userLat) loadWinterInfo(userLat, userLon);
+}
+
+// ── WINTER INFO ────────────────────────────────
+function loadWinterInfo(lat, lon) {
+  const isCanada = detectCanada(lat, lon);
+  const month = new Date().getMonth(); // 0=Jan
+  const isWinter = month <= 2 || month >= 10;
+  let msg = '';
+  if (isCanada && isWinter) {
+    msg = `❄️ Winter parking restrictions likely active in your area. Snow routes are cleared first — avoid parking on snow emergency routes overnight. Check your city's website for specific days and streets.`;
+  } else if (isCanada) {
+    msg = `✅ No active winter restrictions expected. Off-season — but always check local signage for permit zones.`;
+  } else {
+    msg = `Check your local municipality for winter parking rules. Snow emergency routes are typically enforced during and after snowfall.`;
   }
+  document.getElementById('winterText').textContent = msg;
+}
 
-  function findParking() {
-    const btn = document.getElementById('findBtn');
-    document.getElementById('btnLabel').textContent = 'Locating…';
-    btn.classList.add('loading');
-    setStatus('Getting your location…');
+// ── MAIN FIND ──────────────────────────────────
+function findParking() {
+  const btn = document.getElementById('findBtn');
+  document.getElementById('btnLabel').textContent = 'Locating…';
+  btn.classList.add('loading');
+  setStatus('Getting your location…');
 
-    if (!navigator.geolocation) {
-      setStatus('Geolocation not supported on this device', 'red');
-      btn.classList.remove('loading');
-      document.getElementById('btnLabel').textContent = 'Tap to Find';
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      pos => {
-        const lat = pos.coords.latitude;
-        const lon = pos.coords.longitude;
-        setStatus('Found you! Searching for parking…', 'green');
-        fetchParkingFromBackend(lat, lon);
-      },
-      err => {
-        const btn = document.getElementById('findBtn');
-        btn.classList.remove('loading');
-        document.getElementById('btnLabel').textContent = 'Tap to Find';
-        if (err.code === 1) {
-          setStatus('Location blocked — tap here to allow location in browser settings', 'red');
-        } else {
-          setStatus('Could not get location. Check connection and try again.', 'red');
-        }
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    );
+  if (!navigator.geolocation) {
+    setStatus('Geolocation not supported on this device', 'red');
+    btn.classList.remove('loading');
+    return;
   }
-
-  async function fetchParkingFromBackend(lat, lon) {
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/parking?lat=${lat}&lon=${lon}`);
-      const data = await res.json();
-
-      const btn = document.getElementById('findBtn');
-      btn.classList.remove('loading');
-      document.getElementById('btnLabel').textContent = 'Tap to Refresh';
-
-      if (data.results && data.results.length > 0) {
-        allSpots = data.results.map(place => {
-          const pLat = place.geometry.location.lat;
-          const pLon = place.geometry.location.lng;
-          const dist = getDistanceMiles(lat, lon, pLat, pLon);
-          return {
-            id: place.place_id,
-            name: place.name,
-            address: place.vicinity || '',
-            lat: pLat,
-            lon: pLon,
-            dist: dist.toFixed(2),
-            walk: Math.round(dist * 1609 / 80),
-            type: inferType(place.name),
-            open: place.opening_hours ? place.opening_hours.open_now : null,
-            rating: place.rating || null,
-          };
-        }).sort((a, b) => parseFloat(a.dist) - parseFloat(b.dist));
-
-        setStatus(`Found ${allSpots.length} real parking spots near you`, 'green');
-        renderSpots();
-      } else {
-        setStatus('No parking found nearby — try a busier area', 'red');
-        document.getElementById('emptyState').classList.add('show');
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      userLat = pos.coords.latitude;
+      userLon = pos.coords.longitude;
+      // Auto-detect Canada for unit default
+      if (!localStorage.getItem('parktap_unit')) {
+        setUnit(detectCanada(userLat, userLon) ? 'km' : 'mi');
       }
-    } catch (err) {
-      const btn = document.getElementById('findBtn');
+      setStatus('Found you! Searching for parking…', 'green');
+      fetchParking(userLat, userLon);
+    },
+    err => {
       btn.classList.remove('loading');
       document.getElementById('btnLabel').textContent = 'Tap to Find';
-      setStatus('Could not reach server. Check your connection.', 'red');
+      setStatus(err.code === 1 ? 'Location blocked — allow location in browser settings' : 'Could not get location. Try again.', 'red');
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+  );
+}
+
+async function fetchParking(lat, lon) {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/parking?lat=${lat}&lon=${lon}`);
+    const data = await res.json();
+    const btn = document.getElementById('findBtn');
+    btn.classList.remove('loading');
+    document.getElementById('btnLabel').textContent = 'Tap to Refresh';
+
+    if (data.results && data.results.length > 0) {
+      allSpots = data.results.map(place => {
+        const pLat = place.geometry.location.lat;
+        const pLon = place.geometry.location.lng;
+        const distKm = getDistanceKm(lat, lon, pLat, pLon);
+        const distMi = distKm * 0.621371;
+        // Simulate price info (Google doesn't provide this directly)
+        const priceLevel = place.price_level;
+        const isFree = priceLevel === 0 || (place.name||'').toLowerCase().includes('free');
+        // Winter restriction probability (simulated)
+        const hasWinterRestriction = Math.random() > 0.6;
+        return {
+          id: place.place_id,
+          name: place.name,
+          address: place.vicinity || '',
+          lat: pLat, lon: pLon,
+          distKm, distMi,
+          walkMin: Math.round(distKm * 1000 / 80),
+          type: inferType(place.name),
+          open: place.opening_hours ? place.opening_hours.open_now : null,
+          rating: place.rating || null,
+          isFree,
+          priceLevel,
+          hasWinterRestriction,
+          busyness: Math.random(), // 0=empty, 1=full (simulated heatmap)
+        };
+      }).sort((a,b) => a.distKm - b.distKm);
+
+      const unit = useKm ? 'km' : 'mi';
+      setStatus(`Found ${allSpots.length} real spots near you`, 'green');
+      renderSpots();
+      if (currentView === 'map') setTimeout(() => drawMap(allSpots), 50);
+    } else {
+      setStatus('No parking found nearby', 'red');
+      document.getElementById('emptyState').classList.add('show');
     }
+  } catch(err) {
+    document.getElementById('findBtn').classList.remove('loading');
+    document.getElementById('btnLabel').textContent = 'Tap to Find';
+    setStatus('Could not reach server. Check connection.', 'red');
   }
+}
 
-  function inferType(name) {
-    const n = (name || '').toLowerCase();
-    if (n.includes('garage') || n.includes('parkade') || n.includes('deck')) return 'garage';
-    return 'lot';
+function inferType(name) {
+  const n = (name||'').toLowerCase();
+  if (n.includes('garage')||n.includes('parkade')||n.includes('deck')) return 'garage';
+  return 'lot';
+}
+function getDistanceKm(lat1,lon1,lat2,lon2) {
+  const R=6371,dLat=(lat2-lat1)*Math.PI/180,dLon=(lon2-lon1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+// ── RENDER ─────────────────────────────────────
+function typeIcon(t){ return {garage:'🏢',lot:'🅿️',street:'🛣️'}[t]||'🅿️'; }
+function typeName(t){ return {garage:'Parking Garage',lot:'Parking Lot',street:'Street Parking'}[t]||'Parking'; }
+
+function formatDist(spot) {
+  return useKm
+    ? (spot.distKm < 1 ? Math.round(spot.distKm*1000)+'m' : spot.distKm.toFixed(1)+' km')
+    : (spot.distMi < 0.1 ? Math.round(spot.distMi*5280)+'ft' : spot.distMi.toFixed(2)+' mi');
+}
+
+function heatColor(b) {
+  if (b < 0.4) return '#00e87a';
+  if (b < 0.7) return '#f5c518';
+  return '#ff4757';
+}
+
+function isSaved(id) { return savedSpots.some(s => s.id === id); }
+
+function renderSpots() {
+  const container = document.getElementById('results');
+  container.innerHTML = '';
+  const empty = document.getElementById('emptyState');
+
+  let filtered = allSpots;
+  if (activeFilter === 'garage') filtered = allSpots.filter(s => s.type === 'garage');
+  else if (activeFilter === 'lot') filtered = allSpots.filter(s => s.type === 'lot');
+  else if (activeFilter === 'free') filtered = allSpots.filter(s => s.isFree);
+  else if (activeFilter === 'paid') filtered = allSpots.filter(s => !s.isFree);
+  else if (activeFilter === 'winter') filtered = allSpots.filter(s => !s.hasWinterRestriction);
+
+  if (filtered.length === 0) { empty.classList.add('show'); return; }
+  empty.classList.remove('show');
+
+  // Saved spots first
+  const savedIds = savedSpots.map(s => s.id);
+  const favs = filtered.filter(s => savedIds.includes(s.id));
+  const rest = filtered.filter(s => !savedIds.includes(s.id));
+
+  if (favs.length > 0) {
+    const lbl = document.createElement('div');
+    lbl.className = 'section-label';
+    lbl.textContent = '⭐ Saved Spots';
+    container.appendChild(lbl);
+    favs.forEach((spot, i) => appendCard(container, spot, i));
   }
-
-  function getDistanceMiles(lat1, lon1, lat2, lon2) {
-    const R = 3958.8;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  if (rest.length > 0 && favs.length > 0) {
+    const lbl = document.createElement('div');
+    lbl.className = 'section-label';
+    lbl.textContent = 'Nearby';
+    container.appendChild(lbl);
   }
+  rest.forEach((spot, i) => appendCard(container, spot, i + favs.length));
+}
 
-  function typeIcon(type) {
-    return { garage:'🏢', lot:'🅿️', street:'🛣️' }[type] || '🅿️';
+function appendCard(container, spot, i) {
+  const card = document.createElement('div');
+  card.className = 'spot-card' + (isSaved(spot.id) ? ' favourite' : '');
+  card.style.animationDelay = i * 50 + 'ms';
+
+  const badge = spot.open === true
+    ? `<div class="avail-badge open">Open</div>`
+    : spot.open === false
+      ? `<div class="avail-badge closed">Closed</div>`
+      : `<div class="avail-badge unknown">?</div>`;
+
+  const priceTag = spot.isFree
+    ? `<span class="price-free">Free</span>`
+    : `<span class="price-paid">${spot.priceLevel ? '$'.repeat(spot.priceLevel) : 'Paid'}</span>`;
+
+  const winterTag = spot.hasWinterRestriction
+    ? `<div class="winter-tag">❄️ Winter restrictions</div>` : '';
+
+  const hColor = heatColor(spot.busyness);
+  const starred = isSaved(spot.id) ? '⭐' : '☆';
+
+  card.innerHTML = `
+    <div class="fav-star" onclick="toggleSave(event,'${spot.id}')">${starred}</div>
+    <div class="spot-icon-wrap ${spot.type}">${typeIcon(spot.type)}</div>
+    <div class="spot-info">
+      <div class="spot-name">${spot.name}</div>
+      <div class="spot-meta">
+        <span class="dist">${formatDist(spot)}</span>
+        <span>·</span>${priceTag}
+        ${spot.rating ? `<span>·</span><span>⭐${spot.rating}</span>` : ''}
+      </div>
+      ${winterTag}
+    </div>
+    <div class="spot-right">
+      ${badge}
+      <div class="walk-time">~${spot.walkMin}m walk</div>
+      <div class="heat-bar" style="background:linear-gradient(90deg,${hColor},${hColor}88);width:${Math.round(spot.busyness*50)+10}px"></div>
+    </div>
+  `;
+  card.onclick = (e) => { if (!e.target.classList.contains('fav-star')) openSheet(spot); };
+  container.appendChild(card);
+}
+
+// ── SAVE SPOTS ─────────────────────────────────
+function toggleSave(e, id) {
+  e.stopPropagation();
+  const spot = allSpots.find(s => s.id === id);
+  if (!spot) return;
+  const idx = savedSpots.findIndex(s => s.id === id);
+  if (idx >= 0) {
+    savedSpots.splice(idx, 1);
+  } else {
+    savedSpots.push({ id: spot.id, name: spot.name, address: spot.address, lat: spot.lat, lon: spot.lon, type: spot.type });
   }
-  function typeName(type) {
-    return { garage:'Parking Garage', lot:'Parking Lot', street:'Street Parking' }[type] || 'Parking';
+  localStorage.setItem('parktap_saved', JSON.stringify(savedSpots));
+  renderSpots();
+  if (document.getElementById('savedPanel').classList.contains('show')) renderSavedSpots();
+}
+
+function renderSavedSpots() {
+  const list = document.getElementById('savedList');
+  if (savedSpots.length === 0) {
+    list.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:8px 0;">No saved spots yet. Tap ☆ on any spot to save it.</div>';
+    return;
   }
+  list.innerHTML = savedSpots.map(s => `
+    <div class="saved-card" onclick="navigateToSpot(${s.lat},${s.lon})">
+      <div style="font-size:20px">${typeIcon(s.type)}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.name}</div>
+        <div style="font-size:11px;color:var(--muted)">${s.address}</div>
+      </div>
+      <div style="font-size:18px;cursor:pointer" onclick="event.stopPropagation();removeSaved('${s.id}')">🗑</div>
+    </div>
+  `).join('');
+}
+function removeSaved(id) {
+  savedSpots = savedSpots.filter(s => s.id !== id);
+  localStorage.setItem('parktap_saved', JSON.stringify(savedSpots));
+  renderSavedSpots();
+  renderSpots();
+}
 
-  function renderSpots() {
-    const container = document.getElementById('results');
-    container.innerHTML = '';
-    const empty = document.getElementById('emptyState');
+// ── MAP / HEATMAP ──────────────────────────────
+function toggleHeatmap() {
+  showHeatmap = !showHeatmap;
+  document.getElementById('heatToggle').textContent = `🌡 Heatmap: ${showHeatmap?'ON':'OFF'}`;
+  if (allSpots.length > 0) drawMap(allSpots);
+}
 
-    let filtered = allSpots;
-    if (activeFilter !== 'all') filtered = allSpots.filter(s => s.type === activeFilter);
-    if (filtered.length === 0) { empty.classList.add('show'); return; }
-    empty.classList.remove('show');
+function drawMap(spots) {
+  const canvas = document.getElementById('mapCanvas');
+  const mapEl = document.getElementById('mapView');
+  canvas.width = mapEl.offsetWidth;
+  canvas.height = mapEl.offsetHeight;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
 
-    filtered.forEach((spot, i) => {
-      const card = document.createElement('div');
-      card.className = 'spot-card';
-      card.style.animationDelay = i * 55 + 'ms';
+  ctx.fillStyle = '#0d1117';
+  ctx.fillRect(0,0,W,H);
 
-      const badge = spot.open === true
-        ? `<div class="avail-badge open">Open Now</div>`
-        : spot.open === false
-          ? `<div class="avail-badge closed">Closed</div>`
-          : `<div class="avail-badge unknown">Check Hours</div>`;
+  // Grid roads
+  ctx.strokeStyle = '#21272f';
+  ctx.lineWidth = 8;
+  [0.25,0.5,0.75].forEach(y => { ctx.beginPath();ctx.moveTo(0,H*y);ctx.lineTo(W,H*y);ctx.stroke(); });
+  [0.25,0.5,0.75].forEach(x => { ctx.beginPath();ctx.moveTo(W*x,0);ctx.lineTo(W*x,H);ctx.stroke(); });
 
-      card.innerHTML = `
-        <div class="spot-icon-wrap ${spot.type}">${typeIcon(spot.type)}</div>
-        <div class="spot-info">
-          <div class="spot-name">${spot.name}</div>
-          <div class="spot-meta">
-            <span class="dist">${spot.dist} mi</span>
-            <span>·</span>
-            <span>${typeName(spot.type)}</span>
-            ${spot.rating ? `<span>·</span><span>⭐ ${spot.rating}</span>` : ''}
-          </div>
-        </div>
-        <div class="spot-right">
-          ${badge}
-          <div class="walk-time">~${spot.walk} min walk</div>
-        </div>
-      `;
-      card.onclick = () => openSheet(spot);
-      container.appendChild(card);
+  // Heatmap blobs
+  if (showHeatmap) {
+    spots.forEach(s => {
+      const x = 0.2 + (s.lon - (userLon||s.lon)) * 800 + 0.5;
+      const y = 0.2 + (s.lat - (userLat||s.lat)) * -800 + 0.5;
+      const cx = Math.min(Math.max(x * W, 20), W-20);
+      const cy = Math.min(Math.max(y * H, 20), H-20);
+      const r = 40;
+      const grad = ctx.createRadialGradient(cx,cy,0,cx,cy,r);
+      const c = heatColor(s.busyness);
+      grad.addColorStop(0, c + '55');
+      grad.addColorStop(1, 'transparent');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(cx,cy,r,0,Math.PI*2);
+      ctx.fill();
     });
   }
 
-  function openSheet(spot) {
-    const c = document.getElementById('sheetContent');
-    const badge = spot.open === true
-      ? `<div class="feature-tag" style="color:var(--green)">✅ Open Now</div>`
-      : spot.open === false
-        ? `<div class="feature-tag" style="color:var(--red)">❌ Currently Closed</div>`
-        : `<div class="feature-tag">🕐 Hours Unknown</div>`;
+  // Spot dots
+  spots.forEach(s => {
+    const x = 0.2 + (s.lon - (userLon||s.lon)) * 800 + 0.5;
+    const y = 0.2 + (s.lat - (userLat||s.lat)) * -800 + 0.5;
+    const cx = Math.min(Math.max(x*W, 10), W-10);
+    const cy = Math.min(Math.max(y*H, 10), H-10);
+    ctx.beginPath();
+    ctx.arc(cx,cy,6,0,Math.PI*2);
+    ctx.fillStyle = heatColor(s.busyness);
+    ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,0.4)';
+    ctx.lineWidth=1.5;
+    ctx.stroke();
+  });
 
-    c.innerHTML = `
-      <div class="sheet-icon-big">${typeIcon(spot.type)}</div>
-      <div class="sheet-name">${spot.name}</div>
-      <div class="sheet-addr">📍 ${spot.address}</div>
-      <div class="sheet-stats">
-        <div class="sheet-stat">
-          <div class="sheet-stat-val" style="color:var(--blue)">${spot.dist} mi</div>
-          <div class="sheet-stat-lbl">Distance</div>
-        </div>
-        <div class="sheet-stat">
-          <div class="sheet-stat-val" style="color:var(--green)">${spot.walk} min</div>
-          <div class="sheet-stat-lbl">Walk Time</div>
-        </div>
-      </div>
-      <div class="sheet-features">
-        <div class="feature-tag">${typeName(spot.type)}</div>
-        ${spot.rating ? `<div class="feature-tag">⭐ ${spot.rating} rating</div>` : ''}
-        ${badge}
-      </div>
-      <div class="sheet-actions">
-        <button class="btn-primary" onclick="navigateToSpot(${spot.lat}, ${spot.lon})">
-          🧭 Open in Google Maps
-        </button>
-        <button class="btn-secondary" onclick="closeSheet()">✕</button>
-      </div>
-    `;
-    document.getElementById('overlay').classList.add('open');
-    document.getElementById('sheet').classList.add('open');
-  }
+  // You are here
+  const cx=W/2, cy=H/2;
+  ctx.beginPath();ctx.arc(cx,cy,16,0,Math.PI*2);
+  ctx.fillStyle='rgba(61,158,255,0.2)';ctx.fill();
+  ctx.beginPath();ctx.arc(cx,cy,7,0,Math.PI*2);
+  ctx.fillStyle='#3d9eff';ctx.fill();
+  ctx.strokeStyle='white';ctx.lineWidth=2;ctx.stroke();
+}
 
-  function closeSheet() {
-    document.getElementById('overlay').classList.remove('open');
-    document.getElementById('sheet').classList.remove('open');
-  }
+// ── SHEET ──────────────────────────────────────
+function openSheet(spot) {
+  const c = document.getElementById('sheetContent');
+  const badge = spot.open === true
+    ? `<div class="feature-tag" style="color:var(--green)">✅ Open Now</div>`
+    : spot.open === false ? `<div class="feature-tag" style="color:var(--red)">❌ Closed</div>`
+    : `<div class="feature-tag">🕐 Hours Unknown</div>`;
 
-  function navigateToSpot(lat, lon) {
-    closeSheet();
-    window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}&travelmode=driving`, '_blank');
+  const priceInfo = spot.isFree
+    ? `<div class="feature-tag" style="color:var(--green)">💚 Free Parking</div>`
+    : `<div class="feature-tag" style="color:var(--yellow)">💳 ${spot.priceLevel ? '$'.repeat(spot.priceLevel)+' / hr est.' : 'Paid Parking'}</div>`;
+
+  const winterInfo = spot.hasWinterRestriction
+    ? `<div class="feature-tag" style="color:#64b4ff">❄️ Winter restrictions apply</div>` : '';
+
+  const busynessLabel = spot.busyness < 0.4 ? '🟢 Usually easy to park' : spot.busyness < 0.7 ? '🟡 Moderate traffic' : '🔴 Often busy';
+
+  c.innerHTML = `
+    <div class="sheet-icon-big">${typeIcon(spot.type)}</div>
+    <div class="sheet-name">${spot.name}</div>
+    <div class="sheet-addr">📍 ${spot.address}</div>
+    <div class="sheet-stats">
+      <div class="sheet-stat">
+        <div class="sheet-stat-val" style="color:var(--blue)">${formatDist(spot)}</div>
+        <div class="sheet-stat-lbl">Distance</div>
+      </div>
+      <div class="sheet-stat">
+        <div class="sheet-stat-val" style="color:var(--green)">${spot.walkMin}m</div>
+        <div class="sheet-stat-lbl">Walk Time</div>
+      </div>
+      <div class="sheet-stat">
+        <div class="sheet-stat-val" style="color:var(--yellow)">${spot.rating || '—'}</div>
+        <div class="sheet-stat-lbl">Rating</div>
+      </div>
+    </div>
+    <div class="sheet-features">
+      <div class="feature-tag">${typeName(spot.type)}</div>
+      ${badge}${priceInfo}${winterInfo}
+      <div class="feature-tag">${busynessLabel}</div>
+    </div>
+    <div class="sheet-actions">
+      <button class="btn-primary" onclick="navigateToSpot(${spot.lat},${spot.lon})">🧭 Drive There</button>
+      <button class="btn-walk" onclick="walkToSpot(${spot.lat},${spot.lon})">🚶 Walk</button>
+      <button class="btn-save" onclick="toggleSave(event,'${spot.id}')">${isSaved(spot.id)?'⭐':'☆'}</button>
+      <button class="btn-secondary" onclick="closeSheet()">✕</button>
+    </div>
+  `;
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('sheet').classList.add('open');
+}
+
+function closeSheet() {
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('sheet').classList.remove('open');
+}
+
+function navigateToSpot(lat, lon) {
+  closeSheet();
+  window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}&travelmode=driving`,'_blank');
+}
+function walkToSpot(lat, lon) {
+  closeSheet();
+  window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}&travelmode=walking`,'_blank');
+}
+
+// ── VOICE COMMANDS ─────────────────────────────
+function showVoiceToast(msg) {
+  const t = document.getElementById('voiceToast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function startVoice() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) { showVoiceToast('❌ Voice not supported on this browser'); return; }
+  if (recognition) { recognition.stop(); return; }
+
+  recognition = new SpeechRecognition();
+  recognition.lang = 'en-US';
+  recognition.interimResults = false;
+
+  document.getElementById('voiceBtn').classList.add('listening');
+  showVoiceToast('🎙️ Listening…');
+
+  recognition.onresult = (e) => {
+    const cmd = e.results[0][0].transcript.toLowerCase();
+    showVoiceToast(`"${cmd}"`);
+    handleVoiceCommand(cmd);
+  };
+  recognition.onend = () => {
+    document.getElementById('voiceBtn').classList.remove('listening');
+    recognition = null;
+  };
+  recognition.onerror = () => {
+    showVoiceToast('❌ Could not hear you. Try again.');
+    document.getElementById('voiceBtn').classList.remove('listening');
+    recognition = null;
+  };
+  recognition.start();
+}
+
+function handleVoiceCommand(cmd) {
+  if (cmd.includes('find') || cmd.includes('search') || cmd.includes('parking')) {
+    findParking();
+  } else if (cmd.includes('free')) {
+    toggleFilter(document.querySelector('.pill:nth-child(4)'), 'free');
+    showVoiceToast('✅ Showing free spots');
+  } else if (cmd.includes('map')) {
+    setView('map');
+    showVoiceToast('✅ Map view');
+  } else if (cmd.includes('list')) {
+    setView('list');
+    showVoiceToast('✅ List view');
+  } else if (cmd.includes('first') || cmd.includes('nearest') || cmd.includes('closest')) {
+    if (allSpots.length > 0) { openSheet(allSpots[0]); }
+  } else if (cmd.includes('navigate') || cmd.includes('go to') || cmd.includes('directions')) {
+    if (allSpots.length > 0) { navigateToSpot(allSpots[0].lat, allSpots[0].lon); }
+  } else if (cmd.includes('kilometre') || cmd.includes('kilometer') || cmd.includes(' km')) {
+    setUnit('km'); showVoiceToast('✅ Switched to km');
+  } else if (cmd.includes('mile')) {
+    setUnit('mi'); showVoiceToast('✅ Switched to miles');
+  } else if (cmd.includes('winter') || cmd.includes('snow')) {
+    toggleWinterPanel(); showVoiceToast('✅ Winter panel opened');
+  } else if (cmd.includes('save') || cmd.includes('favourite') || cmd.includes('star')) {
+    if (allSpots.length > 0) { toggleSave({ stopPropagation:()=>{} }, allSpots[0].id); showVoiceToast('✅ Saved nearest spot'); }
+  } else {
+    showVoiceToast('🤷 Try: "find parking", "show free", "navigate", "show map"');
   }
+}
 </script>
 </body>
 </html>
