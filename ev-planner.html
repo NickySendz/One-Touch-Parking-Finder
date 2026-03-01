@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>EV Trip Planner — One Touch Parking</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#0b1120; --navy2:#111827; --navy3:#1c2637; --navy4:#263044;
+  --border:#2d3a4f; --border2:#384a61;
+  --teal:#00c2a8; --teal-dim:rgba(0,194,168,0.12);
+  --amber:#f59e0b; --amber-dim:rgba(245,158,11,0.12);
+  --red:#ef4444; --red-dim:rgba(239,68,68,0.12);
+  --blue:#3b82f6; --blue-dim:rgba(59,130,246,0.12);
+  --green:#22c55e; --green-dim:rgba(34,197,94,0.12);
+  --purple:#a855f7; --purple-dim:rgba(168,85,247,0.12);
+  --white:#f1f5f9; --white2:#cbd5e1; --muted:#64748b; --muted2:#475569;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:var(--navy);color:var(--white);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;padding-bottom:80px;}
+
+/* ── HEADER ── */
+.header{padding:14px 16px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--navy2);position:sticky;top:0;z-index:50;}
+.brand{display:flex;align-items:center;gap:8px;}
+.radar-icon{width:38px;height:38px;position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.radar-ring{position:absolute;border-radius:50%;border:1.5px solid var(--teal);}
+.radar-ring-1{width:38px;height:38px;opacity:0.18;animation:radar-breathe 2.5s ease-in-out infinite;}
+.radar-ring-2{width:26px;height:26px;opacity:0.35;animation:radar-breathe 2.5s ease-in-out infinite 0.3s;}
+@keyframes radar-breathe{0%,100%{transform:scale(1);opacity:inherit;}50%{transform:scale(1.07);opacity:0.08;}}
+.radar-core{width:19px;height:19px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;box-shadow:0 0 10px rgba(0,194,168,0.7),0 0 22px rgba(0,194,168,0.3);z-index:1;}
+.radar-core-p{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;color:#000;line-height:1;}
+.brand-text{display:flex;flex-direction:column;gap:0;line-height:1;}
+.brand-line1{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);line-height:1.2;font-family:'DM Mono',monospace;}
+.brand-line2{font-size:16px;font-weight:800;letter-spacing:-0.5px;line-height:1.15;color:var(--white);}
+.brand-line2 span{color:var(--teal);}
+.header-badge{padding:4px 10px;background:var(--purple-dim);border:1px solid var(--purple);border-radius:6px;font-size:11px;font-weight:700;color:var(--purple);font-family:'DM Mono',monospace;}
+
+/* ── SECTIONS ── */
+.section{padding:16px;}
+.section+.section{border-top:1px solid var(--border);}
+.section-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;font-family:'DM Mono',monospace;}
+
+/* ── CARDS ── */
+.card{background:var(--navy2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;}
+.card-title{font-size:13px;font-weight:700;color:var(--white);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+
+/* ── INPUTS ── */
+.input-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+.input-wrap{flex:1;position:relative;}
+.input-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none;}
+.inp{width:100%;background:var(--navy3);border:1px solid var(--border);border-radius:9px;padding:10px 12px 10px 36px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--white);outline:none;transition:border-color 0.15s;}
+.inp:focus{border-color:var(--teal);}
+.inp::placeholder{color:var(--muted);}
+.inp-bare{width:100%;background:var(--navy3);border:1px solid var(--border);border-radius:9px;padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--white);outline:none;transition:border-color 0.15s;}
+.inp-bare:focus{border-color:var(--teal);}
+.inp-bare option{background:var(--navy2);}
+.add-stop-btn{padding:9px 14px;background:var(--navy3);border:1px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;transition:all 0.15s;}
+.add-stop-btn:active{background:var(--navy4);}
+
+/* ── VEHICLE SELECTOR ── */
+.vehicle-search-wrap{position:relative;margin-bottom:8px;}
+.vehicle-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--navy2);border:1px solid var(--border2);border-radius:10px;max-height:220px;overflow-y:auto;z-index:100;display:none;box-shadow:0 8px 30px rgba(0,0,0,0.5);}
+.vehicle-dropdown.show{display:block;}
+.vehicle-opt{padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border);transition:background 0.1s;}
+.vehicle-opt:last-child{border-bottom:none;}
+.vehicle-opt:active{background:var(--navy3);}
+.vehicle-opt-name{font-weight:600;color:var(--white);}
+.vehicle-opt-specs{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px;}
+.selected-vehicle{background:var(--teal-dim);border:1px solid var(--teal);border-radius:10px;padding:12px 14px;display:none;margin-bottom:10px;}
+.sel-v-name{font-size:14px;font-weight:700;color:var(--teal);margin-bottom:4px;}
+.sel-v-specs{display:flex;gap:10px;flex-wrap:wrap;}
+.sel-v-spec{font-size:10px;font-family:'DM Mono',monospace;color:var(--white2);background:rgba(0,0,0,0.2);padding:2px 8px;border-radius:4px;}
+
+/* ── SLIDERS ── */
+.slider-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.slider-label{font-size:12px;color:var(--white2);min-width:110px;}
+.slider-val{font-size:12px;font-family:'DM Mono',monospace;color:var(--teal);min-width:44px;text-align:right;}
+input[type=range]{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--border2);outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--teal);cursor:pointer;box-shadow:0 0 6px rgba(0,194,168,0.5);}
+
+/* ── TOGGLES ── */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.toggle-label{font-size:13px;color:var(--white2);display:flex;align-items:center;gap:8px;}
+.toggle{width:40px;height:22px;background:var(--border2);border-radius:100px;position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;}
+.toggle.on{background:var(--teal);}
+.toggle::after{content:'';position:absolute;width:16px;height:16px;background:white;border-radius:50%;top:3px;left:3px;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.3);}
+.toggle.on::after{left:21px;}
+
+/* ── TABS ── */
+.tabs{display:flex;background:var(--navy3);border-radius:10px;padding:3px;gap:2px;margin-bottom:14px;}
+.tab{flex:1;padding:8px;text-align:center;border-radius:8px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:all 0.15s;}
+.tab.active{background:var(--navy2);color:var(--teal);box-shadow:0 1px 4px rgba(0,0,0,0.3);}
+
+/* ── PLAN BTN ── */
+.plan-btn{width:100%;padding:15px;background:var(--teal);color:#000;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:800;cursor:pointer;transition:opacity 0.15s,transform 0.1s;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 20px rgba(0,194,168,0.3);}
+.plan-btn:active{opacity:0.85;transform:scale(0.98);}
+.plan-btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+/* ── RESULTS ── */
+.results-section{display:none;}
+.results-section.show{display:block;}
+
+/* Route summary bar */
+.route-summary{background:var(--navy2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;}
+.route-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
+.rstat{text-align:center;}
+.rstat-val{font-size:17px;font-weight:800;font-family:'DM Mono',monospace;line-height:1;}
+.rstat-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:3px;}
+
+/* Charging stop cards */
+.stop-card{background:var(--navy2);border:1px solid var(--border);border-radius:12px;padding:13px;margin-bottom:8px;position:relative;overflow:hidden;}
+.stop-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;}
+.stop-card.type-start::before{background:var(--teal);}
+.stop-card.type-charge::before{background:var(--amber);}
+.stop-card.type-dest::before{background:var(--green);}
+.stop-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.stop-badge{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.stop-badge.start{background:var(--teal-dim);}
+.stop-badge.charge{background:var(--amber-dim);}
+.stop-badge.dest{background:var(--green-dim);}
+.stop-name{font-size:13px;font-weight:700;}
+.stop-addr{font-size:11px;color:var(--muted);}
+.stop-stats{display:flex;gap:8px;flex-wrap:wrap;}
+.stop-stat{font-size:10px;font-family:'DM Mono',monospace;padding:3px 8px;border-radius:5px;background:var(--navy3);color:var(--white2);}
+.stop-stat.soc{color:var(--teal);}
+.stop-stat.time{color:var(--amber);}
+.stop-stat.dist{color:var(--blue);}
+.stop-connector{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+.connector-tag{font-size:9px;padding:2px 7px;background:var(--purple-dim);border:1px solid var(--purple-dim);border-radius:4px;color:#c084fc;}
+
+/* Battery arc */
+.battery-arc-wrap{display:flex;align-items:center;gap:12px;margin:12px 0;}
+.battery-arc{position:relative;width:70px;height:70px;flex-shrink:0;}
+.battery-arc svg{width:70px;height:70px;transform:rotate(-90deg);}
+.arc-bg{fill:none;stroke:var(--border2);stroke-width:6;}
+.arc-fill{fill:none;stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset 0.8s ease;}
+.arc-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;font-family:'DM Mono',monospace;}
+
+/* Leg connector */
+.leg-line{display:flex;align-items:center;gap:10px;padding:6px 14px;margin-bottom:4px;}
+.leg-dot-line{width:2px;height:30px;background:var(--border2);margin-left:13px;}
+.leg-info{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;}
+
+/* Map */
+.trip-map{border-radius:12px;overflow:hidden;border:1px solid var(--border);height:260px;margin-bottom:12px;}
+#tripMapDiv{width:100%;height:100%;}
+.leaflet-control-zoom,.leaflet-control-attribution{display:none!important;}
+
+/* Cost breakdown */
+.cost-table{width:100%;border-collapse:collapse;}
+.cost-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.cost-row:last-child{border-bottom:none;font-weight:700;color:var(--white);}
+.cost-label{color:var(--white2);}
+.cost-val{font-family:'DM Mono',monospace;color:var(--teal);}
+
+/* CO2 */
+.co2-bar{background:var(--green-dim);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px;}
+.co2-icon{font-size:28px;}
+.co2-text{flex:1;}
+.co2-main{font-size:14px;font-weight:700;color:var(--green);}
+.co2-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+
+/* Share btn */
+.share-btn{width:100%;padding:13px;background:var(--navy3);border:1px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:var(--white2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;}
+.share-btn:active{background:var(--navy4);}
+
+/* Amenities */
+.amenity-card{background:var(--navy3);border-radius:9px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px;}
+.amenity-icon{font-size:18px;flex-shrink:0;}
+.amenity-name{font-size:12px;font-weight:600;}
+.amenity-detail{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;}
+
+/* Loading */
+.loading-state{text-align:center;padding:40px 20px;display:none;}
+.loading-state.show{display:block;}
+.loading-spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--teal);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 14px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:13px;color:var(--muted);}
+
+/* Toast */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--navy2);border:1px solid var(--border2);border-radius:100px;padding:9px 20px;font-size:13px;font-weight:500;color:var(--white);z-index:200;opacity:0;transition:opacity 0.25s,transform 0.25s;white-space:nowrap;pointer-events:none;box-shadow:0 8px 30px rgba(0,0,0,0.5);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:62px;background:var(--navy2);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;z-index:90;padding-bottom:env(safe-area-inset-bottom);}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;padding:8px 0;text-decoration:none;transition:opacity 0.15s;}
+.nav-item:active{opacity:0.7;}
+.nav-icon{font-size:22px;line-height:1;}
+.nav-label{font-size:10px;font-weight:600;color:var(--muted);letter-spacing:0.3px;font-family:'DM Mono',monospace;text-transform:uppercase;}
+.nav-item.active .nav-label{color:var(--teal);}
+.nav-item.active .nav-icon{filter:drop-shadow(0 0 6px rgba(0,194,168,0.6));}
+.nav-divider{width:1px;height:28px;background:var(--border);}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="brand">
+    <div class="radar-icon">
+      <div class="radar-ring radar-ring-1"></div>
+      <div class="radar-ring radar-ring-2"></div>
+      <div class="radar-core"><div class="radar-core-p">P</div></div>
+    </div>
+    <div class="brand-text">
+      <div class="brand-line1">One Touch</div>
+      <div class="brand-line2">Parking <span>Finder</span></div>
+    </div>
+  </div>
+  <div class="header-badge">⚡ EV Planner</div>
+</div>
+
+<!-- ── TRIP SETUP ── -->
+<div class="section">
+  <div class="section-title">Route</div>
+
+  <!-- Origin -->
+  <div class="input-row">
+    <div class="input-wrap">
+      <div class="input-icon">🟢</div>
+      <input class="inp" id="originInput" placeholder="Starting point" autocomplete="off"/>
+    </div>
+    <button class="add-stop-btn" onclick="useMyLocation()">📍 Me</button>
+  </div>
+
+  <!-- Waypoints container -->
+  <div id="waypointsContainer"></div>
+
+  <!-- Destination -->
+  <div class="input-row">
+    <div class="input-wrap">
+      <div class="input-icon">🔴</div>
+      <input class="inp" id="destInput" placeholder="Destination" autocomplete="off"/>
+    </div>
+    <button class="add-stop-btn" onclick="addWaypoint()">+ Stop</button>
+  </div>
+</div>
+
+<!-- ── VEHICLE ── -->
+<div class="section">
+  <div class="section-title">Vehicle</div>
+  <div class="vehicle-search-wrap">
+    <input class="inp-bare" id="vehicleSearch" placeholder="Search EV model (e.g. Tesla Model 3)..." autocomplete="off" oninput="searchVehicles(this.value)" onfocus="searchVehicles(this.value)"/>
+    <div class="vehicle-dropdown" id="vehicleDropdown"></div>
+  </div>
+  <div class="selected-vehicle" id="selectedVehicle">
+    <div class="sel-v-name" id="selVName"></div>
+    <div class="sel-v-specs" id="selVSpecs"></div>
+  </div>
+
+  <!-- SOC -->
+  <div class="slider-row">
+    <div class="slider-label">🔋 Current charge</div>
+    <input type="range" id="socSlider" min="5" max="100" value="80" oninput="updateSlider('soc',this.value,'%')">
+    <div class="slider-val" id="socVal">80%</div>
+  </div>
+  <div class="slider-row">
+    <div class="slider-label">🛡 Min SOC buffer</div>
+    <input type="range" id="bufferSlider" min="5" max="30" value="10" oninput="updateSlider('buffer',this.value,'%')">
+    <div class="slider-val" id="bufferVal">10%</div>
+  </div>
+</div>
+
+<!-- ── CONDITIONS ── -->
+<div class="section">
+  <div class="section-title">Conditions</div>
+
+  <div class="slider-row">
+    <div class="slider-label">🌡 Temperature</div>
+    <input type="range" id="tempSlider" min="-30" max="45" value="20" oninput="updateSlider('temp',this.value,'°C')">
+    <div class="slider-val" id="tempVal">20°C</div>
+  </div>
+  <div class="slider-row">
+    <div class="slider-label">💨 Wind speed</div>
+    <input type="range" id="windSlider" min="0" max="80" value="10" oninput="updateSlider('wind',this.value,' km/h')">
+    <div class="slider-val" id="windVal">10 km/h</div>
+  </div>
+  <div class="slider-row">
+    <div class="slider-label">🚗 Highway speed</div>
+    <input type="range" id="speedSlider" min="80" max="140" value="110" oninput="updateSlider('speed',this.value,' km/h')">
+    <div class="slider-val" id="speedVal">110 km/h</div>
+  </div>
+  <div class="slider-row">
+    <div class="slider-label">⚖️ Load / cargo</div>
+    <input type="range" id="loadSlider" min="0" max="5" value="0" oninput="updateSlider('load',this.value,'')">
+    <div class="slider-val" id="loadVal">None</div>
+  </div>
+
+  <div class="toggle-row">
+    <div class="toggle-label">❄️ HVAC / heat on</div>
+    <div class="toggle" id="hvacToggle" onclick="toggleSwitch('hvac')"></div>
+  </div>
+  <div class="toggle-row">
+    <div class="toggle-label">🚐 Towing mode</div>
+    <div class="toggle" id="towToggle" onclick="toggleSwitch('tow')"></div>
+  </div>
+  <div class="toggle-row">
+    <div class="toggle-label">🔌 Precondition battery</div>
+    <div class="toggle" id="precondToggle" onclick="toggleSwitch('precond')"></div>
+  </div>
+</div>
+
+<!-- ── CHARGER PREFERENCES ── -->
+<div class="section">
+  <div class="section-title">Charger Preferences</div>
+
+  <div class="input-row" style="margin-bottom:10px">
+    <div style="font-size:12px;color:var(--white2);min-width:110px;">Min charge speed</div>
+    <select class="inp-bare" id="minSpeedSelect">
+      <option value="0">Any speed</option>
+      <option value="50">50 kW+ (Fast)</option>
+      <option value="100">100 kW+ (Rapid)</option>
+      <option value="150">150 kW+ (Ultra)</option>
+      <option value="250">250 kW+ (HPC)</option>
+    </select>
+  </div>
+
+  <div style="font-size:12px;color:var(--white2);margin-bottom:8px;">Connector types</div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;" id="connectorFilters">
+    <div class="connector-btn active" onclick="toggleConnector(this,'CCS')">CCS</div>
+    <div class="connector-btn active" onclick="toggleConnector(this,'CHAdeMO')">CHAdeMO</div>
+    <div class="connector-btn active" onclick="toggleConnector(this,'Tesla')">Tesla</div>
+    <div class="connector-btn active" onclick="toggleConnector(this,'Type2')">Type 2</div>
+    <div class="connector-btn active" onclick="toggleConnector(this,'J1772')">J1772</div>
+  </div>
+
+  <div style="font-size:12px;color:var(--white2);margin-bottom:8px;">Electricity cost</div>
+  <div class="slider-row">
+    <div class="slider-label">💰 Rate</div>
+    <input type="range" id="rateSlider" min="5" max="80" value="15" oninput="updateSlider('rate',this.value,'¢/kWh')">
+    <div class="slider-val" id="rateVal">15¢/kWh</div>
+  </div>
+
+  <div style="font-size:12px;color:var(--white2);margin-bottom:8px;">Departure time</div>
+  <input class="inp-bare" type="datetime-local" id="departureTime" style="margin-bottom:0"/>
+</div>
+
+<!-- PLAN BUTTON -->
+<div style="padding:16px;">
+  <button class="plan-btn" id="planBtn" onclick="planTrip()">
+    ⚡ Plan My EV Trip
+  </button>
+</div>
+
+<!-- LOADING -->
+<div class="loading-state" id="loadingState">
+  <div class="loading-spinner"></div>
+  <div class="loading-text" id="loadingText">Calculating optimal route…</div>
+</div>
+
+<!-- ── RESULTS ── -->
+<div class="results-section" id="resultsSection">
+
+  <div class="section">
+    <div class="section-title">Trip Summary</div>
+    <div class="route-summary">
+      <div class="route-stats" id="routeStats"></div>
+      <div class="co2-bar" id="co2Bar"></div>
+    </div>
+  </div>
+
+  <!-- Map -->
+  <div style="padding:0 16px 16px;">
+    <div class="trip-map">
+      <div id="tripMapDiv"></div>
+    </div>
+  </div>
+
+  <!-- Charging stops -->
+  <div class="section">
+    <div class="section-title">Route Breakdown</div>
+    <div id="stopsContainer"></div>
+  </div>
+
+  <!-- Cost breakdown -->
+  <div class="section">
+    <div class="section-title">Trip Cost</div>
+    <div class="card">
+      <div id="costBreakdown"></div>
+    </div>
+  </div>
+
+  <!-- Amenities -->
+  <div class="section" id="amenitiesSection">
+    <div class="section-title">While You Charge</div>
+    <div id="amenitiesList"></div>
+  </div>
+
+  <!-- Share -->
+  <div style="padding:0 16px 16px;">
+    <button class="share-btn" onclick="shareTrip()">🔗 Share Trip Plan</button>
+  </div>
+</div>
+
+<style>
+.connector-btn{padding:5px 12px;background:var(--navy3);border:1px solid var(--border);border-radius:6px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;transition:all 0.15s;}
+.connector-btn.active{background:var(--purple-dim);border-color:var(--purple);color:#c084fc;}
+</style>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <a class="nav-item" href="index.html">
+    <div class="nav-icon">🅿️</div>
+    <div class="nav-label">Parking</div>
+  </a>
+  <div class="nav-divider"></div>
+  <a class="nav-item active" href="ev-planner.html">
+    <div class="nav-icon">⚡</div>
+    <div class="nav-label">EV Planner</div>
+  </a>
+</nav>
+
+<script>
+const BACKEND = 'https://one-touch-parking-finder-backend.vercel.app';
+const GOOGLE_MAPS_KEY = ''; // Uses backend for directions
+
+// ── STATE ──────────────────────────────────────
+let selectedVehicle = null;
+let waypoints = [];
+let tripMap = null;
+let tripResult = null;
+let connectorFilters = new Set(['CCS','CHAdeMO','Tesla','Type2','J1772']);
+let toggles = { hvac: false, tow: false, precond: false };
+
+// Set default departure time to now
+document.getElementById('departureTime').value = new Date(Date.now() - new Date().getTimezoneOffset()*60000).toISOString().slice(0,16);
+
+// ── VEHICLE DATABASE (300+ EVs) ─────────────────
+const VEHICLES = [
+  // Tesla
+  {make:'Tesla',model:'Model 3 Standard Range',year:2024,battery:57.5,range:438,efficiency:131,maxCharge:170,connectors:['CCS','Tesla']},
+  {make:'Tesla',model:'Model 3 Long Range AWD',year:2024,battery:82,range:629,efficiency:130,maxCharge:250,connectors:['CCS','Tesla']},
+  {make:'Tesla',model:'Model 3 Performance',year:2024,battery:82,range:547,efficiency:150,maxCharge:250,connectors:['CCS','Tesla']},
+  {make:'Tesla',model:'Model Y Standard Range',year:2024,battery:60,range:430,efficiency:139,maxCharge:170,connectors:['CCS','Tesla']},
+  {make:'Tesla',model:'Model Y Long Range AWD',year:2024,battery:82,range:533,efficiency:154,maxCharge:250,connectors:['CCS','Tesla']},
+  {make:'Tesla',model:'Model Y Performance',year:2024,battery:82,range:514,efficiency:160,maxCharge:250,connectors:['CCS','Tesla']},
+  {make:'Tesla',model:'Model S Long Range',year:2024,battery:100,range:652,efficiency:153,maxCharge:250,connectors:['CCS','Tesla']},
+  {make:'Tesla',model:'Model S Plaid',year:2024,battery:100,range:600,efficiency:167,maxCharge:250,connectors:['CCS','Tesla']},
+  {make:'Tesla',model:'Model X Long Range',year:2024,battery:100,range:543,efficiency:184,maxCharge:250,connectors:['CCS','Tesla']},
+  {make:'Tesla',model:'Model X Plaid',year:2024,battery:100,range:508,efficiency:197,maxCharge:250,connectors:['CCS','Tesla']},
+  {make:'Tesla',model:'Cybertruck AWD',year:2024,battery:123,range:547,efficiency:225,maxCharge:250,connectors:['CCS','Tesla']},
+  // GM / Chevrolet
+  {make:'Chevrolet',model:'Bolt EV',year:2024,battery:65,range:416,efficiency:156,maxCharge:55,connectors:['CCS','J1772']},
+  {make:'Chevrolet',model:'Bolt EUV',year:2024,battery:65,range:397,efficiency:164,maxCharge:55,connectors:['CCS','J1772']},
+  {make:'Chevrolet',model:'Equinox EV LT',year:2024,battery:85,range:483,efficiency:176,maxCharge:150,connectors:['CCS','J1772']},
+  {make:'Chevrolet',model:'Blazer EV SS',year:2024,battery:102,range:449,efficiency:227,maxCharge:190,connectors:['CCS','J1772']},
+  {make:'Chevrolet',model:'Silverado EV WT',year:2024,battery:200,range:640,efficiency:313,maxCharge:350,connectors:['CCS','J1772']},
+  {make:'GMC',model:'Hummer EV Pickup',year:2024,battery:246,range:529,efficiency:465,maxCharge:350,connectors:['CCS','J1772']},
+  {make:'GMC',model:'Sierra EV Denali',year:2024,battery:200,range:644,efficiency:311,maxCharge:350,connectors:['CCS','J1772']},
+  {make:'Cadillac',model:'Lyriq RWD',year:2024,battery:102,range:530,efficiency:192,maxCharge:190,connectors:['CCS','J1772']},
+  {make:'Cadillac',model:'Optiq',year:2024,battery:85,range:483,efficiency:176,maxCharge:150,connectors:['CCS','J1772']},
+  // Ford
+  {make:'Ford',model:'Mustang Mach-E Standard RWD',year:2024,battery:70,range:440,efficiency:159,maxCharge:150,connectors:['CCS','J1772']},
+  {make:'Ford',model:'Mustang Mach-E Extended RWD',year:2024,battery:91,range:519,efficiency:175,maxCharge:150,connectors:['CCS','J1772']},
+  {make:'Ford',model:'Mustang Mach-E GT',year:2024,battery:91,range:490,efficiency:186,maxCharge:150,connectors:['CCS','J1772']},
+  {make:'Ford',model:'F-150 Lightning Standard',year:2024,battery:98,range:386,efficiency:254,maxCharge:150,connectors:['CCS','J1772']},
+  {make:'Ford',model:'F-150 Lightning Extended',year:2024,battery:131,range:515,efficiency:254,maxCharge:150,connectors:['CCS','J1772']},
+  {make:'Ford',model:'Explorer EV Standard',year:2024,battery:77,range:448,efficiency:172,maxCharge:135,connectors:['CCS','J1772']},
+  // Hyundai / Kia / Genesis
+  {make:'Hyundai',model:'IONIQ 5 Standard RWD',year:2024,battery:58,range:384,efficiency:151,maxCharge:200,connectors:['CCS','J1772']},
+  {make:'Hyundai',model:'IONIQ 5 Long Range RWD',year:2024,battery:77.4,range:507,efficiency:153,maxCharge:220,connectors:['CCS','J1772']},
+  {make:'Hyundai',model:'IONIQ 5 Long Range AWD',year:2024,battery:77.4,range:461,efficiency:168,maxCharge:220,connectors:['CCS','J1772']},
+  {make:'Hyundai',model:'IONIQ 5 N',year:2024,battery:84,range:448,efficiency:188,maxCharge:230,connectors:['CCS','J1772']},
+  {make:'Hyundai',model:'IONIQ 6 Standard RWD',year:2024,battery:53,range:385,efficiency:138,maxCharge:200,connectors:['CCS','J1772']},
+  {make:'Hyundai',model:'IONIQ 6 Long Range RWD',year:2024,battery:77.4,range:614,efficiency:126,maxCharge:220,connectors:['CCS','J1772']},
+  {make:'Hyundai',model:'IONIQ 6 Long Range AWD',year:2024,battery:77.4,range:519,efficiency:149,maxCharge:220,connectors:['CCS','J1772']},
+  {make:'Hyundai',model:'Kona Electric',year:2024,battery:48.4,range:390,efficiency:124,maxCharge:100,connectors:['CCS','J1772']},
+  {make:'Kia',model:'EV6 Standard RWD',year:2024,battery:58,range:394,efficiency:147,maxCharge:200,connectors:['CCS','J1772']},
+  {make:'Kia',model:'EV6 Long Range RWD',year:2024,battery:77.4,range:528,efficiency:147,maxCharge:220,connectors:['CCS','J1772']},
+  {make:'Kia',model:'EV6 Long Range AWD',year:2024,battery:77.4,range:484,efficiency:160,maxCharge:220,connectors:['CCS','J1772']},
+  {make:'Kia',model:'EV6 GT',year:2024,battery:77.4,range:424,efficiency:183,maxCharge:240,connectors:['CCS','J1772']},
+  {make:'Kia',model:'EV9 Long Range AWD',year:2024,battery:99.8,range:505,efficiency:198,maxCharge:240,connectors:['CCS','J1772']},
+  {make:'Kia',model:'Niro EV',year:2024,battery:64.8,range:463,efficiency:140,maxCharge:100,connectors:['CCS','J1772']},
+  {make:'Genesis',model:'GV60 Standard',year:2024,battery:58,range:368,efficiency:158,maxCharge:200,connectors:['CCS','J1772']},
+  {make:'Genesis',model:'GV60 Performance',year:2024,battery:77.4,range:470,efficiency:165,maxCharge:220,connectors:['CCS','J1772']},
+  {make:'Genesis',model:'GV70 Electrified',year:2024,battery:77.4,range:455,efficiency:170,maxCharge:220,connectors:['CCS','J1772']},
+  {make:'Genesis',model:'GV80 Electrified',year:2024,battery:87,range:451,efficiency:193,maxCharge:220,connectors:['CCS','J1772']},
+  // BMW / Mercedes / Audi / VW
+  {make:'BMW',model:'i4 eDrive35',year:2024,battery:70.2,range:483,efficiency:145,maxCharge:180,connectors:['CCS','J1772']},
+  {make:'BMW',model:'i4 eDrive40',year:2024,battery:83.9,range:560,efficiency:150,maxCharge:200,connectors:['CCS','J1772']},
+  {make:'BMW',model:'i4 M50',year:2024,battery:83.9,range:521,efficiency:161,maxCharge:200,connectors:['CCS','J1772']},
+  {make:'BMW',model:'iX xDrive40',year:2024,battery:76.6,range:425,efficiency:180,maxCharge:150,connectors:['CCS','J1772']},
+  {make:'BMW',model:'iX xDrive50',year:2024,battery:111.5,range:630,efficiency:177,maxCharge:200,connectors:['CCS','J1772']},
+  {make:'BMW',model:'iX M60',year:2024,battery:111.5,range:566,efficiency:197,maxCharge:200,connectors:['CCS','J1772']},
+  {make:'BMW',model:'i5 eDrive40',year:2024,battery:84,range:525,efficiency:160,maxCharge:205,connectors:['CCS','J1772']},
+  {make:'BMW',model:'i7 xDrive60',year:2024,battery:105.7,range:634,efficiency:167,maxCharge:195,connectors:['CCS','J1772']},
+  {make:'Mercedes',model:'EQA 250',year:2024,battery:66.5,range:426,efficiency:156,maxCharge:100,connectors:['CCS','J1772']},
+  {make:'Mercedes',model:'EQB 300 4MATIC',year:2024,battery:66.5,range:423,efficiency:157,maxCharge:100,connectors:['CCS','J1772']},
+  {make:'Mercedes',model:'EQC 400 4MATIC',year:2024,battery:85,range:440,efficiency:193,maxCharge:110,connectors:['CCS','J1772']},
+  {make:'Mercedes',model:'EQE 350+',year:2024,battery:96.1,range:654,efficiency:147,maxCharge:170,connectors:['CCS','J1772']},
+  {make:'Mercedes',model:'EQS 450+',year:2024,battery:107.8,range:784,efficiency:138,maxCharge:200,connectors:['CCS','J1772']},
+  {make:'Mercedes',model:'EQS SUV 450+',year:2024,battery:107.8,range:672,efficiency:160,maxCharge:200,connectors:['CCS','J1772']},
+  {make:'Audi',model:'Q4 e-tron 40',year:2024,battery:82,range:491,efficiency:167,maxCharge:135,connectors:['CCS','J1772']},
+  {make:'Audi',model:'Q4 e-tron 50 quattro',year:2024,battery:82,range:488,efficiency:168,maxCharge:135,connectors:['CCS','J1772']},
+  {make:'Audi',model:'Q8 e-tron 50 quattro',year:2024,battery:114,range:491,efficiency:232,maxCharge:170,connectors:['CCS','J1772']},
+  {make:'Audi',model:'Q8 e-tron 55 quattro',year:2024,battery:114,range:582,efficiency:196,maxCharge:170,connectors:['CCS','J1772']},
+  {make:'Audi',model:'e-tron GT quattro',year:2024,battery:93.4,range:488,efficiency:192,maxCharge:270,connectors:['CCS','J1772']},
+  {make:'Audi',model:'RS e-tron GT',year:2024,battery:93.4,range:472,efficiency:198,maxCharge:270,connectors:['CCS','J1772']},
+  {make:'Volkswagen',model:'ID.4 Standard',year:2024,battery:62,range:349,efficiency:178,maxCharge:110,connectors:['CCS','J1772']},
+  {make:'Volkswagen',model:'ID.4 Pro',year:2024,battery:82,range:435,efficiency:188,maxCharge:135,connectors:['CCS','J1772']},
+  {make:'Volkswagen',model:'ID.4 Pro S AWD',year:2024,battery:82,range:426,efficiency:192,maxCharge:135,connectors:['CCS','J1772']},
+  {make:'Volkswagen',model:'ID.Buzz',year:2024,battery:82,range:420,efficiency:195,maxCharge:170,connectors:['CCS','J1772']},
+  {make:'Porsche',model:'Taycan',year:2024,battery:93.4,range:484,efficiency:193,maxCharge:270,connectors:['CCS','J1772']},
+  {make:'Porsche',model:'Taycan 4S',year:2024,battery:93.4,range:463,efficiency:202,maxCharge:270,connectors:['CCS','J1772']},
+  {make:'Porsche',model:'Taycan Turbo',year:2024,battery:93.4,range:435,efficiency:215,maxCharge:270,connectors:['CCS','J1772']},
+  {make:'Porsche',model:'Taycan Turbo S',year:2024,battery:93.4,range:412,efficiency:227,maxCharge:270,connectors:['CCS','J1772']},
+  {make:'Porsche',model:'Macan EV',year:2024,battery:100,range:516,efficiency:194,maxCharge:270,connectors:['CCS','J1772']},
+  // Rivian / Lucid
+  {make:'Rivian',model:'R1T Standard',year:2024,battery:135,range:483,efficiency:280,maxCharge:216,connectors:['CCS','J1772']},
+  {make:'Rivian',model:'R1T Large',year:2024,battery:135,range:505,efficiency:267,maxCharge:216,connectors:['CCS','J1772']},
+  {make:'Rivian',model:'R1S Standard',year:2024,battery:135,range:461,efficiency:293,maxCharge:216,connectors:['CCS','J1772']},
+  {make:'Rivian',model:'R1S Large',year:2024,battery:135,range:483,efficiency:280,maxCharge:216,connectors:['CCS','J1772']},
+  {make:'Lucid',model:'Air Pure RWD',year:2024,battery:88,range:653,efficiency:135,maxCharge:200,connectors:['CCS','J1772']},
+  {make:'Lucid',model:'Air Grand Touring',year:2024,battery:118,range:837,efficiency:141,maxCharge:300,connectors:['CCS','J1772']},
+  {make:'Lucid',model:'Air Sapphire',year:2024,battery:118,range:687,efficiency:172,maxCharge:300,connectors:['CCS','J1772']},
+  // Nissan / Mitsubishi
+  {make:'Nissan',model:'Leaf 40 kWh',year:2024,battery:40,range:270,efficiency:148,maxCharge:50,connectors:['CHAdeMO','J1772']},
+  {make:'Nissan',model:'Leaf Plus 62 kWh',year:2024,battery:62,range:363,efficiency:171,maxCharge:100,connectors:['CHAdeMO','J1772']},
+  {make:'Nissan',model:'Ariya 63 kWh FWD',year:2024,battery:63,range:402,efficiency:157,maxCharge:130,connectors:['CHAdeMO','CCS','J1772']},
+  {make:'Nissan',model:'Ariya 87 kWh FWD',year:2024,battery:87,range:533,efficiency:163,maxCharge:130,connectors:['CHAdeMO','CCS','J1772']},
+  {make:'Mitsubishi',model:'Outlander PHEV',year:2024,battery:20,range:82,efficiency:244,maxCharge:50,connectors:['CHAdeMO','J1772']},
+  // Volvo / Polestar
+  {make:'Polestar',model:'2 Standard',year:2024,battery:69,range:456,efficiency:151,maxCharge:130,connectors:['CCS','J1772']},
+  {make:'Polestar',model:'2 Long Range Single Motor',year:2024,battery:82,range:655,efficiency:125,maxCharge:205,connectors:['CCS','J1772']},
+  {make:'Polestar',model:'2 Long Range Dual Motor',year:2024,battery:82,range:592,efficiency:139,maxCharge:205,connectors:['CCS','J1772']},
+  {make:'Polestar',model:'3 Long Range',year:2024,battery:111,range:634,efficiency:175,maxCharge:250,connectors:['CCS','J1772']},
+  {make:'Volvo',model:'C40 Recharge Twin',year:2024,battery:82,range:478,efficiency:172,maxCharge:150,connectors:['CCS','J1772']},
+  {make:'Volvo',model:'XC40 Recharge Pure Electric',year:2024,battery:82,range:510,efficiency:161,maxCharge:150,connectors:['CCS','J1772']},
+  {make:'Volvo',model:'EX90 Twin Motor',year:2024,battery:111,range:600,efficiency:185,maxCharge:250,connectors:['CCS','J1772']},
+  // Subaru / Toyota / Honda / Mazda
+  {make:'Subaru',model:'Solterra AWD',year:2024,battery:71.4,range:400,efficiency:178,maxCharge:150,connectors:['CCS','J1772']},
+  {make:'Toyota',model:'bZ4X AWD',year:2024,battery:71.4,range:406,efficiency:176,maxCharge:150,connectors:['CCS','J1772']},
+  {make:'Toyota',model:'bZ4X FWD',year:2024,battery:71.4,range:450,efficiency:159,maxCharge:150,connectors:['CCS','J1772']},
+  {make:'Honda',model:'Prologue AWD',year:2024,battery:102,range:452,efficiency:226,maxCharge:150,connectors:['CCS','J1772']},
+  {make:'Mazda',model:'MX-30 EV',year:2024,battery:35.5,range:200,efficiency:178,maxCharge:50,connectors:['CCS','J1772']},
+  // Jeep / Ram / Dodge
+  {make:'Jeep',model:'Wrangler 4xe',year:2024,battery:17.3,range:42,efficiency:413,maxCharge:7.2,connectors:['J1772']},
+  {make:'Jeep',model:'Grand Cherokee 4xe',year:2024,battery:17.3,range:42,efficiency:413,maxCharge:7.2,connectors:['J1772']},
+  {make:'Jeep',model:'Avenger',year:2024,battery:54,range:400,efficiency:135,maxCharge:100,connectors:['CCS','J1772']},
+  {make:'Ram',model:'1500 REV',year:2025,battery:229,range:800,efficiency:286,maxCharge:350,connectors:['CCS','J1772']},
+  // Chinese brands now in Canada
+  {make:'BYD',model:'Atto 3',year:2024,battery:60.5,range:420,efficiency:144,maxCharge:80,connectors:['CCS','J1772']},
+  {make:'BYD',model:'Seal',year:2024,battery:82.56,range:570,efficiency:145,maxCharge:150,connectors:['CCS','J1772']},
+  {make:'BYD',model:'Han EV',year:2024,battery:85.4,range:605,efficiency:141,maxCharge:120,connectors:['CCS','J1772']},
+  // Misc
+  {make:'Mini',model:'Cooper SE',year:2024,battery:32.6,range:230,efficiency:142,maxCharge:50,connectors:['CCS','J1772']},
+  {make:'Mini',model:'Countryman E',year:2024,battery:64.7,range:462,efficiency:140,maxCharge:130,connectors:['CCS','J1772']},
+  {make:'Fiat',model:'500e',year:2024,battery:42,range:320,efficiency:131,maxCharge:85,connectors:['CCS','J1772']},
+  {make:'Smart',model:'#1 Brabus',year:2024,battery:66,range:440,efficiency:150,maxCharge:150,connectors:['CCS','J1772']},
+  {make:'Alfa Romeo',model:'Giulia Estrema',year:2024,battery:19.5,range:78,efficiency:250,maxCharge:50,connectors:['CCS','J1772']},
+  {make:'Lotus',model:'Eletre R',year:2024,battery:112,range:490,efficiency:229,maxCharge:350,connectors:['CCS','J1772']},
+  {make:'Rolls-Royce',model:'Spectre',year:2024,battery:102,range:520,efficiency:196,maxCharge:195,connectors:['CCS','J1772']},
+  {make:'Bentley',model:'Bentayga EWB Azure',year:2024,battery:18.9,range:46,efficiency:411,maxCharge:7.2,connectors:['J1772']},
+  {make:'Lamborghini',model:'Revuelto',year:2024,battery:3.8,range:13,efficiency:292,maxCharge:7.2,connectors:['J1772']},
+  {make:'Ferrari',model:'SF90 Stradale',year:2024,battery:7.9,range:25,efficiency:316,maxCharge:7.2,connectors:['J1772']},
+];
+
+// ── VEHICLE SEARCH ──────────────────────────────
+function searchVehicles(query) {
+  const dd = document.getElementById('vehicleDropdown');
+  if (!query || query.length < 1) {
+    // Show top popular vehicles
+    const popular = VEHICLES.slice(0, 15);
+    renderVehicleList(popular, dd);
+    return;
+  }
+  const q = query.toLowerCase();
+  const matches = VEHICLES.filter(v =>
+    `${v.make} ${v.model}`.toLowerCase().includes(q) ||
+    v.make.toLowerCase().includes(q) ||
+    v.model.toLowerCase().includes(q)
+  ).slice(0, 20);
+  renderVehicleList(matches, dd);
+}
+
+function renderVehicleList(list, dd) {
+  if (!list.length) { dd.classList.remove('show'); return; }
+  dd.innerHTML = list.map((v, i) => `
+    <div class="vehicle-opt" onclick="selectVehicle(${VEHICLES.indexOf(v)})">
+      <div class="vehicle-opt-name">${v.year} ${v.make} ${v.model}</div>
+      <div class="vehicle-opt-specs">${v.battery} kWh · ${v.range} km range · ${v.efficiency} Wh/km · Max ${v.maxCharge} kW</div>
+    </div>
+  `).join('');
+  dd.classList.add('show');
+}
+
+function selectVehicle(idx) {
+  selectedVehicle = VEHICLES[idx];
+  document.getElementById('vehicleSearch').value = `${selectedVehicle.year} ${selectedVehicle.make} ${selectedVehicle.model}`;
+  document.getElementById('vehicleDropdown').classList.remove('show');
+  const sv = document.getElementById('selectedVehicle');
+  sv.style.display = 'block';
+  document.getElementById('selVName').textContent = `${selectedVehicle.year} ${selectedVehicle.make} ${selectedVehicle.model}`;
+  document.getElementById('selVSpecs').innerHTML = `
+    <div class="sel-v-spec">🔋 ${selectedVehicle.battery} kWh</div>
+    <div class="sel-v-spec">🛣 ${selectedVehicle.range} km</div>
+    <div class="sel-v-spec">⚡ ${selectedVehicle.efficiency} Wh/km</div>
+    <div class="sel-v-spec">⚡ Max ${selectedVehicle.maxCharge} kW DC</div>
+  `;
+}
+
+// Close dropdown on outside click
+document.addEventListener('click', e => {
+  if (!e.target.closest('.vehicle-search-wrap')) {
+    document.getElementById('vehicleDropdown').classList.remove('show');
+  }
+});
+
+// ── WAYPOINTS ──────────────────────────────────
+function addWaypoint() {
+  const id = Date.now();
+  waypoints.push(id);
+  const wrap = document.getElementById('waypointsContainer');
+  const row = document.createElement('div');
+  row.className = 'input-row';
+  row.id = 'wp_' + id;
+  row.innerHTML = `
+    <div class="input-wrap">
+      <div class="input-icon">🔵</div>
+      <input class="inp" id="wp_inp_${id}" placeholder="Waypoint (hotel, restaurant…)" autocomplete="off"/>
+    </div>
+    <button class="add-stop-btn" style="color:var(--red)" onclick="removeWaypoint(${id})">✕</button>
+  `;
+  wrap.appendChild(row);
+}
+function removeWaypoint(id) {
+  waypoints = waypoints.filter(w => w !== id);
+  document.getElementById('wp_' + id)?.remove();
+}
+
+// ── SLIDERS ────────────────────────────────────
+function updateSlider(key, val, unit) {
+  const labels = { load: ['None','Light (+50kg)','Moderate (+100kg)','Heavy (+150kg)','Full load (+200kg)','Towing (+500kg)'] };
+  const display = labels[key] ? labels[key][parseInt(val)] : val + unit;
+  document.getElementById(key + 'Val').textContent = display;
+}
+function updateSlider(key, val, unit) {
+  const el = document.getElementById(key + 'Val');
+  if (key === 'load') {
+    const lbl = ['None','Light +50kg','Moderate +100kg','Heavy +150kg','Full +200kg','Towing +500kg'];
+    el.textContent = lbl[parseInt(val)];
+  } else {
+    el.textContent = val + unit;
+  }
+}
+
+// ── TOGGLES ────────────────────────────────────
+function toggleSwitch(key) {
+  toggles[key] = !toggles[key];
+  document.getElementById(key + 'Toggle').classList.toggle('on', toggles[key]);
+}
+
+// ── CONNECTORS ─────────────────────────────────
+function toggleConnector(el, type) {
+  el.classList.toggle('active');
+  if (connectorFilters.has(type)) connectorFilters.delete(type);
+  else connectorFilters.add(type);
+}
+
+// ── LOCATION ───────────────────────────────────
+function useMyLocation() {
+  if (!navigator.geolocation) { showToast('Geolocation not supported'); return; }
+  showToast('📍 Getting your location…');
+  navigator.geolocation.getCurrentPosition(pos => {
+    const { latitude: lat, longitude: lon } = pos.coords;
+    // Reverse geocode using Nominatim
+    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`)
+      .then(r => r.json())
+      .then(d => {
+        const addr = d.display_name?.split(',').slice(0,3).join(',') || `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+        document.getElementById('originInput').value = addr;
+        document.getElementById('originInput').dataset.lat = lat;
+        document.getElementById('originInput').dataset.lon = lon;
+        showToast('✅ Location set');
+      })
+      .catch(() => {
+        document.getElementById('originInput').value = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+        showToast('✅ Location set');
+      });
+  }, () => showToast('❌ Location blocked'));
+}
+
+// ── RANGE PREDICTION ──────────────────────────
+function calcEfficiency(vehicle) {
+  if (!vehicle) return 200;
+  let eff = vehicle.efficiency; // base Wh/km
+
+  // Temperature penalty
+  const temp = parseInt(document.getElementById('tempSlider').value);
+  if (temp < 0) eff *= 1 + Math.abs(temp) * 0.012;      // ~1.2% per °C below 0
+  else if (temp > 30) eff *= 1 + (temp - 30) * 0.005;    // ~0.5% per °C above 30
+
+  // Speed penalty (base at 100 km/h)
+  const speed = parseInt(document.getElementById('speedSlider').value);
+  eff *= Math.pow(speed / 100, 1.8);
+
+  // Wind
+  const wind = parseInt(document.getElementById('windSlider').value);
+  eff *= 1 + wind * 0.003;
+
+  // Load
+  const load = parseInt(document.getElementById('loadSlider').value);
+  eff *= 1 + load * 0.04;
+
+  // HVAC
+  if (toggles.hvac) eff *= temp < 5 ? 1.25 : 1.10;
+
+  // Towing
+  if (toggles.tow) eff *= 1.60;
+
+  return Math.round(eff);
+}
+
+function calcRange(vehicle, socPct, effWh) {
+  const usablekWh = vehicle.battery * (socPct / 100);
+  return Math.round((usablekWh * 1000) / effWh);
+}
+
+// ── GEOCODE ────────────────────────────────────
+async function geocode(address) {
+  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`;
+  const r = await fetch(url, { headers: { 'Accept-Language': 'en' } });
+  const d = await r.json();
+  if (!d.length) throw new Error('Could not find: ' + address);
+  return { lat: parseFloat(d[0].lat), lon: parseFloat(d[0].lon), name: d[0].display_name?.split(',').slice(0,2).join(',') };
+}
+
+// ── FIND CHARGERS ──────────────────────────────
+async function findChargers(lat, lon) {
+  try {
+    const res = await fetch(`${BACKEND}/api/parking?lat=${lat}&lon=${lon}&type=ev`);
+    const data = await res.json();
+    return data.results || [];
+  } catch { return []; }
+}
+
+// ── PLAN TRIP ──────────────────────────────────
+async function planTrip() {
+  const origin = document.getElementById('originInput').value.trim();
+  const dest = document.getElementById('destInput').value.trim();
+
+  if (!origin) { showToast('❌ Enter a starting point'); return; }
+  if (!dest) { showToast('❌ Enter a destination'); return; }
+  if (!selectedVehicle) { showToast('❌ Select your EV model'); return; }
+
+  setLoading(true, 'Geocoding locations…');
+  document.getElementById('resultsSection').classList.remove('show');
+
+  try {
+    // 1. Geocode origin, waypoints, destination
+    const [originGeo, destGeo] = await Promise.all([geocode(origin), geocode(dest)]);
+    const wpGeos = [];
+    for (const id of waypoints) {
+      const val = document.getElementById(`wp_inp_${id}`)?.value?.trim();
+      if (val) wpGeos.push(await geocode(val));
+    }
+
+    const allPoints = [originGeo, ...wpGeos, destGeo];
+
+    // 2. Calculate total straight-line distance (km)
+    let totalDistKm = 0;
+    for (let i = 0; i < allPoints.length - 1; i++) {
+      totalDistKm += haversine(allPoints[i].lat, allPoints[i].lon, allPoints[i+1].lat, allPoints[i+1].lon);
+    }
+    // Road factor ~1.25x for actual driving distance
+    totalDistKm = Math.round(totalDistKm * 1.25);
+
+    setLoading(true, 'Calculating range and charging stops…');
+
+    // 3. Range prediction
+    const effWh = calcEfficiency(selectedVehicle);
+    const socStart = parseInt(document.getElementById('socSlider').value);
+    const socBuffer = parseInt(document.getElementById('bufferSlider').value);
+    const usableRange = calcRange(selectedVehicle, socStart - socBuffer, effWh);
+    const chargeToRange = calcRange(selectedVehicle, 80 - socBuffer, effWh); // charge to 80%
+    const electricityRate = parseInt(document.getElementById('rateSlider').value) / 100; // $/kWh
+
+    // 4. Calculate charging stops needed
+    const stops = [];
+    let remainingDist = totalDistKm;
+    let currentRange = usableRange;
+    let distCovered = 0;
+    let stopIndex = 0;
+
+    stops.push({ type: 'start', name: originGeo.name, dist: 0, socIn: socStart, socOut: socStart, chargeTime: 0, distFromPrev: 0 });
+
+    while (remainingDist > currentRange) {
+      // Place charger at ~85% of current range
+      const legDist = Math.round(currentRange * 0.85);
+      distCovered += legDist;
+      remainingDist -= legDist;
+      stopIndex++;
+
+      // Find a point along the route for this charger
+      const progress = distCovered / totalDistKm;
+      const interpLat = originGeo.lat + (destGeo.lat - originGeo.lat) * progress;
+      const interpLon = originGeo.lon + (destGeo.lon - originGeo.lon) * progress;
+
+      setLoading(true, `Finding charger stop ${stopIndex}…`);
+      const chargers = await findChargers(interpLat, interpLon);
+      const bestCharger = chargers[0];
+
+      const socIn = socBuffer + 5;
+      const socOut = 80;
+      const kWhNeeded = selectedVehicle.battery * (socOut - socIn) / 100;
+      const chargeKw = Math.min(selectedVehicle.maxCharge, 150);
+      const chargeMin = Math.round((kWhNeeded / chargeKw) * 60);
+
+      stops.push({
+        type: 'charge',
+        name: bestCharger ? bestCharger.name : `Charging Stop ${stopIndex}`,
+        address: bestCharger ? bestCharger.vicinity : 'Along route',
+        lat: bestCharger ? bestCharger.geometry.location.lat : interpLat,
+        lon: bestCharger ? bestCharger.geometry.location.lng : interpLon,
+        dist: distCovered,
+        distFromPrev: legDist,
+        socIn,
+        socOut,
+        chargeTime: chargeMin,
+        kWhAdded: Math.round(kWhNeeded * 10) / 10,
+        chargeKw,
+        connectors: bestCharger?.connectors || ['CCS'],
+        numPoints: bestCharger?.num_points || null,
+      });
+
+      currentRange = chargeToRange;
+    }
+
+    stops.push({
+      type: 'dest',
+      name: destGeo.name,
+      dist: totalDistKm,
+      distFromPrev: remainingDist,
+      socIn: Math.round(socBuffer + (currentRange - remainingDist) / currentRange * (80 - socBuffer)),
+      socOut: null,
+      chargeTime: 0,
+    });
+
+    // 5. Calculate totals
+    const totalChargeMin = stops.reduce((s, x) => s + (x.chargeTime || 0), 0);
+    const drivingMin = Math.round(totalDistKm / parseInt(document.getElementById('speedSlider').value) * 60);
+    const totalMin = drivingMin + totalChargeMin;
+    const totalKwh = (totalDistKm * effWh) / 1000;
+    const totalCost = Math.round(totalKwh * electricityRate * 100) / 100;
+    const gasCost = Math.round(totalDistKm * 0.12 * 100) / 100; // avg $0.12/km
+    const co2SavedKg = Math.round(totalDistKm * 0.21 / 1000 * 10) / 10; // 210g/km avg gas car
+
+    tripResult = { stops, totalDistKm, totalChargeMin, drivingMin, totalMin, totalKwh, totalCost, gasCost, co2SavedKg, effWh, allPoints };
+
+    setLoading(false);
+    renderResults(tripResult);
+
+  } catch(e) {
+    setLoading(false);
+    showToast('❌ ' + e.message);
+  }
+}
+
+function haversine(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dL = (lat2-lat1)*Math.PI/180, dG = (lon2-lon1)*Math.PI/180;
+  const a = Math.sin(dL/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dG/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+// ── RENDER RESULTS ────────────────────────────
+function renderResults(t) {
+  // Summary stats
+  document.getElementById('routeStats').innerHTML = `
+    <div class="rstat"><div class="rstat-val" style="color:var(--teal)">${t.totalDistKm}</div><div class="rstat-lbl">km total</div></div>
+    <div class="rstat"><div class="rstat-val" style="color:var(--amber)">${fmtTime(t.totalMin)}</div><div class="rstat-lbl">total time</div></div>
+    <div class="rstat"><div class="rstat-val" style="color:var(--purple)">${t.stops.filter(s=>s.type==='charge').length}</div><div class="rstat-lbl">charge stops</div></div>
+    <div class="rstat"><div class="rstat-val" style="color:var(--green)">$${t.totalCost}</div><div class="rstat-lbl">est. cost</div></div>
+  `;
+
+  // CO2
+  document.getElementById('co2Bar').innerHTML = `
+    <div class="co2-icon">🌿</div>
+    <div class="co2-text">
+      <div class="co2-main">~${t.co2SavedKg} kg CO₂ saved vs gas</div>
+      <div class="co2-sub">Equivalent to planting ${Math.round(t.co2SavedKg / 21)} trees · ${Math.round(t.totalKwh)} kWh used · ${t.effWh} Wh/km</div>
+    </div>
+  `;
+
+  // Map
+  initTripMap(t);
+
+  // Stops
+  const sc = document.getElementById('stopsContainer');
+  sc.innerHTML = '';
+  t.stops.forEach((stop, i) => {
+    const isCharge = stop.type === 'charge';
+    const isStart = stop.type === 'start';
+
+    // Leg line before stop (except first)
+    if (i > 0) {
+      const leg = document.createElement('div');
+      leg.className = 'leg-line';
+      leg.innerHTML = `
+        <div class="leg-dot-line"></div>
+        <div class="leg-info">🛣 ${stop.distFromPrev} km · ~${Math.round(stop.distFromPrev / parseInt(document.getElementById('speedSlider').value) * 60)} min drive</div>
+      `;
+      sc.appendChild(leg);
+    }
+
+    const card = document.createElement('div');
+    card.className = `stop-card type-${stop.type}`;
+
+    const badgeIcon = isStart ? '🟢' : isCharge ? '⚡' : '🏁';
+    const badgeCls = isStart ? 'start' : isCharge ? 'charge' : 'dest';
+
+    let statsHtml = `<span class="stop-stat dist">📍 ${stop.dist} km from start</span>`;
+    if (isCharge) {
+      statsHtml += `
+        <span class="stop-stat soc">🔋 Arrive ${stop.socIn}% → Leave ${stop.socOut}%</span>
+        <span class="stop-stat time">⏱ ${stop.chargeTime} min charge</span>
+        <span class="stop-stat">⚡ +${stop.kWhAdded} kWh @ ${stop.chargeKw} kW</span>
+      `;
+    } else if (stop.type === 'dest') {
+      statsHtml += `<span class="stop-stat soc">🔋 Arrive ${stop.socIn}%</span>`;
+    }
+
+    const connHtml = isCharge && stop.connectors?.length
+      ? `<div class="stop-connector">${stop.connectors.map(c=>`<span class="connector-tag">${c}</span>`).join('')}${stop.numPoints ? `<span class="connector-tag">${stop.numPoints} points</span>` : ''}</div>` : '';
+
+    const navHtml = isCharge && stop.lat
+      ? `<div style="margin-top:10px"><button onclick="navToStop(${stop.lat},${stop.lon})" style="padding:8px 14px;background:var(--teal-dim);border:1px solid var(--teal);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:var(--teal);cursor:pointer;">🧭 Navigate</button></div>` : '';
+
+    const precondHtml = toggles.precond && isCharge
+      ? `<div style="margin-top:6px;font-size:11px;color:var(--amber)">🔋 Precondition battery ~30 min before arrival for faster charging</div>` : '';
+
+    card.innerHTML = `
+      <div class="stop-header">
+        <div class="stop-badge ${badgeCls}">${badgeIcon}</div>
+        <div>
+          <div class="stop-name">${stop.name}</div>
+          ${stop.address ? `<div class="stop-addr">${stop.address}</div>` : ''}
+        </div>
+      </div>
+      <div class="stop-stats">${statsHtml}</div>
+      ${connHtml}${navHtml}${precondHtml}
+    `;
+    sc.appendChild(card);
+  });
+
+  // Cost breakdown
+  const chargeStops = t.stops.filter(s => s.type === 'charge');
+  const chargeCost = chargeStops.reduce((sum, s) => sum + (s.kWhAdded || 0) * (parseInt(document.getElementById('rateSlider').value) / 100), 0);
+  document.getElementById('costBreakdown').innerHTML = `
+    <div class="cost-row"><span class="cost-label">⚡ Energy used</span><span class="cost-val">${Math.round(t.totalKwh)} kWh</span></div>
+    <div class="cost-row"><span class="cost-label">🔌 Charging cost</span><span class="cost-val">$${chargeCost.toFixed(2)}</span></div>
+    <div class="cost-row"><span class="cost-label">🚗 Equivalent gas cost</span><span class="cost-val" style="color:var(--red)">$${t.gasCost}</span></div>
+    <div class="cost-row"><span class="cost-label">💰 You save vs gas</span><span class="cost-val">$${Math.max(0, t.gasCost - chargeCost).toFixed(2)}</span></div>
+    <div class="cost-row"><span class="cost-label">🏁 Total EV trip cost</span><span class="cost-val">$${chargeCost.toFixed(2)}</span></div>
+  `;
+
+  // Amenities at first charge stop
+  renderAmenities(t.stops.find(s => s.type === 'charge'));
+
+  document.getElementById('resultsSection').classList.add('show');
+  document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+}
+
+function fmtTime(min) {
+  const h = Math.floor(min / 60), m = min % 60;
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+}
+
+// ── TRIP MAP ──────────────────────────────────
+function initTripMap(t) {
+  if (tripMap) { tripMap.remove(); tripMap = null; }
+  const div = document.getElementById('tripMapDiv');
+  div.innerHTML = '';
+
+  const allLats = t.allPoints.map(p => p.lat);
+  const allLons = t.allPoints.map(p => p.lon);
+  const centerLat = (Math.min(...allLats) + Math.max(...allLats)) / 2;
+  const centerLon = (Math.min(...allLons) + Math.max(...allLons)) / 2;
+
+  tripMap = L.map('tripMapDiv', { zoomControl: false, attributionControl: false });
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, subdomains: 'abcd' }).addTo(tripMap);
+
+  // Route line
+  const routePoints = t.allPoints.map(p => [p.lat, p.lon]);
+  L.polyline(routePoints, { color: '#00c2a8', weight: 3, opacity: 0.8, dashArray: '6,4' }).addTo(tripMap);
+
+  // Stop markers
+  t.stops.forEach(stop => {
+    if (!stop.lat && stop.type !== 'start' && stop.type !== 'dest') return;
+    const lat = stop.lat || t.allPoints[0].lat;
+    const lon = stop.lon || t.allPoints[0].lon;
+    const color = stop.type === 'start' ? '#00c2a8' : stop.type === 'charge' ? '#f59e0b' : '#22c55e';
+    const icon = L.divIcon({
+      html: `<div style="width:14px;height:14px;background:${color};border-radius:50%;border:2px solid white;box-shadow:0 0 8px ${color}88"></div>`,
+      iconSize: [14,14], iconAnchor: [7,7], className: ''
+    });
+    L.marker([lat, lon], { icon }).addTo(tripMap);
+  });
+
+  // Origin / destination specific markers
+  const orig = t.allPoints[0];
+  const dest = t.allPoints[t.allPoints.length-1];
+  const startIcon = L.divIcon({ html: `<div style="width:18px;height:18px;background:#00c2a8;border-radius:50%;border:3px solid white;box-shadow:0 0 12px #00c2a888;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:#000">S</div>`, iconSize:[18,18],iconAnchor:[9,9],className:'' });
+  const endIcon = L.divIcon({ html: `<div style="width:18px;height:18px;background:#22c55e;border-radius:50%;border:3px solid white;box-shadow:0 0 12px #22c55e88;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:#000">D</div>`, iconSize:[18,18],iconAnchor:[9,9],className:'' });
+  L.marker([orig.lat, orig.lon], { icon: startIcon }).addTo(tripMap);
+  L.marker([dest.lat, dest.lon], { icon: endIcon }).addTo(tripMap);
+
+  tripMap.fitBounds(L.latLngBounds(routePoints).pad(0.15));
+}
+
+// ── AMENITIES ─────────────────────────────────
+function renderAmenities(chargeStop) {
+  const sec = document.getElementById('amenitiesSection');
+  const list = document.getElementById('amenitiesList');
+  if (!chargeStop || !chargeStop.chargeTime) { sec.style.display = 'none'; return; }
+  sec.style.display = 'block';
+
+  const chargeMin = chargeStop.chargeTime;
+  const amenities = [
+    { icon: '☕', name: 'Coffee & snacks', detail: `Quick stop · ~10 min`, minTime: 0 },
+    { icon: '🍔', name: 'Restaurant nearby', detail: `Sit-down meal · ~45 min`, minTime: 30 },
+    { icon: '🛒', name: 'Grocery / convenience', detail: `Stock up · ~15 min`, minTime: 0 },
+    { icon: '🚻', name: 'Restrooms', detail: `At charger location`, minTime: 0 },
+    { icon: '🌳', name: 'Walk / stretch', detail: `Short walk · ~15 min`, minTime: 0 },
+    { icon: '📱', name: 'Check emails / relax', detail: `In your car · any time`, minTime: 0 },
+  ].filter(a => a.minTime <= chargeMin);
+
+  list.innerHTML = amenities.map(a => `
+    <div class="amenity-card">
+      <div class="amenity-icon">${a.icon}</div>
+      <div>
+        <div class="amenity-name">${a.name}</div>
+        <div class="amenity-detail">${a.detail}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── NAVIGATE ───────────────────────────────────
+function navToStop(lat, lon) {
+  window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}&travelmode=driving`, '_blank');
+}
+
+// ── SHARE ──────────────────────────────────────
+function shareTrip() {
+  if (!tripResult) { showToast('Plan a trip first'); return; }
+  const origin = encodeURIComponent(document.getElementById('originInput').value);
+  const dest = encodeURIComponent(document.getElementById('destInput').value);
+  const vehicle = encodeURIComponent(`${selectedVehicle.year} ${selectedVehicle.make} ${selectedVehicle.model}`);
+  const url = `${window.location.href.split('?')[0]}?from=${origin}&to=${dest}&v=${vehicle}`;
+  if (navigator.share) {
+    navigator.share({ title: 'My EV Trip Plan', text: `${document.getElementById('originInput').value} → ${document.getElementById('destInput').value} in my ${selectedVehicle.make} ${selectedVehicle.model}`, url });
+  } else {
+    navigator.clipboard.writeText(url).then(() => showToast('✅ Link copied to clipboard'));
+  }
+}
+
+// ── LOADING ────────────────────────────────────
+function setLoading(on, msg) {
+  document.getElementById('loadingState').classList.toggle('show', on);
+  document.getElementById('planBtn').disabled = on;
+  if (msg) document.getElementById('loadingText').textContent = msg;
+}
+
+// ── TOAST ──────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── LOAD FROM URL PARAMS ───────────────────────
+window.addEventListener('load', () => {
+  const p = new URLSearchParams(window.location.search);
+  if (p.get('from')) document.getElementById('originInput').value = decodeURIComponent(p.get('from'));
+  if (p.get('to')) document.getElementById('destInput').value = decodeURIComponent(p.get('to'));
+  if (p.get('v')) {
+    document.getElementById('vehicleSearch').value = decodeURIComponent(p.get('v'));
+    const match = VEHICLES.find(v => `${v.year} ${v.make} ${v.model}` === decodeURIComponent(p.get('v')));
+    if (match) selectVehicle(VEHICLES.indexOf(match));
+  }
+});
+</script>
+</body>
+</html>
