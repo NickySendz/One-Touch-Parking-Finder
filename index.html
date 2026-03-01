@@ -1684,11 +1684,23 @@ function renderList() {
     f = evSpots;
   } else if (filter==='street') {
     f = streetSpots;
+  } else if (filter==='all') {
+    // Merge parking + street spots, sort free first then by distance
+    f = [...spots, ...streetSpots];
+    f.sort((a, b) => {
+      if (a.isFree && !b.isFree) return -1;
+      if (!a.isFree && b.isFree) return 1;
+      return a.dkm - b.dkm;
+    });
   } else {
     f = spots;
     if (filter==='garage') f=spots.filter(s=>s.type==='garage');
     else if (filter==='lot') f=spots.filter(s=>s.type==='lot');
-    else if (filter==='free') f=spots.filter(s=>s.isFree);
+    else if (filter==='free') {
+      // Free parking + free street spots, closest first
+      f = [...spots.filter(s=>s.isFree), ...streetSpots.filter(s=>s.isFree)];
+      f.sort((a,b) => a.dkm - b.dkm);
+    }
     else if (filter==='paid') f=spots.filter(s=>!s.isFree);
     else if (filter==='nowinter') f=spots.filter(s=>!s.hasWinter);
   }
