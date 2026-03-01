@@ -1358,6 +1358,102 @@ document.addEventListener('click', e => {
   if (btn && !btn.contains(e.target)) closeMenu();
 });
 
+// ── PARKING PAYMENT DEEP LINKS ────────────────
+const OPERATORS = [
+  // Green P (Toronto)
+  { keywords: ['green p', 'greenp', 'toronto parking authority', 'tpa'],
+    name: 'Green P', icon: '🟢',
+    ios: 'greenparkingapp://', android: 'https://play.google.com/store/apps/details?id=com.mti.greenpTO',
+    fallback: 'https://parking.greenp.com', color: '#22c55e' },
+  // PayByPhone
+  { keywords: ['paybyphone', 'pay by phone', 'pbp'],
+    name: 'PayByPhone', icon: '📱',
+    ios: 'paybyphone://', android: 'paybyphone://',
+    fallback: 'https://m.paybyphone.com', color: '#0ea5e9' },
+  // HonkMobile
+  { keywords: ['honk', 'honkmobile'],
+    name: 'HonkMobile', icon: '📳',
+    ios: 'honkmobile://', android: 'honkmobile://',
+    fallback: 'https://www.honkmobile.com/pay', color: '#f59e0b' },
+  // ParkWhiz
+  { keywords: ['parkwhiz'],
+    name: 'ParkWhiz', icon: '🅿️',
+    ios: 'parkwhiz://', android: 'parkwhiz://',
+    fallback: 'https://www.parkwhiz.com', color: '#3b82f6' },
+  // SpotHero
+  { keywords: ['spothero'],
+    name: 'SpotHero', icon: '🦸',
+    ios: 'spothero://', android: 'spothero://',
+    fallback: 'https://spothero.com', color: '#ef4444' },
+  // Impark (Canada)
+  { keywords: ['impark', 'imperial parking'],
+    name: 'Impark', icon: '🅿️',
+    ios: null, android: null,
+    fallback: 'https://www.impark.com', color: '#8b5cf6' },
+  // Indigo / LAZ
+  { keywords: ['indigo', 'laz parking'],
+    name: 'Indigo', icon: '🟣',
+    ios: null, android: null,
+    fallback: 'https://www.indigoneo.com', color: '#a855f7' },
+  // SP+ / Standard Parking
+  { keywords: ['sp+', 'sp plus', 'standard parking'],
+    name: 'SP+', icon: '🅿️',
+    ios: null, android: null,
+    fallback: 'https://www.spplus.com', color: '#64748b' },
+  // ParkNow / EasyPark
+  { keywords: ['parknow', 'easypark', 'park now'],
+    name: 'EasyPark', icon: '🅿️',
+    ios: 'easypark://', android: 'easypark://',
+    fallback: 'https://easypark.net', color: '#06b6d4' },
+  // Precise ParkLink (Canada)
+  { keywords: ['precise', 'parklink', 'precise parklink'],
+    name: 'Precise ParkLink', icon: '🅿️',
+    ios: null, android: null,
+    fallback: 'https://www.preciseparklink.com', color: '#64748b' },
+];
+
+function detectOperator(spotName, spotAddress) {
+  const text = `${spotName} ${spotAddress}`.toLowerCase();
+  for (const op of OPERATORS) {
+    if (op.keywords.some(k => text.includes(k))) return op;
+  }
+  return null;
+}
+
+function getPayUrl(op, spotLat, spotLon, spotName) {
+  // Try to build a location-aware deep link
+  const encodedName = encodeURIComponent(spotName || '');
+  const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+
+  if (op.name === 'Green P') {
+    return isIOS
+      ? `greenparkingapp://map?lat=${spotLat}&lon=${spotLon}`
+      : `https://parking.greenp.com/map/?lat=${spotLat}&lng=${spotLon}`;
+  }
+  if (op.name === 'PayByPhone') {
+    return `https://m.paybyphone.com/parking`;
+  }
+  if (op.name === 'HonkMobile') {
+    return isIOS ? 'honkmobile://pay' : 'https://www.honkmobile.com/pay';
+  }
+  if (op.name === 'EasyPark') {
+    return isIOS ? 'easypark://pay' : 'https://easypark.net';
+  }
+  return op.fallback;
+}
+
+function openPayment(spotId) {
+  const spot = [...spots, ...streetSpots, ...evSpots].find(s => s.id === spotId);
+  if (!spot) return;
+  const op = detectOperator(spot.name, spot.address);
+  if (!op) {
+    showToast('No payment app detected for this spot');
+    return;
+  }
+  const url = getPayUrl(op, spot.lat, spot.lon, spot.name);
+  window.open(url, '_blank');
+}
+
 // ── TUTORIAL ──────────────────────────────────
 const tutSteps = [
   { icon:'🅿️', title:'One Touch Parking Finder', text:'Find real nearby parking and EV charging stations in one tap — anywhere, on any device.' },
@@ -1917,6 +2013,12 @@ function openSheet(s) {
       <button class="sbtn sbtn-save" onclick="toggleSave(event,'${s.id}')">${isSaved(s.id)?'⭐':'☆'}</button>
       <button class="sbtn sbtn-close" onclick="closeSheet()">✕</button>
     </div>
+    ${(()=>{
+      const op = detectOperator(s.name, s.address);
+      return op ? `<button class="sbtn sbtn-pay" style="background:${op.color}22;border-color:${op.color};color:${op.color}" onclick="openPayment('${s.id}')">
+        ${op.icon} Pay with ${op.name} →
+      </button>` : '';
+    })()}
   `;
   document.getElementById('overlay').classList.add('open');
   document.getElementById('sheet').classList.add('open');
