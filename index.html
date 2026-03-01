@@ -575,7 +575,7 @@ body.low-battery { filter: brightness(0.85); }
 
 /* ── RESULTS ── */
 .results-container {
-  padding: 12px 20px 120px;
+  padding: 12px 20px 140px;
 }
 .results-header {
   display: flex;
@@ -1007,6 +1007,48 @@ body.low-battery { filter: brightness(0.85); }
   box-shadow: 0 4px 20px rgba(0,194,168,0.3);
 }
 .welcome-cta:active { opacity: 0.85; transform: scale(0.98); }
+
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 62px;
+  background: var(--navy2);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 90;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  padding: 8px 0;
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+.nav-item:active { opacity: 0.7; }
+.nav-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+.nav-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.3px;
+  font-family: 'DM Mono', monospace;
+  text-transform: uppercase;
+}
+.nav-item.active .nav-label { color: var(--teal); }
+.nav-item.active .nav-icon { filter: drop-shadow(0 0 6px rgba(0,194,168,0.6)); }
+.nav-divider { width: 1px; height: 28px; background: var(--border); }
 </style>
 </head>
 <body>
@@ -1975,5 +2017,19 @@ function handleCmd(cmd) {
   }
 }
 </script>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <a class="nav-item active" href="index.html">
+    <div class="nav-icon">🅿️</div>
+    <div class="nav-label">Parking</div>
+  </a>
+  <div class="nav-divider"></div>
+  <a class="nav-item" href="ev-planner.html">
+    <div class="nav-icon">⚡</div>
+    <div class="nav-label">EV Planner</div>
+  </a>
+</nav>
+
 </body>
 </html>
