@@ -800,11 +800,40 @@ body.low-battery { filter: brightness(0.85); }
   border-radius: 14px;
   overflow: hidden;
   border: 1px solid var(--border);
-  height: 200px;
+  height: 220px;
   margin-bottom: 14px;
   background: var(--navy2);
 }
-#welcomeCanvas { width: 100%; height: 100%; display: block; }
+.welcome-map-frame {
+  width: 100%; height: 100%;
+  border: none;
+  display: block;
+}
+.welcome-map-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--navy2);
+  gap: 12px;
+}
+.welcome-locating {
+  font-size: 11px;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 1px;
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  background: rgba(11,17,32,0.9);
+  padding: 4px 12px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+}
 .welcome-map-center {
   position: absolute;
   top: 50%; left: 50%;
@@ -864,20 +893,19 @@ body.low-battery { filter: brightness(0.85); }
 .welcome-cards {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 6px;
   margin-bottom: 14px;
 }
 .welcome-card {
-  background: var(--navy2);
-  border: 1px solid var(--border);
-  border-radius: 11px;
-  padding: 12px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 9px;
+  padding: 8px 10px;
+  pointer-events: none;
+  user-select: none;
 }
-.welcome-card-icon { font-size: 22px; flex-shrink: 0; }
-.welcome-card-title { font-size: 12px; font-weight: 700; color: var(--white); margin-bottom: 2px; }
+.welcome-card-icon { font-size: 20px; flex-shrink: 0; opacity: 0.85; }
+.welcome-card-title { font-size: 12px; font-weight: 600; color: var(--white2); margin-bottom: 1px; }
 .welcome-card-sub { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; }
 
 .welcome-cta {
@@ -1029,16 +1057,17 @@ body.low-battery { filter: brightness(0.85); }
 
   <!-- WELCOME STATE (shown before first search) -->
   <div class="welcome-state" id="welcomeState">
-    <div class="welcome-map-wrap">
-      <canvas id="welcomeCanvas"></canvas>
-      <div class="welcome-map-center">
+    <div class="welcome-map-wrap" id="welcomeMapWrap">
+      <div class="welcome-map-loading" id="welcomeMapLoading">
         <div class="welcome-pin-ring-2"></div>
         <div class="welcome-pin-ring-1"></div>
-        <div class="welcome-pin-core">
-          <div class="welcome-pin-p">P</div>
-        </div>
+        <div class="welcome-pin-core"><div class="welcome-pin-p">P</div></div>
+        <div class="welcome-locating">Locating you…</div>
       </div>
-      <div class="welcome-map-label">Your location will appear here</div>
+      <iframe id="welcomeMapFrame" class="welcome-map-frame" style="display:none"
+        frameborder="0" allowfullscreen
+        allow="geolocation">
+      </iframe>
     </div>
     <div class="welcome-cards">
       <div class="welcome-card">
@@ -1094,44 +1123,41 @@ body.low-battery { filter: brightness(0.85); }
 // ── CONFIG ─────────────────────────────────────
 const BACKEND = 'https://one-touch-parking-finder-backend.vercel.app';
 
-// Draw welcome map on load
-window.addEventListener('load', () => { drawWelcomeMap(); });
-function drawWelcomeMap() {
-  const canvas = document.getElementById('welcomeCanvas');
-  if (!canvas) return;
-  const wrap = canvas.parentElement;
-  canvas.width = wrap.offsetWidth;
-  canvas.height = wrap.offsetHeight;
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
+// Load real location map on welcome screen
+window.addEventListener('load', () => { loadWelcomeMap(); });
+function loadWelcomeMap() {
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
+      userLat = lat;
+      userLon = lon;
+      // Auto-detect Canada
+      if (!localStorage.getItem('otpf_unit')) setUnit(isCanada(lat,lon) ? 'km' : 'mi');
 
-  // Background
-  ctx.fillStyle = '#0b1120';
-  ctx.fillRect(0, 0, W, H);
+      const frame = document.getElementById('welcomeMapFrame');
+      const loading = document.getElementById('welcomeMapLoading');
 
-  // Subtle grid roads
-  ctx.strokeStyle = '#1a2535';
-  ctx.lineWidth = 8;
-  [0.2, 0.45, 0.7, 0.9].forEach(r => {
-    ctx.beginPath(); ctx.moveTo(0, H*r); ctx.lineTo(W, H*r); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(W*r, 0); ctx.lineTo(W*r, H); ctx.stroke();
-  });
-
-  // Ghost spot dots scattered around
-  const ghostDots = [
-    {x:0.18,y:0.22}, {x:0.75,y:0.18}, {x:0.85,y:0.55},
-    {x:0.22,y:0.72}, {x:0.65,y:0.78}, {x:0.38,y:0.35},
-    {x:0.72,y:0.38}, {x:0.15,y:0.5},
-  ];
-  ghostDots.forEach(d => {
-    ctx.beginPath();
-    ctx.arc(d.x*W, d.y*H, 5, 0, Math.PI*2);
-    ctx.fillStyle = 'rgba(0,194,168,0.15)';
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(0,194,168,0.25)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-  });
+      // Use Google Maps embed with user's real location
+      const apiKey = ''; // No key needed for embed static view
+      // Use OpenStreetMap embed — no API key required, shows real location
+      frame.src = `https://www.openstreetmap.org/export/embed.html?bbox=${lon-0.005}%2C${lat-0.003}%2C${lon+0.005}%2C${lat+0.003}&layer=mapnik&marker=${lat}%2C${lon}`;
+      frame.style.display = 'block';
+      frame.onload = () => {
+        loading.style.display = 'none';
+      };
+      // Update locating label
+      const lbl = document.getElementById('welcomeMapLoading')?.querySelector('.welcome-locating');
+      if (lbl) lbl.textContent = 'Found your location';
+    },
+    err => {
+      // Keep the animated loading state, just update label
+      const lbl = document.getElementById('welcomeMapLoading')?.querySelector('.welcome-locating');
+      if (lbl) lbl.textContent = 'Allow location for live map';
+    },
+    { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 }
+  );
 }
 
 // ── STATE ──────────────────────────────────────
