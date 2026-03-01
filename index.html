@@ -400,6 +400,12 @@ body.low-battery { filter: brightness(0.85); }
   gap: 7px;
   margin-bottom: 10px;
 }
+.filter-grid .chip:last-child:nth-child(3n+1) {
+  grid-column: span 3;
+}
+.filter-grid .chip:last-child:nth-child(3n+2) {
+  grid-column: span 2;
+}
 .chip {
   padding: 10px 8px;
   background: var(--navy3);
@@ -640,6 +646,7 @@ body.low-battery { filter: brightness(0.85); }
 .spot-type-badge.lot { background: var(--blue-dim); }
 .spot-type-badge.street { background: var(--amber-dim); }
 .spot-type-badge.ev { background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.2); }
+.spot-type-badge.street_parking { background: var(--amber-dim); border: 1px solid rgba(245,158,11,0.2); }
 
 .spot-body { flex: 1; min-width: 0; }
 .spot-name {
@@ -1112,6 +1119,10 @@ body.low-battery { filter: brightness(0.85); }
       <div class="chip-icon">💚</div>
       <div class="chip-info"><div class="chip-name">Free Only</div><div class="chip-sub">No cost spots</div></div>
     </div>
+    <div class="chip" onclick="setChip(this,'street')">
+      <div class="chip-icon">🛣️</div>
+      <div class="chip-info"><div class="chip-name">Street Parking</div><div class="chip-sub">Free & metered</div></div>
+    </div>
     <div class="chip" onclick="setChip(this,'ev')">
       <div class="chip-icon">⚡</div>
       <div class="chip-info"><div class="chip-name">EV Charging</div><div class="chip-sub">Charge stations</div></div>
@@ -1275,7 +1286,7 @@ function loadWelcomeMap() {
 }
 
 // ── STATE ──────────────────────────────────────
-let spots = [], evSpots = [], userLat = null, userLon = null;
+let spots = [], evSpots = [], streetSpots = [], userLat = null, userLon = null;
 let filter = 'all', view = 'list', useKm = true, showHeat = true;
 let saved = JSON.parse(localStorage.getItem('otpf_saved') || '[]');
 let lowBatt = false;
@@ -1414,6 +1425,7 @@ function setChip(el, f) {
     lot: 'chip active',
     free: 'chip active-green',
     paid: 'chip active-amber',
+    street: 'chip active-amber',
     ev: 'chip active-purple',
     nowinter: 'chip active-blue',
   };
@@ -1453,6 +1465,7 @@ function findParking() {
       setStatus('Found you! Searching…', 'ok');
       doFetch(userLat, userLon);
       fetchEV(userLat, userLon);
+      fetchStreet(userLat, userLon);
     },
     err => {
       btn.classList.remove('loading');
@@ -1500,6 +1513,50 @@ async function fetchEV(lat, lon) {
     }
   } catch(e) {
     setStatus('Could not load EV data. Check connection.', 'err');
+  }
+}
+
+async function fetchStreet(lat, lon) {
+  setStatus('Loading street parking…', 'ok');
+  try {
+    const res = await fetch(`${BACKEND}/api/parking?lat=${lat}&lon=${lon}&type=street`);
+    const data = await res.json();
+    if (data.results && data.results.length > 0) {
+      streetSpots = data.results.map(p => {
+        const pLat = p.geometry.location.lat;
+        const pLon = p.geometry.location.lng;
+        const dkm = distKm(lat, lon, pLat, pLon);
+        return {
+          id: p.place_id,
+          name: p.name || 'Street Parking',
+          address: p.vicinity || '',
+          lat: pLat, lon: pLon,
+          dkm, dmi: dkm * 0.621371,
+          walk: Math.round(dkm * 1000 / 80),
+          type: 'street_parking',
+          open: true,
+          rating: null,
+          isFree: p.is_free || !p.is_metered,
+          isMetered: p.is_metered || false,
+          maxStay: p.max_stay || null,
+          parkingType: p.parking_type || 'street',
+          hasWinter: false,
+          busy: Math.random() * 0.5,
+          is_street: true,
+        };
+      }).sort((a, b) => a.dkm - b.dkm);
+      if (streetSpots.length > 0) {
+        setStatus(`Found ${streetSpots.length} street parking spots`, 'ok');
+        if (filter === 'street') renderList();
+      } else {
+        if (filter === 'street') setStatus('No street parking data for this area (OpenStreetMap coverage may be limited)', 'err');
+      }
+    } else {
+      streetSpots = [];
+      if (filter === 'street') setStatus('No street parking found — OpenStreetMap coverage may be limited here', 'err');
+    }
+  } catch(e) {
+    if (filter === 'street') setStatus('Could not load street parking data.', 'err');
   }
 }
 
@@ -1563,8 +1620,8 @@ function heatColor(b) {
   if (b<0.7) return '#f59e0b';
   return '#ef4444';
 }
-function typeIcon(t){ return {garage:'🏢',lot:'🅿️',street:'🛣️',ev:'⚡'}[t]||'🅿️'; }
-function typeName(t){ return {garage:'Garage',lot:'Parking Lot',street:'Street',ev:'EV Charger'}[t]||'Parking'; }
+function typeIcon(t){ return {garage:'🏢',lot:'🅿️',street:'🛣️',ev:'⚡',street_parking:'🛣️'}[t]||'🛣️'; }
+function typeName(t){ return {garage:'Garage',lot:'Parking Lot',street:'Street',ev:'EV Charger',street_parking:'Street Parking'}[t]||'Parking'; }
 function isSaved(id){ return saved.some(s=>s.id===id); }
 
 // ── RENDER LIST ────────────────────────────────
@@ -1576,6 +1633,8 @@ function renderList() {
   let f;
   if (filter==='ev') {
     f = evSpots;
+  } else if (filter==='street') {
+    f = streetSpots;
   } else {
     f = spots;
     if (filter==='garage') f=spots.filter(s=>s.type==='garage');
@@ -1770,6 +1829,9 @@ function openSheet(s) {
     <div class="sheet-chips">
       ${openChip}${priceChip}${busyChip}${winterChip}
       <div class="schip">${typeName(s.type)}</div>
+      ${s.is_street && s.maxStay ? `<div class="schip">⏱ Max stay: ${s.maxStay}</div>` : ''}
+      ${s.is_street && s.isMetered ? `<div class="schip" style="color:#fcd34d">🅿️ Metered</div>` : ''}
+      ${s.is_street && s.isFree && !s.isMetered ? `<div class="schip" style="color:#86efac">💚 Free Street Parking</div>` : ''}
       ${s.is_ev && s.numPoints ? `<div class="schip">🔌 ${s.numPoints} charge point${s.numPoints>1?'s':''}</div>` : ''}
       ${s.is_ev && s.connectors && s.connectors.length ? `<div class="schip">🔋 ${s.connectors.join(', ')}</div>` : ''}
       ${s.is_ev && s.network ? `<div class="schip">🏢 ${s.network}</div>` : ''}
