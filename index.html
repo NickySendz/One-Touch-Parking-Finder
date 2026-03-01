@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>One Touch Parking Finder</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 
 <!-- Favicon & App Icons -->
@@ -70,10 +72,10 @@ body.low-battery { filter: brightness(0.85); }
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 .radar-icon {
-  width: 40px; height: 40px;
+  width: 38px; height: 38px;
   position: relative;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
@@ -84,12 +86,12 @@ body.low-battery { filter: brightness(0.85); }
   border: 1.5px solid var(--teal);
 }
 .radar-ring-1 {
-  width: 40px; height: 40px;
+  width: 38px; height: 38px;
   opacity: 0.18;
   animation: radar-breathe 2.5s ease-in-out infinite;
 }
 .radar-ring-2 {
-  width: 28px; height: 28px;
+  width: 26px; height: 26px;
   opacity: 0.35;
   animation: radar-breathe 2.5s ease-in-out infinite 0.3s;
 }
@@ -98,7 +100,7 @@ body.low-battery { filter: brightness(0.85); }
   50% { transform: scale(1.07); opacity: 0.08; }
 }
 .radar-core {
-  width: 20px; height: 20px;
+  width: 19px; height: 19px;
   border-radius: 50%;
   background: var(--teal);
   display: flex; align-items: center; justify-content: center;
@@ -107,7 +109,7 @@ body.low-battery { filter: brightness(0.85); }
 }
 .radar-core-p {
   font-family: 'DM Mono', monospace;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 500;
   color: #000;
   line-height: 1;
@@ -115,50 +117,135 @@ body.low-battery { filter: brightness(0.85); }
 .brand-text {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0px;
+  line-height: 1;
 }
 .brand-line1 {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 2.5px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   color: var(--muted);
-  line-height: 1;
+  line-height: 1.2;
   font-family: 'DM Mono', monospace;
 }
 .brand-line2 {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 800;
-  letter-spacing: -0.4px;
-  line-height: 1;
+  letter-spacing: -0.5px;
+  line-height: 1.15;
   color: var(--white);
 }
 .brand-line2 span { color: var(--teal); }
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
-.hbtn {
-  width: 34px; height: 34px;
-  border-radius: 8px;
+/* Battery badge still shown inline */
+.battery-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  padding: 3px 7px;
+  background: var(--navy3);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  display: none;
+}
+.battery-badge.show { display: block; }
+.battery-badge.low { color: var(--red); border-color: var(--red-dim); background: var(--red-dim); }
+
+/* Menu button */
+.menu-btn {
+  width: 36px; height: 36px;
+  border-radius: 9px;
   border: 1px solid var(--border);
   background: var(--navy3);
   color: var(--white2);
-  font-size: 14px;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
   transition: all 0.15s;
   flex-shrink: 0;
+  position: relative;
 }
-.hbtn:active { transform: scale(0.92); background: var(--navy4); }
-.hbtn.on { background: var(--teal-dim); border-color: var(--teal); color: var(--teal); }
+.menu-btn:active { transform: scale(0.93); }
+.menu-btn.open { background: var(--teal-dim); border-color: var(--teal); color: var(--teal); }
+.menu-btn-icon { font-size: 18px; line-height: 1; }
+
+/* Dropdown */
+.dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 230px;
+  background: var(--navy2);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  padding: 8px;
+  z-index: 200;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+  opacity: 0;
+  transform: translateY(-6px) scale(0.97);
+  pointer-events: none;
+  transition: opacity 0.18s, transform 0.18s;
+}
+.dropdown.open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: all;
+}
+.dd-section {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted2);
+  padding: 6px 10px 4px;
+  font-family: 'DM Mono', monospace;
+}
+.dd-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: background 0.12s;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--white2);
+}
+.dd-item:active { background: var(--navy4); }
+.dd-item:hover { background: var(--navy3); }
+.dd-item.on { color: var(--teal); }
+.dd-icon { font-size: 17px; flex-shrink: 0; width: 24px; text-align: center; }
+.dd-sep { height: 1px; background: var(--border); margin: 4px 8px; }
+
+/* Unit toggle inside dropdown */
+.dd-unit-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+}
+.dd-unit-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--white2);
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.dd-unit-icon { font-size: 17px; width: 24px; text-align: center; }
 .unit-pill {
   display: flex;
   background: var(--navy3);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 7px;
   overflow: hidden;
+  flex-shrink: 0;
 }
 .upill {
   padding: 5px 10px;
@@ -172,18 +259,6 @@ body.low-battery { filter: brightness(0.85); }
   transition: all 0.15s;
 }
 .upill.active { background: var(--teal); color: #000; }
-.battery-badge {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  color: var(--muted);
-  padding: 4px 8px;
-  background: var(--navy3);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  display: none;
-}
-.battery-badge.show { display: block; }
-.battery-badge.low { color: var(--red); border-color: var(--red-dim); background: var(--red-dim); }
 
 /* ── MAIN FIND BUTTON ── */
 .find-section {
@@ -804,11 +879,9 @@ body.low-battery { filter: brightness(0.85); }
   margin-bottom: 14px;
   background: var(--navy2);
 }
-.welcome-map-frame {
-  width: 100%; height: 100%;
-  border: none;
-  display: block;
-}
+/* Leaflet overrides for dark map */
+#welcomeMapDiv .leaflet-control-zoom,
+#welcomeMapDiv .leaflet-control-attribution { display: none !important; }
 .welcome-map-loading {
   position: absolute;
   inset: 0;
@@ -960,14 +1033,34 @@ body.low-battery { filter: brightness(0.85); }
     </div>
   </div>
   <div class="header-actions">
-    <div class="unit-pill">
-      <button class="upill" id="kmBtn" onclick="setUnit('km')">KM</button>
-      <button class="upill" id="miBtn" onclick="setUnit('mi')">MI</button>
-    </div>
-    <div class="hbtn" id="favHBtn" onclick="togglePanel('savedPanel','favHBtn')" title="Saved spots">⭐</div>
-    <div class="hbtn" id="winHBtn" onclick="togglePanel('winterPanel','winHBtn')" title="Winter alerts">❄️</div>
-    <div class="hbtn" onclick="showTut()" title="Help">?</div>
     <div class="battery-badge" id="battBadge"></div>
+    <div class="menu-btn" id="menuBtn" onclick="toggleMenu()">
+      <div class="menu-btn-icon">☰</div>
+      <!-- DROPDOWN -->
+      <div class="dropdown" id="dropdown">
+        <div class="dd-section">Distance</div>
+        <div class="dd-unit-row">
+          <div class="dd-unit-label"><span class="dd-unit-icon">📏</span> Units</div>
+          <div class="unit-pill">
+            <button class="upill" id="kmBtn" onclick="event.stopPropagation();setUnit('km')">KM</button>
+            <button class="upill" id="miBtn" onclick="event.stopPropagation();setUnit('mi')">MI</button>
+          </div>
+        </div>
+        <div class="dd-sep"></div>
+        <div class="dd-section">Quick Access</div>
+        <div class="dd-item" id="ddFav" onclick="event.stopPropagation();closeMenu();togglePanel('savedPanel','ddFav')">
+          <span class="dd-icon">⭐</span> Saved Spots
+        </div>
+        <div class="dd-item" id="ddWin" onclick="event.stopPropagation();closeMenu();togglePanel('winterPanel','ddWin')">
+          <span class="dd-icon">❄️</span> Winter Restrictions
+        </div>
+        <div class="dd-sep"></div>
+        <div class="dd-section">Help</div>
+        <div class="dd-item" onclick="event.stopPropagation();closeMenu();showTut()">
+          <span class="dd-icon">📖</span> Tutorial
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1064,10 +1157,7 @@ body.low-battery { filter: brightness(0.85); }
         <div class="welcome-pin-core"><div class="welcome-pin-p">P</div></div>
         <div class="welcome-locating">Locating you…</div>
       </div>
-      <iframe id="welcomeMapFrame" class="welcome-map-frame" style="display:none"
-        frameborder="0" allowfullscreen
-        allow="geolocation">
-      </iframe>
+      <div id="welcomeMapDiv" style="width:100%;height:100%;display:none;"></div>
     </div>
     <div class="welcome-cards">
       <div class="welcome-card">
@@ -1136,17 +1226,41 @@ function loadWelcomeMap() {
       // Auto-detect Canada
       if (!localStorage.getItem('otpf_unit')) setUnit(isCanada(lat,lon) ? 'km' : 'mi');
 
-      const frame = document.getElementById('welcomeMapFrame');
       const loading = document.getElementById('welcomeMapLoading');
 
       // Use Google Maps embed with user's real location
       const apiKey = ''; // No key needed for embed static view
-      // Use OpenStreetMap embed — no API key required, shows real location
-      frame.src = `https://www.openstreetmap.org/export/embed.html?bbox=${lon-0.005}%2C${lat-0.003}%2C${lon+0.005}%2C${lat+0.003}&layer=mapnik&marker=${lat}%2C${lon}`;
-      frame.style.display = 'block';
-      frame.onload = () => {
-        loading.style.display = 'none';
-      };
+      // Init Leaflet dark map directly in the page
+      const mapDiv = document.getElementById('welcomeMapDiv');
+      mapDiv.style.display = 'block';
+      loading.style.display = 'none';
+
+      const wMap = L.map('welcomeMapDiv', {
+        center: [lat, lon],
+        zoom: 15,
+        zoomControl: false,
+        attributionControl: false,
+        dragging: false,
+        scrollWheelZoom: false,
+        doubleClickZoom: false,
+        touchZoom: false,
+      });
+
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19,
+        subdomains: 'abcd',
+      }).addTo(wMap);
+
+      const markerIcon = L.divIcon({
+        html: '<div style="width:18px;height:18px;background:#00c2a8;border-radius:50%;border:3px solid white;box-shadow:0 0 14px rgba(0,194,168,0.9)"></div>',
+        iconSize: [18, 18],
+        iconAnchor: [9, 9],
+        className: ''
+      });
+      L.marker([lat, lon], { icon: markerIcon }).addTo(wMap);
+
+      // Force map to recalculate size after display
+      setTimeout(() => wMap.invalidateSize(), 100);
       // Update locating label
       const lbl = document.getElementById('welcomeMapLoading')?.querySelector('.welcome-locating');
       if (lbl) lbl.textContent = 'Found your location';
@@ -1166,6 +1280,23 @@ let filter = 'all', view = 'list', useKm = true, showHeat = true;
 let saved = JSON.parse(localStorage.getItem('otpf_saved') || '[]');
 let lowBatt = false;
 let recog = null;
+
+// ── MENU ───────────────────────────────────────
+function toggleMenu() {
+  const btn = document.getElementById('menuBtn');
+  const dd = document.getElementById('dropdown');
+  const isOpen = dd.classList.toggle('open');
+  btn.classList.toggle('open', isOpen);
+}
+function closeMenu() {
+  document.getElementById('dropdown').classList.remove('open');
+  document.getElementById('menuBtn').classList.remove('open');
+}
+// Close menu when tapping outside
+document.addEventListener('click', e => {
+  const btn = document.getElementById('menuBtn');
+  if (btn && !btn.contains(e.target)) closeMenu();
+});
 
 // ── TUTORIAL ──────────────────────────────────
 const tutSteps = [
@@ -1246,9 +1377,12 @@ function setStatus(msg, t) {
 // ── PANELS ─────────────────────────────────────
 function togglePanel(panelId, btnId) {
   const panel = document.getElementById(panelId);
-  const btn = document.getElementById(btnId);
   const isOpen = panel.classList.toggle('open');
-  btn.classList.toggle('on', isOpen);
+  // Highlight the dd item if provided
+  if (btnId) {
+    const btn = document.getElementById(btnId);
+    if (btn) btn.classList.toggle('on', isOpen);
+  }
   if (panelId === 'savedPanel' && isOpen) renderSaved();
   if (panelId === 'winterPanel' && isOpen && userLat) renderWinter();
 }
