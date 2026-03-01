@@ -1297,7 +1297,13 @@ function loadWelcomeMap() {
         scrollWheelZoom: false,
         doubleClickZoom: false,
         touchZoom: false,
+        tap: false,
+        keyboard: false,
+        boxZoom: false,
       });
+      // Prevent map from capturing any touch/pointer events so page scrolls normally
+      wMap.getContainer().style.pointerEvents = 'none';
+      document.getElementById('welcomeMapDiv').style.pointerEvents = 'none';
 
       L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
         maxZoom: 19,
