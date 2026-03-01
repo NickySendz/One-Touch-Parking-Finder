@@ -315,44 +315,69 @@ body.low-battery { filter: brightness(0.85); }
 
 /* ── TOOLBAR ── */
 .toolbar {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 20px;
-  overflow-x: auto;
-  scrollbar-width: none;
+  padding: 12px 16px 10px;
   border-bottom: 1px solid var(--border);
   background: var(--navy2);
 }
-.toolbar::-webkit-scrollbar { display: none; }
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+  margin-bottom: 10px;
+}
 .chip {
-  flex-shrink: 0;
-  padding: 6px 14px;
-  border-radius: 7px;
-  border: 1px solid var(--border);
+  padding: 10px 8px;
   background: var(--navy3);
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   cursor: pointer;
   transition: all 0.15s;
-  white-space: nowrap;
 }
-.chip:active { transform: scale(0.96); }
-.chip.active { background: var(--teal-dim); border-color: var(--teal); color: var(--teal); }
-.chip.active-amber { background: var(--amber-dim); border-color: var(--amber); color: var(--amber); }
-.chip.active-blue { background: var(--blue-dim); border-color: var(--blue); color: #60a5fa; }
-.toolbar-sep { width: 1px; height: 20px; background: var(--border); flex-shrink: 0; }
+.chip:active { transform: scale(0.97); }
+.chip.active { background: var(--teal-dim); border-color: var(--teal); }
+.chip.active-amber { background: var(--amber-dim); border-color: var(--amber); }
+.chip.active-green { background: var(--green-dim); border-color: var(--green); }
+.chip.active-blue { background: var(--blue-dim); border-color: var(--blue); }
+.chip.active-purple { background: rgba(168,85,247,0.1); border-color: #a855f7; }
+.chip-icon { font-size: 18px; flex-shrink: 0; }
+.chip-info { min-width: 0; }
+.chip-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.chip.active .chip-name { color: var(--teal); }
+.chip.active-amber .chip-name { color: var(--amber); }
+.chip.active-green .chip-name { color: var(--green); }
+.chip.active-blue .chip-name { color: #60a5fa; }
+.chip.active-purple .chip-name { color: #c084fc; }
+.chip-sub {
+  font-size: 9px;
+  color: var(--muted2);
+  font-family: 'DM Mono', monospace;
+  margin-top: 1px;
+}
+.toolbar-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
 .view-switch {
   display: flex;
   background: var(--navy3);
   border: 1px solid var(--border);
   border-radius: 7px;
   overflow: hidden;
-  flex-shrink: 0;
 }
 .vsw {
-  padding: 6px 10px;
+  padding: 6px 12px;
   font-size: 13px;
   background: transparent;
   border: none;
@@ -840,17 +865,37 @@ body.low-battery { filter: brightness(0.85); }
 
 <!-- TOOLBAR -->
 <div class="toolbar">
-  <div class="chip active" onclick="setChip(this,'all')">All</div>
-  <div class="chip" onclick="setChip(this,'garage')">🏢 Garages</div>
-  <div class="chip" onclick="setChip(this,'lot')">🅿️ Lots</div>
-  <div class="chip" onclick="setChip(this,'free')">💚 Free</div>
-  <div class="chip" onclick="setChip(this,'paid')">💳 Paid</div>
-  <div class="chip" onclick="setChip(this,'nowinter')">❄️ No Restrictions</div>
-  <div class="chip" onclick="setChip(this,'ev')">⚡ EV Charging</div>
-  <div class="toolbar-sep"></div>
-  <div class="view-switch">
-    <button class="vsw active" id="listVBtn" onclick="setView('list')" title="List">☰</button>
-    <button class="vsw" id="mapVBtn" onclick="setView('map')" title="Map">⬡</button>
+  <div class="filter-grid">
+    <div class="chip active" onclick="setChip(this,'all')">
+      <div class="chip-icon">🅿️</div>
+      <div class="chip-info"><div class="chip-name">All Spots</div><div class="chip-sub">Parking + EV</div></div>
+    </div>
+    <div class="chip" onclick="setChip(this,'garage')">
+      <div class="chip-icon">🏢</div>
+      <div class="chip-info"><div class="chip-name">Garages</div><div class="chip-sub">Covered lots</div></div>
+    </div>
+    <div class="chip" onclick="setChip(this,'lot')">
+      <div class="chip-icon">🚗</div>
+      <div class="chip-info"><div class="chip-name">Lots</div><div class="chip-sub">Surface parking</div></div>
+    </div>
+    <div class="chip" onclick="setChip(this,'free')">
+      <div class="chip-icon">💚</div>
+      <div class="chip-info"><div class="chip-name">Free Only</div><div class="chip-sub">No cost spots</div></div>
+    </div>
+    <div class="chip" onclick="setChip(this,'ev')">
+      <div class="chip-icon">⚡</div>
+      <div class="chip-info"><div class="chip-name">EV Charging</div><div class="chip-sub">Charge stations</div></div>
+    </div>
+    <div class="chip" onclick="setChip(this,'nowinter')">
+      <div class="chip-icon">❄️</div>
+      <div class="chip-info"><div class="chip-name">No Restrictions</div><div class="chip-sub">Winter safe</div></div>
+    </div>
+  </div>
+  <div class="toolbar-bottom">
+    <div class="view-switch">
+      <button class="vsw active" id="listVBtn" onclick="setView('list')" title="List view">☰ List</button>
+      <button class="vsw" id="mapVBtn" onclick="setView('map')" title="Map view">⬡ Map</button>
+    </div>
   </div>
 </div>
 
@@ -1001,9 +1046,19 @@ function renderWinter() {
 
 // ── FILTER / VIEW ──────────────────────────────
 function setChip(el, f) {
-  document.querySelectorAll('.chip').forEach(c => c.className = 'chip');
-  const cls = f === 'nowinter' ? 'chip active-blue' : f === 'paid' ? 'chip active-amber' : 'chip active';
-  el.className = cls;
+  document.querySelectorAll('.chip').forEach(c => {
+    c.className = 'chip';
+  });
+  const clsMap = {
+    all: 'chip active',
+    garage: 'chip active',
+    lot: 'chip active',
+    free: 'chip active-green',
+    paid: 'chip active-amber',
+    ev: 'chip active-purple',
+    nowinter: 'chip active-blue',
+  };
+  el.className = clsMap[f] || 'chip active';
   filter = f;
   renderList();
 }
