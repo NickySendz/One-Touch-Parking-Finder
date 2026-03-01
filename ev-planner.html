@@ -1086,7 +1086,41 @@ window.addEventListener('load', () => {
     const match = VEHICLES.find(v => `${v.year} ${v.make} ${v.model}` === decodeURIComponent(p.get('v')));
     if (match) selectVehicle(VEHICLES.indexOf(match));
   }
+  autoFillWeather();
 });
+
+async function autoFillWeather() {
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(async pos => {
+    const { latitude: lat, longitude: lon } = pos.coords;
+    try {
+      // Open-Meteo — completely free, no API key needed
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,wind_speed_10m&wind_speed_unit=kmh&timezone=auto`;
+      const res = await fetch(url);
+      const data = await res.json();
+
+      const temp = Math.round(data.current.temperature_2m);
+      const wind = Math.round(data.current.wind_speed_10m);
+
+      // Set sliders
+      document.getElementById('tempSlider').value = temp;
+      document.getElementById('windSlider').value = Math.min(wind, 80);
+      updateSlider('temp', temp, '°C');
+      updateSlider('wind', Math.min(wind, 80), ' km/h');
+
+      // Auto-enable HVAC if cold
+      if (temp < 5 && !toggles.hvac) {
+        toggles.hvac = true;
+        document.getElementById('hvacToggle').classList.add('on');
+      }
+
+      // Show a subtle confirmation
+      showToast(`🌡 Weather loaded: ${temp}°C · 💨 ${wind} km/h`);
+    } catch(e) {
+      // Silently fail — user can still adjust manually
+    }
+  }, () => {}, { timeout: 5000 });
+}
 </script>
 </body>
 </html>
