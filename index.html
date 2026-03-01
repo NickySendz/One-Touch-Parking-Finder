@@ -1207,9 +1207,9 @@ body.low-battery { filter: brightness(0.85); }
 
   <div id="resultsList"></div>
   <div class="empty-state" id="emptyState">
-    <div class="empty-icon">🔍</div>
-    <div class="empty-title">No spots found</div>
-    <div class="empty-text">Try a different filter or check location permissions</div>
+    <div class="empty-icon" id="emptyIcon">🔍</div>
+    <div class="empty-title" id="emptyTitle">No spots found</div>
+    <div class="empty-text" id="emptyText">Try a different filter or check location permissions</div>
   </div>
 </div>
 
@@ -1644,7 +1644,20 @@ function renderList() {
     else if (filter==='nowinter') f=spots.filter(s=>!s.hasWinter);
   }
 
-  if (!f.length) { empty.classList.add('show'); document.getElementById('resultsCount').textContent=''; return; }
+  if (!f.length) {
+    empty.classList.add('show');
+    document.getElementById('resultsCount').textContent = '';
+    if (filter === 'street') {
+      document.getElementById('emptyIcon').textContent = '🛣️';
+      document.getElementById('emptyTitle').textContent = 'No street parking data here';
+      document.getElementById('emptyText').textContent = 'OpenStreetMap coverage varies by area. This filter works best in busy downtown neighbourhoods. Try a different filter to find nearby parking.';
+    } else {
+      document.getElementById('emptyIcon').textContent = '🔍';
+      document.getElementById('emptyTitle').textContent = 'No spots found';
+      document.getElementById('emptyText').textContent = 'Try a different filter or check location permissions';
+    }
+    return;
+  }
 
   // Hide welcome state once results appear
   document.getElementById('welcomeState').classList.add('hide');
