@@ -790,6 +790,115 @@ body.low-battery { filter: brightness(0.85); }
 .empty-icon { font-size: 44px; margin-bottom: 10px; }
 .empty-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
 .empty-text { font-size: 13px; color: var(--muted); }
+
+/* ── WELCOME STATE ── */
+.welcome-state { padding: 4px 0 20px; }
+.welcome-state.hide { display: none; }
+
+.welcome-map-wrap {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  height: 200px;
+  margin-bottom: 14px;
+  background: var(--navy2);
+}
+#welcomeCanvas { width: 100%; height: 100%; display: block; }
+.welcome-map-center {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex; align-items: center; justify-content: center;
+}
+.welcome-pin-ring-1 {
+  position: absolute;
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  border: 1.5px solid var(--teal);
+  opacity: 0.2;
+  animation: w-ring 2.5s ease-in-out infinite;
+}
+.welcome-pin-ring-2 {
+  position: absolute;
+  width: 90px; height: 90px;
+  border-radius: 50%;
+  border: 1px solid var(--teal);
+  opacity: 0.1;
+  animation: w-ring 2.5s ease-in-out infinite 0.4s;
+}
+@keyframes w-ring {
+  0%,100% { transform: scale(1); opacity: inherit; }
+  50% { transform: scale(1.08); opacity: 0.04; }
+}
+.welcome-pin-core {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--teal);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 20px rgba(0,194,168,0.5), 0 0 40px rgba(0,194,168,0.2);
+  z-index: 1;
+  position: relative;
+}
+.welcome-pin-p {
+  font-family: 'DM Mono', monospace;
+  font-size: 16px;
+  font-weight: 500;
+  color: #000;
+}
+.welcome-map-label {
+  position: absolute;
+  bottom: 10px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: var(--muted);
+  background: rgba(11,17,32,0.85);
+  padding: 4px 12px;
+  border-radius: 100px;
+  white-space: nowrap;
+  backdrop-filter: blur(4px);
+  border: 1px solid var(--border);
+  font-family: 'DM Mono', monospace;
+}
+
+.welcome-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.welcome-card {
+  background: var(--navy2);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.welcome-card-icon { font-size: 22px; flex-shrink: 0; }
+.welcome-card-title { font-size: 12px; font-weight: 700; color: var(--white); margin-bottom: 2px; }
+.welcome-card-sub { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; }
+
+.welcome-cta {
+  width: 100%;
+  padding: 14px;
+  background: var(--teal);
+  color: #000;
+  border: none;
+  border-radius: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: opacity 0.15s, transform 0.1s;
+  box-shadow: 0 4px 20px rgba(0,194,168,0.3);
+}
+.welcome-cta:active { opacity: 0.85; transform: scale(0.98); }
 </style>
 </head>
 <body>
@@ -917,6 +1026,55 @@ body.low-battery { filter: brightness(0.85); }
   <div class="results-header">
     <div class="results-count" id="resultsCount"></div>
   </div>
+
+  <!-- WELCOME STATE (shown before first search) -->
+  <div class="welcome-state" id="welcomeState">
+    <div class="welcome-map-wrap">
+      <canvas id="welcomeCanvas"></canvas>
+      <div class="welcome-map-center">
+        <div class="welcome-pin-ring-2"></div>
+        <div class="welcome-pin-ring-1"></div>
+        <div class="welcome-pin-core">
+          <div class="welcome-pin-p">P</div>
+        </div>
+      </div>
+      <div class="welcome-map-label">Your location will appear here</div>
+    </div>
+    <div class="welcome-cards">
+      <div class="welcome-card">
+        <div class="welcome-card-icon">🅿️</div>
+        <div class="welcome-card-text">
+          <div class="welcome-card-title">Real Parking</div>
+          <div class="welcome-card-sub">Garages, lots & street</div>
+        </div>
+      </div>
+      <div class="welcome-card">
+        <div class="welcome-card-icon">⚡</div>
+        <div class="welcome-card-text">
+          <div class="welcome-card-title">EV Charging</div>
+          <div class="welcome-card-sub">Live availability</div>
+        </div>
+      </div>
+      <div class="welcome-card">
+        <div class="welcome-card-icon">🧭</div>
+        <div class="welcome-card-text">
+          <div class="welcome-card-title">Navigate</div>
+          <div class="welcome-card-sub">Drive or walk there</div>
+        </div>
+      </div>
+      <div class="welcome-card">
+        <div class="welcome-card-icon">⭐</div>
+        <div class="welcome-card-text">
+          <div class="welcome-card-title">Save Spots</div>
+          <div class="welcome-card-sub">Quick access favourites</div>
+        </div>
+      </div>
+    </div>
+    <button class="welcome-cta" onclick="findParking()">
+      <span>📍</span> Tap to Find Parking Near Me
+    </button>
+  </div>
+
   <div id="resultsList"></div>
   <div class="empty-state" id="emptyState">
     <div class="empty-icon">🔍</div>
@@ -936,6 +1094,46 @@ body.low-battery { filter: brightness(0.85); }
 // ── CONFIG ─────────────────────────────────────
 const BACKEND = 'https://one-touch-parking-finder-backend.vercel.app';
 
+// Draw welcome map on load
+window.addEventListener('load', () => { drawWelcomeMap(); });
+function drawWelcomeMap() {
+  const canvas = document.getElementById('welcomeCanvas');
+  if (!canvas) return;
+  const wrap = canvas.parentElement;
+  canvas.width = wrap.offsetWidth;
+  canvas.height = wrap.offsetHeight;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+
+  // Background
+  ctx.fillStyle = '#0b1120';
+  ctx.fillRect(0, 0, W, H);
+
+  // Subtle grid roads
+  ctx.strokeStyle = '#1a2535';
+  ctx.lineWidth = 8;
+  [0.2, 0.45, 0.7, 0.9].forEach(r => {
+    ctx.beginPath(); ctx.moveTo(0, H*r); ctx.lineTo(W, H*r); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(W*r, 0); ctx.lineTo(W*r, H); ctx.stroke();
+  });
+
+  // Ghost spot dots scattered around
+  const ghostDots = [
+    {x:0.18,y:0.22}, {x:0.75,y:0.18}, {x:0.85,y:0.55},
+    {x:0.22,y:0.72}, {x:0.65,y:0.78}, {x:0.38,y:0.35},
+    {x:0.72,y:0.38}, {x:0.15,y:0.5},
+  ];
+  ghostDots.forEach(d => {
+    ctx.beginPath();
+    ctx.arc(d.x*W, d.y*H, 5, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(0,194,168,0.15)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(0,194,168,0.25)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  });
+}
+
 // ── STATE ──────────────────────────────────────
 let spots = [], evSpots = [], userLat = null, userLon = null;
 let filter = 'all', view = 'list', useKm = true, showHeat = true;
@@ -945,13 +1143,14 @@ let recog = null;
 
 // ── TUTORIAL ──────────────────────────────────
 const tutSteps = [
-  { icon:'🅿️', title:'One Touch Parking Finder', text:'Find real, nearby parking spots in one tap. Powered by Google Places.' },
-  { icon:'📍', title:'One-Tap Location', text:'Hit the big P button — your location is found instantly and nearby spots appear.' },
-  { icon:'🧭', title:'Google Maps Navigation', text:'Tap any spot → Drive There or Walk to open Google Maps with live directions.' },
-  { icon:'⭐', title:'Save Favourites', text:'Tap the star on any spot to save it. Saved spots always appear first.' },
-  { icon:'🎙️', title:'Voice Commands', text:'Tap the mic and say: "find parking", "show free", "navigate", "show map", "save nearest".' },
-  { icon:'❄️', title:'Winter Restrictions', text:'Tap ❄️ in the header to see snow plow routes and winter parking rules for your area.' },
-  { icon:'⬡', title:'Heatmap View', text:'Switch to map view to see a real-time busyness heatmap — green is easy, red is busy.' },
+  { icon:'🅿️', title:'One Touch Parking Finder', text:'Find real nearby parking and EV charging stations in one tap — anywhere, on any device.' },
+  { icon:'📍', title:'One-Tap Location', text:'Hit the big P button — your GPS location is found instantly and nearby spots appear.' },
+  { icon:'🧭', title:'Google Maps Navigation', text:'Tap any spot → Drive There or Walk to open Google Maps with live turn-by-turn directions.' },
+  { icon:'⚡', title:'EV Charging Stations', text:'Tap the EV Charging filter to find nearby chargers — shows charge points, connector types, and live availability.' },
+  { icon:'⭐', title:'Save Favourites', text:'Tap the star on any spot to save it. Your saved spots always appear first in the list.' },
+  { icon:'🎙️', title:'Voice Commands', text:'Tap the mic and say: "find parking", "show free", "EV charging", "navigate", or "show map".' },
+  { icon:'❄️', title:'Winter Restrictions', text:'Tap ❄️ in the header to see snow plow routes and winter parking restrictions for your area.' },
+  { icon:'⬡', title:'Heatmap View', text:'Switch to map view to see a busyness heatmap — green means easy to park, red means busy.' },
 ];
 let tutIdx = 0;
 function showTut() {
@@ -1228,6 +1427,8 @@ function renderList() {
 
   if (!f.length) { empty.classList.add('show'); document.getElementById('resultsCount').textContent=''; return; }
 
+  // Hide welcome state once results appear
+  document.getElementById('welcomeState').classList.add('hide');
   document.getElementById('resultsCount').textContent = `${f.length} spot${f.length!==1?'s':''} found`;
 
   const favs = f.filter(s=>isSaved(s.id));
