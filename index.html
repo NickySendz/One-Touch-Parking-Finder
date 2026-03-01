@@ -539,6 +539,7 @@ body.low-battery { filter: brightness(0.85); }
 .spot-type-badge.garage { background: var(--teal-dim); }
 .spot-type-badge.lot { background: var(--blue-dim); }
 .spot-type-badge.street { background: var(--amber-dim); }
+.spot-type-badge.ev { background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.2); }
 
 .spot-body { flex: 1; min-width: 0; }
 .spot-name {
@@ -845,6 +846,7 @@ body.low-battery { filter: brightness(0.85); }
   <div class="chip" onclick="setChip(this,'free')">💚 Free</div>
   <div class="chip" onclick="setChip(this,'paid')">💳 Paid</div>
   <div class="chip" onclick="setChip(this,'nowinter')">❄️ No Restrictions</div>
+  <div class="chip" onclick="setChip(this,'ev')">⚡ EV Charging</div>
   <div class="toolbar-sep"></div>
   <div class="view-switch">
     <button class="vsw active" id="listVBtn" onclick="setView('list')" title="List">☰</button>
@@ -890,7 +892,7 @@ body.low-battery { filter: brightness(0.85); }
 const BACKEND = 'https://one-touch-parking-finder-backend.vercel.app';
 
 // ── STATE ──────────────────────────────────────
-let spots = [], userLat = null, userLon = null;
+let spots = [], evSpots = [], userLat = null, userLon = null;
 let filter = 'all', view = 'list', useKm = true, showHeat = true;
 let saved = JSON.parse(localStorage.getItem('otpf_saved') || '[]');
 let lowBatt = false;
@@ -1036,6 +1038,7 @@ function findParking() {
       if (!localStorage.getItem('otpf_unit')) setUnit(isCanada(userLat,userLon)?'km':'mi');
       setStatus('Found you! Searching…', 'ok');
       doFetch(userLat, userLon);
+      fetchEV(userLat, userLon);
     },
     err => {
       btn.classList.remove('loading');
@@ -1044,6 +1047,46 @@ function findParking() {
     },
     { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
   );
+}
+
+async function fetchEV(lat, lon) {
+  setStatus('Loading EV chargers…', 'ok');
+  try {
+    const res = await fetch(`${BACKEND}/api/parking?lat=${lat}&lon=${lon}&type=ev`);
+    const data = await res.json();
+    if (data.results && data.results.length > 0) {
+      evSpots = data.results.map(p => {
+        const pLat = p.geometry.location.lat;
+        const pLon = p.geometry.location.lng;
+        const dkm = distKm(lat, lon, pLat, pLon);
+        return {
+          id: p.place_id,
+          name: p.name,
+          address: p.vicinity || '',
+          lat: pLat, lon: pLon,
+          dkm, dmi: dkm * 0.621371,
+          walk: Math.round(dkm * 1000 / 80),
+          type: 'ev',
+          open: p.opening_hours ? p.opening_hours.open_now : null,
+          rating: null,
+          isFree: p.is_free || false,
+          numPoints: p.num_points || 1,
+          connectors: p.connectors || [],
+          network: p.network || null,
+          usageCost: p.usage_cost || null,
+          hasWinter: false,
+          busy: Math.random() * 0.5,
+          is_ev: true,
+        };
+      }).sort((a, b) => a.dkm - b.dkm);
+      setStatus(`Found ${evSpots.length} EV chargers near you`, 'ok');
+      renderList();
+    } else {
+      setStatus('No EV chargers found nearby', 'err');
+    }
+  } catch(e) {
+    setStatus('Could not load EV data. Check connection.', 'err');
+  }
 }
 
 async function doFetch(lat, lon) {
@@ -1106,8 +1149,8 @@ function heatColor(b) {
   if (b<0.7) return '#f59e0b';
   return '#ef4444';
 }
-function typeIcon(t){ return {garage:'🏢',lot:'🅿️',street:'🛣️'}[t]||'🅿️'; }
-function typeName(t){ return {garage:'Garage',lot:'Parking Lot',street:'Street'}[t]||'Parking'; }
+function typeIcon(t){ return {garage:'🏢',lot:'🅿️',street:'🛣️',ev:'⚡'}[t]||'🅿️'; }
+function typeName(t){ return {garage:'Garage',lot:'Parking Lot',street:'Street',ev:'EV Charger'}[t]||'Parking'; }
 function isSaved(id){ return saved.some(s=>s.id===id); }
 
 // ── RENDER LIST ────────────────────────────────
@@ -1116,12 +1159,17 @@ function renderList() {
   const empty = document.getElementById('emptyState');
   list.innerHTML=''; empty.classList.remove('show');
 
-  let f = spots;
-  if (filter==='garage') f=spots.filter(s=>s.type==='garage');
-  else if (filter==='lot') f=spots.filter(s=>s.type==='lot');
-  else if (filter==='free') f=spots.filter(s=>s.isFree);
-  else if (filter==='paid') f=spots.filter(s=>!s.isFree);
-  else if (filter==='nowinter') f=spots.filter(s=>!s.hasWinter);
+  let f;
+  if (filter==='ev') {
+    f = evSpots;
+  } else {
+    f = spots;
+    if (filter==='garage') f=spots.filter(s=>s.type==='garage');
+    else if (filter==='lot') f=spots.filter(s=>s.type==='lot');
+    else if (filter==='free') f=spots.filter(s=>s.isFree);
+    else if (filter==='paid') f=spots.filter(s=>!s.isFree);
+    else if (filter==='nowinter') f=spots.filter(s=>!s.hasWinter);
+  }
 
   if (!f.length) { empty.classList.add('show'); document.getElementById('resultsCount').textContent=''; return; }
 
@@ -1306,6 +1354,10 @@ function openSheet(s) {
     <div class="sheet-chips">
       ${openChip}${priceChip}${busyChip}${winterChip}
       <div class="schip">${typeName(s.type)}</div>
+      ${s.is_ev && s.numPoints ? `<div class="schip">🔌 ${s.numPoints} charge point${s.numPoints>1?'s':''}</div>` : ''}
+      ${s.is_ev && s.connectors && s.connectors.length ? `<div class="schip">🔋 ${s.connectors.join(', ')}</div>` : ''}
+      ${s.is_ev && s.network ? `<div class="schip">🏢 ${s.network}</div>` : ''}
+      ${s.is_ev && s.usageCost ? `<div class="schip">💰 ${s.usageCost}</div>` : ''}
     </div>
     <div class="sheet-btns">
       <button class="sbtn sbtn-primary" onclick="driveToSpot(${s.lat},${s.lon})">🧭 Drive There</button>
