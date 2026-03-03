@@ -1774,9 +1774,16 @@ function findParking() {
         fetchEV(userLat, userLon),
         fetchStreet(userLat, userLon),
       ]).then(() => {
+        btn.classList.remove('loading');
+        document.getElementById('findLabel').textContent = 'Refresh';
         renderList();
-        setStatus(`Found ${spots.length} parking · ${streetSpots.length} street · ${evSpots.length} EV`, 'ok');
+        if (view === 'map') setTimeout(drawMap, 50);
+        setStatus(`Found ${spots.length} parking · ${streetSpots.length} street · ${evSpots.length} EV nearby`, 'ok');
         startAutoRefresh();
+      }).catch(() => {
+        btn.classList.remove('loading');
+        document.getElementById('findLabel').textContent = 'Find Parking';
+        setStatus('Something went wrong. Try again.', 'err');
       });
     },
     err => {
@@ -1818,13 +1825,11 @@ async function fetchEV(lat, lon) {
           is_ev: true,
         };
       }).sort((a, b) => a.dkm - b.dkm);
-      setStatus(`Found ${evSpots.length} EV chargers near you`, 'ok');
-      renderList();
-    } else {
-      setStatus('No EV chargers found nearby', 'err');
+      } else {
+      evSpots = [];
     }
   } catch(e) {
-    setStatus('Could not load EV data. Check connection.', 'err');
+    evSpots = [];
   }
 }
 
@@ -1859,16 +1864,12 @@ async function fetchStreet(lat, lon) {
       }).sort((a, b) => a.dkm - b.dkm);
       if (streetSpots.length > 0) {
         setStatus(`Found ${streetSpots.length} street parking spots`, 'ok');
-        if (filter === 'street') renderList();
-      } else {
-        if (filter === 'street') setStatus('No street parking data for this area (OpenStreetMap coverage may be limited)', 'err');
-      }
+        // render handled by caller
     } else {
       streetSpots = [];
-      if (filter === 'street') setStatus('No street parking found — OpenStreetMap coverage may be limited here', 'err');
     }
   } catch(e) {
-    if (filter === 'street') setStatus('Could not load street parking data.', 'err');
+    streetSpots = [];
   }
 }
 
@@ -1876,8 +1877,6 @@ async function doFetch(lat, lon) {
   try {
     const res = await fetch(`${BACKEND}/api/parking?lat=${lat}&lon=${lon}`);
     const data = await res.json();
-    document.getElementById('findBtn').classList.remove('loading');
-    document.getElementById('findLabel').textContent = 'Refresh';
     if (data.results && data.results.length > 0) {
       spots = data.results.map(p => {
         const pLat = p.geometry.location.lat;
@@ -1899,17 +1898,11 @@ async function doFetch(lat, lon) {
           busy: Math.random(),
         };
       }).sort((a,b) => a.dkm-b.dkm);
-      setStatus(`Found ${spots.length} spots near you`, 'ok');
-      renderList();
-      if (view==='map') setTimeout(drawMap,50);
-    } else {
-      setStatus('No parking found nearby', 'err');
-      document.getElementById('emptyState').classList.add('show');
+      } else {
+      spots = [];
     }
   } catch(e) {
-    document.getElementById('findBtn').classList.remove('loading');
-    document.getElementById('findLabel').textContent = 'Find Parking';
-    setStatus('Server error. Check connection.', 'err');
+    spots = [];
   }
 }
 
