@@ -1009,6 +1009,61 @@ body.low-battery { filter: brightness(0.85); }
 }
 .welcome-cta:active { opacity: 0.85; transform: scale(0.98); }
 
+/* ── IN-APP NAVIGATION PANEL ── */
+.nav-panel {
+  position: fixed;
+  inset: 0;
+  background: var(--navy);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.32,0.72,0,1);
+}
+.nav-panel.open { transform: translateY(0); }
+.nav-panel-header {
+  padding: 14px 16px 12px;
+  background: var(--navy2);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  z-index: 10;
+}
+.nav-back-btn {
+  width: 36px; height: 36px;
+  border-radius: 9px;
+  background: var(--navy3);
+  border: 1px solid var(--border);
+  color: var(--white);
+  font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.nav-dest-info { flex: 1; min-width: 0; }
+.nav-dest-name { font-size: 14px; font-weight: 700; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nav-dest-sub { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 1px; }
+.nav-mode-toggle { display: flex; background: var(--navy3); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; flex-shrink: 0; }
+.nav-mode-btn { padding: 7px 11px; font-size: 14px; background: transparent; border: none; color: var(--muted); cursor: pointer; transition: all 0.15s; }
+.nav-mode-btn.active { background: var(--teal-dim); color: var(--teal); }
+#navMapDiv { flex: 1; width: 100%; min-height: 0; }
+#navMapDiv .leaflet-control-zoom, #navMapDiv .leaflet-control-attribution { display: none !important; }
+.nav-directions-bar { background: var(--navy2); border-top: 1px solid var(--border); flex-shrink: 0; max-height: 38vh; overflow-y: auto; padding-bottom: env(safe-area-inset-bottom); }
+.nav-summary { display: flex; gap: 0; border-bottom: 1px solid var(--border); }
+.nav-summary-stat { flex: 1; padding: 12px 8px; text-align: center; border-right: 1px solid var(--border); }
+.nav-summary-stat:last-child { border-right: none; }
+.nav-summary-val { font-size: 18px; font-weight: 800; font-family: 'DM Mono', monospace; color: var(--teal); line-height: 1; }
+.nav-summary-lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
+.nav-step { display: flex; align-items: flex-start; gap: 12px; padding: 11px 16px; border-bottom: 1px solid var(--border); font-size: 13px; }
+.nav-step:last-child { border-bottom: none; }
+.nav-step-icon { width: 28px; height: 28px; border-radius: 7px; background: var(--navy3); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+.nav-step-text { flex: 1; color: var(--white2); line-height: 1.4; }
+.nav-step-dist { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--muted); flex-shrink: 0; margin-top: 3px; }
+.nav-loading { padding: 30px; text-align: center; color: var(--muted); font-size: 13px; }
+.nav-loading-spinner { width: 28px; height: 28px; border: 2px solid var(--border); border-top-color: var(--teal); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 10px; }
+
 /* ── PULL TO REFRESH ── */
 .ptr-indicator {
   text-align: center;
@@ -2120,8 +2175,8 @@ function openSheet(s) {
       ${s.is_ev && s.usageCost ? `<div class="schip">💰 ${s.usageCost}</div>` : ''}
     </div>
     <div class="sheet-btns">
-      <button class="sbtn sbtn-primary" onclick="driveToSpot(${s.lat},${s.lon})">🧭 Drive There</button>
-      <button class="sbtn sbtn-walk" onclick="walkToSpot(${s.lat},${s.lon})">🚶 Walk</button>
+      <button class="sbtn sbtn-primary" onclick="driveToSpot(${s.lat},${s.lon},`${s.name}`)">🧭 Drive There</button>
+      <button class="sbtn sbtn-walk" onclick="walkToSpot(${s.lat},${s.lon},`${s.name}`)">🚶 Walk</button>
       <button class="sbtn sbtn-save" onclick="toggleSave(event,'${s.id}')">${isSaved(s.id)?'⭐':'☆'}</button>
       <button class="sbtn sbtn-close" onclick="closeSheet()">✕</button>
     </div>
@@ -2139,13 +2194,112 @@ function closeSheet() {
   document.getElementById('overlay').classList.remove('open');
   document.getElementById('sheet').classList.remove('open');
 }
-function driveToSpot(lat,lon) {
+// ── IN-APP NAVIGATION ─────────────────────────
+let navMap = null, navMode = 'drive', navRouteLayer = null;
+let navDestLat = null, navDestLon = null;
+
+function driveToSpot(lat, lon, name) {
   closeSheet();
-  window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}&travelmode=driving`,'_blank');
+  openNav(lat, lon, name || 'Parking Spot', 'drive');
 }
-function walkToSpot(lat,lon) {
+function walkToSpot(lat, lon, name) {
   closeSheet();
-  window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}&travelmode=walking`,'_blank');
+  openNav(lat, lon, name || 'Parking Spot', 'walk');
+}
+
+function openNav(destLat, destLon, name, mode) {
+  navDestLat = destLat; navDestLon = destLon; navMode = mode || 'drive';
+  document.getElementById('navDestName').textContent = name;
+  document.getElementById('navDestSub').textContent = mode === 'drive' ? 'Driving directions' : 'Walking directions';
+  document.getElementById('navDriveBtn').classList.toggle('active', mode === 'drive');
+  document.getElementById('navWalkBtn').classList.toggle('active', mode === 'walk');
+  document.getElementById('navDirectionsBar').innerHTML = '<div class="nav-loading"><div class="nav-loading-spinner"></div>Calculating route...</div>';
+  document.getElementById('navPanel').classList.add('open');
+
+  setTimeout(() => {
+    if (navMap) { navMap.remove(); navMap = null; }
+    navMap = L.map('navMapDiv', { zoomControl: false, attributionControl: false });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, subdomains: 'abcd' }).addTo(navMap);
+
+    if (userLat && userLon) {
+      L.marker([userLat, userLon], { icon: L.divIcon({ html: '<div style="width:14px;height:14px;background:#00c2a8;border-radius:50%;border:3px solid white;box-shadow:0 0 10px rgba(0,194,168,0.8)"></div>', iconSize:[14,14], iconAnchor:[7,7], className:'' }) }).addTo(navMap);
+    }
+    L.marker([destLat, destLon], { icon: L.divIcon({ html: '<div style="width:16px;height:16px;background:#ef4444;border-radius:50%;border:3px solid white;box-shadow:0 0 10px rgba(239,68,68,0.8)"></div>', iconSize:[16,16], iconAnchor:[8,8], className:'' }) }).addTo(navMap);
+    navMap.setView(userLat ? [userLat, userLon] : [destLat, destLon], 14);
+    navMap.invalidateSize();
+    fetchRoute(userLat, userLon, destLat, destLon, mode);
+  }, 120);
+}
+
+function setNavMode(mode) {
+  navMode = mode;
+  document.getElementById('navDriveBtn').classList.toggle('active', mode === 'drive');
+  document.getElementById('navWalkBtn').classList.toggle('active', mode === 'walk');
+  document.getElementById('navDestSub').textContent = mode === 'drive' ? 'Driving directions' : 'Walking directions';
+  document.getElementById('navDirectionsBar').innerHTML = '<div class="nav-loading"><div class="nav-loading-spinner"></div>Recalculating...</div>';
+  if (navRouteLayer) { navMap.removeLayer(navRouteLayer); navRouteLayer = null; }
+  fetchRoute(userLat, userLon, navDestLat, navDestLon, mode);
+}
+
+async function fetchRoute(fromLat, fromLon, toLat, toLon, mode) {
+  if (!fromLat || !fromLon) {
+    document.getElementById('navDirectionsBar').innerHTML = '<div class="nav-loading">Enable location for turn-by-turn directions</div>';
+    navMap.setView([toLat, toLon], 15);
+    return;
+  }
+  try {
+    const profile = mode === 'walk' ? 'foot' : 'car';
+    const url = 'https://router.project-osrm.org/route/v1/' + profile + '/' + fromLon + ',' + fromLat + ';' + toLon + ',' + toLat + '?steps=true&geometries=geojson&overview=full';
+    const res = await fetch(url);
+    const data = await res.json();
+    if (!data.routes || !data.routes.length) throw new Error('No route');
+
+    const route = data.routes[0];
+    const coords = route.geometry.coordinates.map(function(c){ return [c[1], c[0]]; });
+    const distKm = (route.distance / 1000).toFixed(1);
+    const durationMin = Math.round(route.duration / 60);
+
+    if (navRouteLayer) navMap.removeLayer(navRouteLayer);
+    navRouteLayer = L.polyline(coords, { color: '#00c2a8', weight: 5, opacity: 0.85 }).addTo(navMap);
+    navMap.fitBounds(navRouteLayer.getBounds().pad(0.15));
+
+    renderDirections(route.legs[0].steps || [], distKm, durationMin, mode);
+  } catch(e) {
+    document.getElementById('navDirectionsBar').innerHTML = '<div class="nav-loading">Could not load route. Check your connection.</div>';
+  }
+}
+
+function renderDirections(steps, distKm, durationMin, mode) {
+  const icons = { 'turn-left':'&#8624;', 'turn-right':'&#8625;', 'turn-slight-left':'&#8598;', 'turn-slight-right':'&#8599;', 'roundabout':'&#8635;', 'rotary':'&#8635;', 'uturn':'&#8617;', 'straight':'&#8679;', 'merge':'&#8679;', 'depart': mode==='walk'?'&#x1F6B6;':'&#x1F697;', 'arrive':'&#x1F3C1;' };
+  const h = Math.floor(durationMin/60), m = durationMin%60;
+  const timeStr = h > 0 ? h+'h '+m+'m' : m+' min';
+
+  let html = '<div class="nav-summary">';
+  html += '<div class="nav-summary-stat"><div class="nav-summary-val">'+timeStr+'</div><div class="nav-summary-lbl">Est. time</div></div>';
+  html += '<div class="nav-summary-stat"><div class="nav-summary-val">'+distKm+'</div><div class="nav-summary-lbl">km</div></div>';
+  html += '<div class="nav-summary-stat"><div class="nav-summary-val">'+steps.length+'</div><div class="nav-summary-lbl">steps</div></div>';
+  html += '</div>';
+
+  steps.forEach(function(step) {
+    if (!step.maneuver) return;
+    const type = step.maneuver.type || 'straight';
+    const modifier = step.maneuver.modifier || '';
+    const key = modifier ? type+'-'+modifier.replace(/ /g,'-') : type;
+    const icon = icons[key] || icons[type] || '&#8679;';
+    const dist = step.distance < 1000 ? Math.round(step.distance)+'m' : (step.distance/1000).toFixed(1)+'km';
+    let text = step.name ? type.replace(/-/g,' ')+' onto '+step.name : type.replace(/-/g,' ');
+    if (type === 'depart') text = step.name ? 'Head towards '+step.name : 'Depart';
+    if (type === 'arrive') text = 'You have arrived';
+    text = text.charAt(0).toUpperCase() + text.slice(1);
+    html += '<div class="nav-step"><div class="nav-step-icon">'+icon+'</div><div class="nav-step-text">'+text+'</div><div class="nav-step-dist">'+dist+'</div></div>';
+  });
+
+  document.getElementById('navDirectionsBar').innerHTML = html;
+}
+
+function closeNav() {
+  document.getElementById('navPanel').classList.remove('open');
+  if (navMap) { navMap.remove(); navMap = null; }
 }
 
 // ── VOICE ──────────────────────────────────────
@@ -2250,6 +2404,28 @@ function handleCmd(cmd) {
   }
 }
 </script>
+
+<!-- IN-APP NAVIGATION PANEL -->
+<div class="nav-panel" id="navPanel">
+  <div class="nav-panel-header">
+    <div class="nav-back-btn" onclick="closeNav()">&#8592;</div>
+    <div class="nav-dest-info">
+      <div class="nav-dest-name" id="navDestName">Navigating...</div>
+      <div class="nav-dest-sub" id="navDestSub"></div>
+    </div>
+    <div class="nav-mode-toggle">
+      <button class="nav-mode-btn active" id="navDriveBtn" onclick="setNavMode('drive')">&#x1F697;</button>
+      <button class="nav-mode-btn" id="navWalkBtn" onclick="setNavMode('walk')">&#x1F6B6;</button>
+    </div>
+  </div>
+  <div id="navMapDiv"></div>
+  <div class="nav-directions-bar" id="navDirectionsBar">
+    <div class="nav-loading">
+      <div class="nav-loading-spinner"></div>
+      Calculating route...
+    </div>
+  </div>
+</div>
 
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav">
