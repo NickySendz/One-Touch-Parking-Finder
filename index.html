@@ -425,7 +425,6 @@ body.low-battery{filter:brightness(0.85);}
 <script>
 const BACKEND = 'https://one-touch-parking-finder-backend.vercel.app';
 
-// Icon SVG strings - injected from Python, no escaping issues
 const IC = {
   nav: '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>',
   walk: '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 4a1 1 0 1 0 2 0 1 1 0 0 0-2 0"/><path d="M7.5 17l1-4 2.5 2 2-4.5"/><path d="m9.5 8.5 2 1 2.5-1.5"/><path d="M14 11.5l1.5 5.5"/></svg>',
@@ -471,7 +470,7 @@ function loadWelcomeMap(){
     const wMap=L.map('welcomeMapDiv',{center:[lat,lon],zoom:15,zoomControl:false,attributionControl:false,dragging:false,scrollWheelZoom:false,doubleClickZoom:false,touchZoom:false,tap:false,keyboard:false,boxZoom:false});
     wMap.getContainer().style.pointerEvents='none';
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd'}).addTo(wMap);
-    L.marker([lat,lon],{icon:L.divIcon({html:'<div style="width:18px;height:18px;background:#00c2a8;border-radius:50%;border:3px solid white;box-shadow:0 0 14px rgba(0,194,168,0.9)"></div>',iconSize:[18,18],iconAnchor:[9,9],className:''})}  ).addTo(wMap);
+    L.marker([lat,lon],{icon:L.divIcon({html:'<div style="width:18px;height:18px;background:#00c2a8;border-radius:50%;border:3px solid white;box-shadow:0 0 14px rgba(0,194,168,0.9)"></div>',iconSize:[18,18],iconAnchor:[9,9],className:''})}).addTo(wMap);
     setTimeout(()=>wMap.invalidateSize(),100);
   },()=>{const l=document.querySelector('.welcome-locating');if(l)l.textContent='Allow location for live map';},{enableHighAccuracy:true,timeout:8000,maximumAge:30000});
 }
@@ -552,7 +551,7 @@ function renderTut(){
   document.getElementById('tutTitle').textContent=s.title;
   document.getElementById('tutText').textContent=s.text;
   document.getElementById('tutNextBtn').textContent=tutIdx<tutSteps.length-1?'Next →':"Let's go!";
-  document.getElementById('tutDots').innerHTML=tutSteps.map((_,i)=>'<div class="tut-dot '+(i===tutIdx?'on':'')+'" ></div>').join('');
+  document.getElementById('tutDots').innerHTML=tutSteps.map((_,i)=>'<div class="tut-dot'+(i===tutIdx?' on':'')+'" ></div>').join('');
 }
 function nextTut(){if(++tutIdx>=tutSteps.length){closeTut();return;}renderTut();}
 function closeTut(){document.getElementById('tutOverlay').classList.remove('show');localStorage.setItem('otpf_tut','1');}
@@ -709,15 +708,19 @@ function makeCard(s,i){
   const card=document.createElement('div');
   card.className='spot-card'+(isSaved(s.id)?' fav':'');
   card.style.animationDelay=i*45+'ms';
-  const openBadge=s.open===true?'<div class="open-badge open">'+IC.check+' Open</div>':s.open===false?'<div class="open-badge closed">'+IC.circX+' Closed</div>':'<div class="open-badge unknown">'+IC.clock+' &mdash;</div>';
-  const priceTag=s.isFree?'<span class="tag free">Free</span>':'<span class="tag paid">'+(s.priceLevel?'$'.repeat(s.priceLevel):'Paid')+'</span>';
+  const openBadge=s.open===true?`<div class="open-badge open">${IC.check} Open</div>`:s.open===false?`<div class="open-badge closed">${IC.circX} Closed</div>`:`<div class="open-badge unknown">${IC.clock} &mdash;</div>`;
+  const priceTag=s.isFree?'<span class="tag free">Free</span>':`<span class="tag paid">${s.priceLevel?'$'.repeat(s.priceLevel):'Paid'}</span>`;
   const winterTag=s.hasWinter?'<span class="tag winter">Restricted</span>':'';
-  card.innerHTML='<div class="spot-type-badge '+s.type+'">'+typeIcon(s.type)+'</div>'
-    +'<div class="spot-body"><div class="spot-name">'+s.name+'</div>'
-    +'<div class="spot-tags"><span class="tag dist">'+fmtDist(s)+'</span>'+priceTag+(s.rating?'<span class="tag rating">'+s.rating+'</span>':'')+winterTag+'</div></div>'
-    +'<div class="spot-right">'+openBadge+'<div class="walk-label">'+s.walk+'m walk</div>'
-    +'<div class="busy-bar" style="background:'+heatColor(s.busy)+';width:'+(Math.round(s.busy*36)+14)+'px"></div>'
-    +'<div class="fav-toggle'+(isSaved(s.id)?' on':'')+'" onclick="toggleSave(event,''+s.id+'')">'+(isSaved(s.id)?IC.starFill:IC.star)+'</div></div>';
+  const ratingTag=s.rating?`<span class="tag rating">${s.rating}</span>`:'';
+  const favCls=isSaved(s.id)?'fav-toggle on':'fav-toggle';
+  const favIc=isSaved(s.id)?IC.starFill:IC.star;
+  card.innerHTML=
+    `<div class="spot-type-badge ${s.type}">${typeIcon(s.type)}</div>`+
+    `<div class="spot-body"><div class="spot-name">${s.name}</div>`+
+    `<div class="spot-tags"><span class="tag dist">${fmtDist(s)}</span>${priceTag}${ratingTag}${winterTag}</div></div>`+
+    `<div class="spot-right">${openBadge}<div class="walk-label">${s.walk}m walk</div>`+
+    `<div class="busy-bar" style="background:${heatColor(s.busy)};width:${Math.round(s.busy*36)+14}px"></div>`+
+    `<div class="${favCls}" onclick="toggleSave(event,'${s.id}')">${favIc}</div></div>`;
   card.onclick=e=>{if(!e.target.closest('.fav-toggle'))openSheet(s);};
   return card;
 }
@@ -736,10 +739,10 @@ function toggleSave(e,id){
 function renderSaved(){
   const el=document.getElementById('savedList');
   if(!saved.length){el.innerHTML='<div class="saved-empty">No saved spots yet. Tap the bookmark icon on any result.</div>';return;}
-  el.innerHTML=saved.map(s=>'<div class="saved-item" onclick="driveToSpot('+s.lat+','+s.lon+')">'
-    +'<div style="color:var(--teal)">'+typeIcon(s.type)+'</div>'
-    +'<div style="flex:1;min-width:0"><div class="saved-item-name">'+s.name+'</div><div class="saved-item-addr">'+s.address+'</div></div>'
-    +'<div class="del-btn" onclick="event.stopPropagation();deleteSaved(''+s.id+'')">'+IC.trash+'</div></div>').join('');
+  el.innerHTML=saved.map(s=>`<div class="saved-item" onclick="driveToSpot(${s.lat},${s.lon})">
+    <div style="color:var(--teal)">${typeIcon(s.type)}</div>
+    <div style="flex:1;min-width:0"><div class="saved-item-name">${s.name}</div><div class="saved-item-addr">${s.address}</div></div>
+    <div class="del-btn" onclick="event.stopPropagation();deleteSaved('${s.id}')">${IC.trash}</div></div>`).join('');
 }
 function deleteSaved(id){saved=saved.filter(s=>s.id!==id);localStorage.setItem('otpf_saved',JSON.stringify(saved));renderSaved();renderList();}
 
@@ -758,32 +761,34 @@ function drawMap(){
 
 function openSheet(s){
   const b=document.getElementById('sheetBody');
-  const openChip=s.open===true?'<div class="schip" style="color:#86efac;border-color:#22c55e33">'+IC.check+' Open Now</div>':s.open===false?'<div class="schip" style="color:#fca5a5;border-color:#ef444433">'+IC.circX+' Closed</div>':'<div class="schip">'+IC.clock+' Hours Unknown</div>';
-  const priceChip=s.isFree?'<div class="schip" style="color:#86efac;border-color:#22c55e33">Free Parking</div>':'<div class="schip" style="color:#fcd34d;border-color:#f59e0b33">'+(s.priceLevel?'$'.repeat(s.priceLevel)+'/hr est.':'Paid')+'</div>';
+  const openChip=s.open===true?`<div class="schip" style="color:#86efac;border-color:#22c55e33">${IC.check} Open Now</div>`:s.open===false?`<div class="schip" style="color:#fca5a5;border-color:#ef444433">${IC.circX} Closed</div>`:`<div class="schip">${IC.clock} Hours Unknown</div>`;
+  const priceChip=s.isFree?'<div class="schip" style="color:#86efac;border-color:#22c55e33">Free Parking</div>':`<div class="schip" style="color:#fcd34d;border-color:#f59e0b33">${s.priceLevel?'$'.repeat(s.priceLevel)+'/hr est.':'Paid'}</div>`;
   const winterChip=s.hasWinter?'<div class="schip" style="color:#7dd3fc;border-color:#3b82f633">Winter Restrictions</div>':'';
-  const busyChip='<div class="schip">'+(s.busy<0.4?'Usually easy':s.busy<0.7?'Moderate':'Often busy')+'</div>';
+  const busyChip=`<div class="schip">${s.busy<0.4?'Usually easy':s.busy<0.7?'Moderate':'Often busy'}</div>`;
   const op=detectOperator(s.name,s.address);
-  const payBtn=op?'<button class="sbtn-pay" style="border-color:'+op.color+';color:'+op.color+';background:'+op.color+'22" onclick="openPayment(''+s.id+'')">'+IC.card+' Pay with '+op.name+'</button>':'';
-  b.innerHTML='<div class="sheet-header"><div class="sheet-icon-wrap '+s.type+'">'+typeIcon(s.type)+'</div>'
-    +'<div class="sheet-title-block"><div class="sheet-name">'+s.name+'</div>'
-    +'<div class="sheet-addr">'+IC.pin+' '+s.address+'</div></div></div>'
-    +'<div class="sheet-stats">'
-    +'<div class="sstat"><div class="sstat-val" style="color:#60a5fa">'+fmtDist(s)+'</div><div class="sstat-lbl">Distance</div></div>'
-    +'<div class="sstat"><div class="sstat-val" style="color:#5eead4">'+s.walk+'m</div><div class="sstat-lbl">Walk</div></div>'
-    +'<div class="sstat"><div class="sstat-val" style="color:#fcd34d">'+(s.rating||'&mdash;')+'</div><div class="sstat-lbl">Rating</div></div></div>'
-    +'<div class="sheet-chips">'+openChip+priceChip+busyChip+winterChip+'<div class="schip">'+typeName(s.type)+'</div>'
-    +(s.is_street&&s.maxStay?'<div class="schip">Max stay: '+s.maxStay+'</div>':'')
-    +(s.is_street&&s.isMetered?'<div class="schip" style="color:#fcd34d">Metered</div>':'')
-    +(s.is_street&&s.isFree&&!s.isMetered?'<div class="schip" style="color:#86efac">Free Street</div>':'')
-    +(s.is_ev&&s.numPoints?'<div class="schip">'+s.numPoints+' charge point'+(s.numPoints>1?'s':'')+'</div>':'')
-    +(s.is_ev&&s.connectors&&s.connectors.length?'<div class="schip">'+s.connectors.join(', ')+'</div>':'')
-    +'</div>'
-    +'<div class="sheet-btns">'
-    +'<button class="sbtn sbtn-primary" onclick="driveToSpot('+s.lat+','+s.lon+')">'+IC.nav+' Drive</button>'
-    +'<button class="sbtn sbtn-walk" onclick="walkToSpot('+s.lat+','+s.lon+')">'+IC.walk+' Walk</button>'
-    +'<button class="sbtn sbtn-save" onclick="toggleSave(event,''+s.id+'')">'+(isSaved(s.id)?IC.bookmarkFill:IC.bookmark)+'</button>'
-    +'<button class="sbtn sbtn-close" onclick="closeSheet()">'+IC.x+'</button>'
-    +'</div>'+payBtn;
+  const payBtn=op?`<button class="sbtn-pay" style="border-color:${op.color};color:${op.color};background:${op.color}22" onclick="openPayment('${s.id}')">${IC.card} Pay with ${op.name}</button>`:'';
+  const savIc=isSaved(s.id)?IC.bookmarkFill:IC.bookmark;
+  b.innerHTML=
+    `<div class="sheet-header"><div class="sheet-icon-wrap ${s.type}">${typeIcon(s.type)}</div>`+
+    `<div class="sheet-title-block"><div class="sheet-name">${s.name}</div>`+
+    `<div class="sheet-addr">${IC.pin} ${s.address}</div></div></div>`+
+    `<div class="sheet-stats">`+
+    `<div class="sstat"><div class="sstat-val" style="color:#60a5fa">${fmtDist(s)}</div><div class="sstat-lbl">Distance</div></div>`+
+    `<div class="sstat"><div class="sstat-val" style="color:#5eead4">${s.walk}m</div><div class="sstat-lbl">Walk</div></div>`+
+    `<div class="sstat"><div class="sstat-val" style="color:#fcd34d">${s.rating||'&mdash;'}</div><div class="sstat-lbl">Rating</div></div></div>`+
+    `<div class="sheet-chips">${openChip}${priceChip}${busyChip}${winterChip}<div class="schip">${typeName(s.type)}</div>`+
+    (s.is_street&&s.maxStay?`<div class="schip">Max stay: ${s.maxStay}</div>`:'')+
+    (s.is_street&&s.isMetered?'<div class="schip" style="color:#fcd34d">Metered</div>':'')+
+    (s.is_street&&s.isFree&&!s.isMetered?'<div class="schip" style="color:#86efac">Free Street</div>':'')+
+    (s.is_ev&&s.numPoints?`<div class="schip">${s.numPoints} charge point${s.numPoints>1?'s':''}</div>`:'')+
+    (s.is_ev&&s.connectors&&s.connectors.length?`<div class="schip">${s.connectors.join(', ')}</div>`:'')+
+    `</div>`+
+    `<div class="sheet-btns">`+
+    `<button class="sbtn sbtn-primary" onclick="driveToSpot(${s.lat},${s.lon})">${IC.nav} Drive</button>`+
+    `<button class="sbtn sbtn-walk" onclick="walkToSpot(${s.lat},${s.lon})">${IC.walk} Walk</button>`+
+    `<button class="sbtn sbtn-save" onclick="toggleSave(event,'${s.id}')">${savIc}</button>`+
+    `<button class="sbtn sbtn-close" onclick="closeSheet()">${IC.x}</button>`+
+    `</div>${payBtn}`;
   document.getElementById('overlay').classList.add('open');
   document.getElementById('sheet').classList.add('open');
 }
@@ -839,10 +844,10 @@ async function fetchRoute(fromLat,fromLon,toLat,toLon,mode){
 }
 function renderDirections(steps,distKm,durMin,mode){
   const h=Math.floor(durMin/60),m=durMin%60,timeStr=h>0?h+'h '+m+'m':m+' min';
-  let html='<div class="nav-summary">'
-    +'<div class="nav-summary-stat"><div class="nav-summary-val">'+timeStr+'</div><div class="nav-summary-lbl">Est. time</div></div>'
-    +'<div class="nav-summary-stat"><div class="nav-summary-val">'+distKm+'</div><div class="nav-summary-lbl">km</div></div>'
-    +'<div class="nav-summary-stat"><div class="nav-summary-val">'+steps.length+'</div><div class="nav-summary-lbl">steps</div></div></div>';
+  let html=`<div class="nav-summary">
+    <div class="nav-summary-stat"><div class="nav-summary-val">${timeStr}</div><div class="nav-summary-lbl">Est. time</div></div>
+    <div class="nav-summary-stat"><div class="nav-summary-val">${distKm}</div><div class="nav-summary-lbl">km</div></div>
+    <div class="nav-summary-stat"><div class="nav-summary-val">${steps.length}</div><div class="nav-summary-lbl">steps</div></div></div>`;
   steps.forEach(step=>{
     if(!step.maneuver)return;
     const type=step.maneuver.type||'straight',modifier=step.maneuver.modifier||'';
@@ -855,14 +860,13 @@ function renderDirections(steps,distKm,durMin,mode){
     if(type==='depart')text=step.name?'Head towards '+step.name:'Depart';
     if(type==='arrive')text='You have arrived';
     text=text.charAt(0).toUpperCase()+text.slice(1);
-    html+='<div class="nav-step"><div class="nav-step-icon">'+icon+'</div><div class="nav-step-text">'+text+'</div><div class="nav-step-dist">'+dist+'</div></div>';
+    html+=`<div class="nav-step"><div class="nav-step-icon">${icon}</div><div class="nav-step-text">${text}</div><div class="nav-step-dist">${dist}</div></div>`;
   });
   document.getElementById('navDirectionsBar').innerHTML=html;
 }
 function closeNav(){document.getElementById('navPanel').classList.remove('open');if(navMap){navMap.remove();navMap=null;}}
 
 function toast(msg){const t=document.getElementById('voiceToast');t.textContent=msg;t.classList.add('show');clearTimeout(t._timer);t._timer=setTimeout(()=>t.classList.remove('show'),2800);}
-}
 function startVoice(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){toast('Voice not supported. Try Chrome or Safari.');return;}
@@ -873,8 +877,8 @@ function startVoice(){
   recog.onresult=e=>{const cmd=e.results[0][0].transcript.toLowerCase().trim();toast('"'+cmd+'"');handleCmd(cmd);};
   recog.onerror=e=>{document.getElementById('voiceBtn').classList.remove('listening');recog=null;toast(e.error==='not-allowed'?'Microphone blocked':e.error==='no-speech'?'No speech detected':'Voice error: '+e.error);};
   recog.onend=()=>{document.getElementById('voiceBtn').classList.remove('listening');recog=null;};
-  setTimeout(()=>{try{recog.start();}catch(e){toast('Could not start mic.');recog=null;},100);
-}}
+  setTimeout(()=>{try{recog.start();}catch(e){toast('Could not start mic.');recog=null;}},100);
+}
 function handleCmd(cmd){
   if(/find|search|parking|park/.test(cmd)){findParking();toast('Searching for parking…');}
   else if(/free/.test(cmd)){setChip(document.querySelectorAll('.chip')[3],'free');toast('Showing free spots');}
@@ -886,7 +890,7 @@ function handleCmd(cmd){
   else if(/km|kilomet/.test(cmd)){setUnit('km');toast('Kilometres');}
   else if(/mile/.test(cmd)){setUnit('mi');toast('Miles');}
   else if(/ev|electric|charg/.test(cmd)){setChip(document.querySelectorAll('.chip')[5],'ev');toast('Showing EV chargers');}
-  else if(/save|star|favour|bookmark/.test(cmd)){if(spots.length){toggleSave({stopPropagation:()=>{},spots[0].id);toast('Saved nearest spot');}else toast('No spots loaded yet');}
+  else if(/save|star|favour|bookmark/.test(cmd)){if(spots.length){toggleSave({stopPropagation:()=>{}},spots[0].id);toast('Saved nearest spot');}else toast('No spots loaded yet');}
   else if(/winter|snow/.test(cmd)){togglePanel('winterPanel','ddWin');toast('Winter panel toggled');}
   else if(/help|tutorial/.test(cmd)){showTut();}
   else{toast('Try: "find parking", "show free", "navigate", "show map"');}
