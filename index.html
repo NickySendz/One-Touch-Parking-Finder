@@ -7,11 +7,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-
-<!-- Favicon & App Icons -->
 <link rel="icon" type="image/x-icon" href="favicon.ico">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#111827">
@@ -20,1137 +16,264 @@
 <meta name="apple-mobile-web-app-title" content="One Touch Parking">
 <meta name="mobile-web-app-capable" content="yes">
 <style>
-:root {
-  --navy: #0b1120;
-  --navy2: #111827;
-  --navy3: #1c2637;
-  --navy4: #263044;
-  --border: #2d3a4f;
-  --border2: #384a61;
-  --teal: #00c2a8;
-  --teal-dim: rgba(0,194,168,0.12);
-  --teal-glow: rgba(0,194,168,0.25);
-  --amber: #f59e0b;
-  --amber-dim: rgba(245,158,11,0.12);
-  --red: #ef4444;
-  --red-dim: rgba(239,68,68,0.12);
-  --blue: #3b82f6;
-  --blue-dim: rgba(59,130,246,0.12);
-  --white: #f1f5f9;
-  --white2: #cbd5e1;
-  --muted: #64748b;
-  --muted2: #475569;
-  --green: #22c55e;
-  --green-dim: rgba(34,197,94,0.12);
-}
-
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-
-body {
-  background: var(--navy);
-  color: var(--white);
-  font-family: 'DM Sans', sans-serif;
-  min-height: 100vh;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-}
-
-body.low-battery { filter: brightness(0.85); }
-
-/* ── HEADER ── */
-.header {
-  padding: 14px 16px 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--border);
-  background: var(--navy2);
-  position: sticky;
-  top: 0;
-  z-index: 50;
-}
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.radar-icon {
-  width: 38px; height: 38px;
-  position: relative;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-.radar-ring {
-  position: absolute;
-  border-radius: 50%;
-  border: 1.5px solid var(--teal);
-}
-.radar-ring-1 {
-  width: 38px; height: 38px;
-  opacity: 0.18;
-  animation: radar-breathe 2.5s ease-in-out infinite;
-}
-.radar-ring-2 {
-  width: 26px; height: 26px;
-  opacity: 0.35;
-  animation: radar-breathe 2.5s ease-in-out infinite 0.3s;
-}
-@keyframes radar-breathe {
-  0%,100% { transform: scale(1); opacity: inherit; }
-  50% { transform: scale(1.07); opacity: 0.08; }
-}
-.radar-core {
-  width: 19px; height: 19px;
-  border-radius: 50%;
-  background: var(--teal);
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 0 10px rgba(0,194,168,0.7), 0 0 22px rgba(0,194,168,0.3);
-  z-index: 1;
-}
-.radar-core-p {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  font-weight: 500;
-  color: #000;
-  line-height: 1;
-}
-.brand-text {
-  display: flex;
-  flex-direction: column;
-  gap: 0px;
-  line-height: 1;
-}
-.brand-line1 {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: var(--muted);
-  line-height: 1.2;
-  font-family: 'DM Mono', monospace;
-}
-.brand-line2 {
-  font-size: 16px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  line-height: 1.15;
-  color: var(--white);
-}
-.brand-line2 span { color: var(--teal); }
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-/* Battery badge still shown inline */
-.battery-badge {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  color: var(--muted);
-  padding: 3px 7px;
-  background: var(--navy3);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  display: none;
-}
-.battery-badge.show { display: block; }
-.battery-badge.low { color: var(--red); border-color: var(--red-dim); background: var(--red-dim); }
-
-/* Menu button */
-.menu-btn {
-  width: 36px; height: 36px;
-  border-radius: 9px;
-  border: 1px solid var(--border);
-  background: var(--navy3);
-  color: var(--white2);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  transition: all 0.15s;
-  flex-shrink: 0;
-  position: relative;
-}
-.menu-btn:active { transform: scale(0.93); }
-.menu-btn.open { background: var(--teal-dim); border-color: var(--teal); color: var(--teal); }
-.menu-btn-icon { font-size: 18px; line-height: 1; }
-
-/* Dropdown */
-.dropdown {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  width: 230px;
-  background: var(--navy2);
-  border: 1px solid var(--border2);
-  border-radius: 14px;
-  padding: 8px;
-  z-index: 200;
-  box-shadow: 0 16px 48px rgba(0,0,0,0.6);
-  opacity: 0;
-  transform: translateY(-6px) scale(0.97);
-  pointer-events: none;
-  transition: opacity 0.18s, transform 0.18s;
-}
-.dropdown.open {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-  pointer-events: all;
-}
-.dd-section {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: var(--muted2);
-  padding: 6px 10px 4px;
-  font-family: 'DM Mono', monospace;
-}
-.dd-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: 9px;
-  cursor: pointer;
-  transition: background 0.12s;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--white2);
-}
-.dd-item:active { background: var(--navy4); }
-.dd-item:hover { background: var(--navy3); }
-.dd-item.on { color: var(--teal); }
-.dd-icon { font-size: 17px; flex-shrink: 0; width: 24px; text-align: center; }
-.dd-sep { height: 1px; background: var(--border); margin: 4px 8px; }
-
-/* Unit toggle inside dropdown */
-.dd-unit-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-}
-.dd-unit-label {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--white2);
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.dd-unit-icon { font-size: 17px; width: 24px; text-align: center; }
-.unit-pill {
-  display: flex;
-  background: var(--navy3);
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-.upill {
-  padding: 5px 10px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--muted);
-  cursor: pointer;
-  border: none;
-  background: transparent;
-  font-family: 'DM Mono', monospace;
-  transition: all 0.15s;
-}
-.upill.active { background: var(--teal); color: #000; }
-
-/* ── MAIN FIND BUTTON ── */
-.find-section {
-  padding: 28px 20px 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  background: linear-gradient(180deg, var(--navy2) 0%, var(--navy) 100%);
-}
-.find-outer {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.find-ring {
-  position: absolute;
-  width: 186px; height: 186px;
-  border-radius: 50%;
-  border: 1.5px solid var(--teal);
-  opacity: 0.3;
-  animation: ring-pulse 3s ease-in-out infinite;
-}
-.find-ring-2 {
-  position: absolute;
-  width: 210px; height: 210px;
-  border-radius: 50%;
-  border: 1px solid var(--teal);
-  opacity: 0.1;
-  animation: ring-pulse 3s ease-in-out infinite 0.5s;
-}
-@keyframes ring-pulse {
-  0%,100% { transform: scale(1); opacity: 0.3; }
-  50% { transform: scale(1.04); opacity: 0.15; }
-}
-.find-btn {
-  width: 164px; height: 164px;
-  border-radius: 50%;
-  border: none;
-  background: linear-gradient(145deg, #0d3d35, #0a2e28);
-  border: 2px solid var(--teal);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 6px;
-  position: relative;
-  z-index: 1;
-  box-shadow: 0 0 40px rgba(0,194,168,0.2), inset 0 1px 0 rgba(0,194,168,0.15);
-  transition: transform 0.15s, box-shadow 0.15s;
-}
-.find-btn:active { transform: scale(0.95); box-shadow: 0 0 20px rgba(0,194,168,0.15); }
-.find-btn.loading {
-  animation: btn-spin 1.2s linear infinite;
-  box-shadow: 0 0 60px rgba(0,194,168,0.4);
-}
-@keyframes btn-spin { 0%{filter:hue-rotate(0deg)} 100%{filter:hue-rotate(360deg)} }
-.find-p-icon {
-  width: 52px; height: 52px;
-  background: var(--teal);
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 26px;
-  font-weight: 800;
-  color: #000;
-  font-family: 'DM Mono', monospace;
-  box-shadow: 0 4px 16px rgba(0,194,168,0.4);
-}
-.find-btn-label {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--teal);
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  font-family: 'DM Mono', monospace;
-}
-.voice-btn {
-  position: absolute;
-  right: -60px;
-  width: 44px; height: 44px;
-  border-radius: 50%;
-  border: 1px solid var(--border2);
-  background: var(--navy3);
-  color: var(--white2);
-  font-size: 18px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.voice-btn:active { transform: scale(0.9); }
-.voice-btn.listening {
-  background: var(--red-dim);
-  border-color: var(--red);
-  color: var(--red);
-  animation: mic-pulse 1s ease-in-out infinite;
-}
-@keyframes mic-pulse {
-  0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.4)}
-  50%{box-shadow:0 0 0 10px rgba(239,68,68,0)}
-}
-
-/* ── STATUS BAR ── */
-.status-bar {
-  width: 100%;
-  background: var(--navy3);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 10px 14px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 12px;
-  color: var(--muted);
-  min-height: 40px;
-}
-.status-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--muted);
-  flex-shrink: 0;
-}
-.status-dot.ok { background: var(--teal); box-shadow: 0 0 6px var(--teal); animation: blink 2s ease-in-out infinite; }
-.status-dot.err { background: var(--red); }
-@keyframes blink { 0%,100%{opacity:1}50%{opacity:0.3} }
-
-/* ── TOOLBAR ── */
-.toolbar {
-  padding: 12px 16px 10px;
-  border-bottom: 1px solid var(--border);
-  background: var(--navy2);
-}
-.filter-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 7px;
-  margin-bottom: 10px;
-}
-.filter-grid .chip:last-child:nth-child(3n+1) {
-  grid-column: span 3;
-}
-.filter-grid .chip:last-child:nth-child(3n+2) {
-  grid-column: span 2;
-}
-.chip {
-  padding: 10px 8px;
-  background: var(--navy3);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.chip:active { transform: scale(0.97); }
-.chip.active { background: var(--teal-dim); border-color: var(--teal); }
-.chip.active-amber { background: var(--amber-dim); border-color: var(--amber); }
-.chip.active-green { background: var(--green-dim); border-color: var(--green); }
-.chip.active-blue { background: var(--blue-dim); border-color: var(--blue); }
-.chip.active-purple { background: rgba(168,85,247,0.1); border-color: #a855f7; }
-.chip-icon { font-size: 18px; flex-shrink: 0; }
-.chip-info { min-width: 0; }
-.chip-name {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--muted);
-  line-height: 1.2;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.chip.active .chip-name { color: var(--teal); }
-.chip.active-amber .chip-name { color: var(--amber); }
-.chip.active-green .chip-name { color: var(--green); }
-.chip.active-blue .chip-name { color: #60a5fa; }
-.chip.active-purple .chip-name { color: #c084fc; }
-.chip-sub {
-  font-size: 9px;
-  color: var(--muted2);
-  font-family: 'DM Mono', monospace;
-  margin-top: 1px;
-}
-.toolbar-bottom {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-}
-.view-switch {
-  display: flex;
-  background: var(--navy3);
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  overflow: hidden;
-}
-.vsw {
-  padding: 6px 12px;
-  font-size: 13px;
-  background: transparent;
-  border: none;
-  color: var(--muted);
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.vsw.active { background: var(--teal-dim); color: var(--teal); }
-
-/* ── PANELS ── */
-.panel {
-  margin: 0;
-  padding: 0 20px;
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease, padding 0.3s ease;
-  background: var(--navy2);
-  border-bottom: 1px solid transparent;
-}
-.panel.open {
-  max-height: 300px;
-  padding: 14px 20px;
-  border-bottom-color: var(--border);
-}
-.panel-title {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 10px;
-}
-
-/* SAVED PANEL */
-.saved-empty { font-size: 13px; color: var(--muted); padding: 6px 0; }
-.saved-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
-  background: var(--navy3);
-  border: 1px solid var(--border);
-  border-radius: 9px;
-  margin-bottom: 6px;
-  cursor: pointer;
-  transition: border-color 0.15s;
-}
-.saved-item:active { border-color: var(--teal); }
-.saved-item-name { font-size: 13px; font-weight: 600; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.saved-item-addr { font-size: 11px; color: var(--muted); }
-.del-btn { font-size: 16px; color: var(--muted2); cursor: pointer; padding: 4px; flex-shrink: 0; }
-
-/* WINTER PANEL */
-.winter-box {
-  background: rgba(59,130,246,0.06);
-  border: 1px solid rgba(59,130,246,0.2);
-  border-radius: 9px;
-  padding: 12px;
-  font-size: 12px;
-  color: var(--white2);
-  line-height: 1.6;
-}
-.winter-box strong { color: #60a5fa; }
-
-/* ── MAP VIEW ── */
-.map-container {
-  display: none;
-  margin: 12px 20px;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  position: relative;
-  height: 300px;
-}
-.map-container.show { display: block; }
-#mapCanvas { width: 100%; height: 100%; display: block; }
-.map-overlay-ui {
-  position: absolute;
-  top: 10px; right: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.map-btn {
-  padding: 5px 10px;
-  background: rgba(11,17,32,0.9);
-  border: 1px solid var(--border2);
-  border-radius: 7px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--white2);
-  cursor: pointer;
-  backdrop-filter: blur(4px);
-}
-.map-legend {
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
-  display: flex;
-  gap: 8px;
-}
-.map-leg-item {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 10px;
-  color: var(--white2);
-  background: rgba(11,17,32,0.85);
-  padding: 3px 8px;
-  border-radius: 100px;
-  backdrop-filter: blur(4px);
-}
-.map-leg-dot { width: 7px; height: 7px; border-radius: 50%; }
-
-/* ── RESULTS ── */
-.results-container {
-  padding: 12px 20px 140px;
-}
-.results-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
-.results-count {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.section-lbl {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: var(--muted2);
-  margin: 12px 0 7px;
-  padding-left: 2px;
-}
-
-/* ── SPOT CARD ── */
-.spot-card {
-  background: var(--navy2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px;
-  display: flex;
-  gap: 12px;
-  cursor: pointer;
-  margin-bottom: 8px;
-  transition: border-color 0.15s, transform 0.1s;
-  animation: fadeUp 0.3s ease both;
-  position: relative;
-  overflow: hidden;
-}
-.spot-card::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 3px;
-  background: var(--teal);
-  opacity: 0;
-  transition: opacity 0.15s;
-}
-.spot-card:active { transform: scale(0.985); border-color: var(--border2); }
-.spot-card:active::before { opacity: 1; }
-.spot-card.fav { border-color: rgba(245,158,11,0.3); }
-.spot-card.fav::before { background: var(--amber); opacity: 1; }
-@keyframes fadeUp {
-  from { opacity:0; transform:translateY(12px); }
-  to { opacity:1; transform:translateY(0); }
-}
-
-.spot-type-badge {
-  width: 42px; height: 42px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  flex-shrink: 0;
-}
-.spot-type-badge.garage { background: var(--teal-dim); }
-.spot-type-badge.lot { background: var(--blue-dim); }
-.spot-type-badge.street { background: var(--amber-dim); }
-.spot-type-badge.ev { background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.2); }
-.spot-type-badge.street_parking { background: var(--amber-dim); border: 1px solid rgba(245,158,11,0.2); }
-
-.spot-body { flex: 1; min-width: 0; }
-.spot-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--white);
-  margin-bottom: 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.spot-tags {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  flex-wrap: wrap;
-}
-.tag {
-  font-size: 10px;
-  font-family: 'DM Mono', monospace;
-  padding: 2px 7px;
-  border-radius: 5px;
-  font-weight: 500;
-}
-.tag.dist { background: var(--blue-dim); color: #93c5fd; }
-.tag.free { background: var(--green-dim); color: #86efac; }
-.tag.paid { background: var(--amber-dim); color: #fcd34d; }
-.tag.winter { background: rgba(59,130,246,0.1); color: #7dd3fc; }
-.tag.rating { background: var(--navy3); color: var(--white2); }
-
-.spot-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 5px;
-  flex-shrink: 0;
-}
-.open-badge {
-  font-size: 10px;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 5px;
-  font-family: 'DM Mono', monospace;
-}
-.open-badge.open { background: var(--green-dim); color: #86efac; }
-.open-badge.closed { background: var(--red-dim); color: #fca5a5; }
-.open-badge.unknown { background: var(--navy3); color: var(--muted); }
-.walk-label {
-  font-size: 10px;
-  color: var(--muted);
-  font-family: 'DM Mono', monospace;
-}
-.busy-bar {
-  height: 3px;
-  border-radius: 2px;
-  min-width: 30px;
-  max-width: 50px;
-}
-.fav-toggle {
-  font-size: 14px;
-  cursor: pointer;
-  line-height: 1;
-  color: var(--muted2);
-  transition: color 0.15s;
-}
-.fav-toggle.on { color: var(--amber); }
-
-/* ── SHEET ── */
-.overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.7);
-  z-index: 100;
-  opacity: 0; pointer-events: none;
-  transition: opacity 0.25s;
-  backdrop-filter: blur(6px);
-}
-.overlay.open { opacity: 1; pointer-events: all; }
-.sheet {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  background: var(--navy2);
-  border-radius: 18px 18px 0 0;
-  border-top: 1px solid var(--border2);
-  padding: 10px 22px 48px;
-  z-index: 101;
-  transform: translateY(100%);
-  transition: transform 0.3s cubic-bezier(0.32,0.72,0,1);
-  max-height: 88vh;
-  overflow-y: auto;
-}
-.sheet.open { transform: translateY(0); }
-.sheet-handle { width: 36px; height: 4px; background: var(--border2); border-radius: 2px; margin: 0 auto 18px; }
-
-.sheet-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  margin-bottom: 16px;
-}
-.sheet-icon-wrap {
-  width: 54px; height: 54px;
-  border-radius: 14px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 26px;
-  flex-shrink: 0;
-}
-.sheet-icon-wrap.garage { background: var(--teal-dim); border: 1px solid rgba(0,194,168,0.2); }
-.sheet-icon-wrap.lot { background: var(--blue-dim); border: 1px solid rgba(59,130,246,0.2); }
-.sheet-icon-wrap.street { background: var(--amber-dim); border: 1px solid rgba(245,158,11,0.2); }
-.sheet-title-block { flex: 1; min-width: 0; }
-.sheet-name { font-size: 18px; font-weight: 700; line-height: 1.2; margin-bottom: 4px; }
-.sheet-addr { font-size: 12px; color: var(--muted); line-height: 1.4; }
-
-.sheet-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-bottom: 14px;
-}
-.sstat {
-  background: var(--navy3);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 12px 8px;
-  text-align: center;
-}
-.sstat-val { font-size: 17px; font-weight: 700; margin-bottom: 2px; font-family: 'DM Mono', monospace; }
-.sstat-lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
-
-.sheet-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
-.schip {
-  padding: 5px 11px;
-  background: var(--navy3);
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  font-size: 11px;
-  color: var(--white2);
-}
-
-.sheet-btns { display: flex; gap: 8px; flex-wrap: wrap; }
-.sbtn {
-  flex: 1;
-  min-width: 120px;
-  padding: 13px;
-  border-radius: 10px;
-  border: none;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: opacity 0.15s, transform 0.1s;
-  display: flex; align-items: center; justify-content: center; gap: 6px;
-}
-.sbtn:active { opacity: 0.85; transform: scale(0.97); }
-.sbtn-primary { background: var(--teal); color: #000; }
-.sbtn-walk { background: var(--blue-dim); color: #93c5fd; border: 1px solid rgba(59,130,246,0.3); }
-.sbtn-save { background: var(--navy3); color: var(--amber); border: 1px solid rgba(245,158,11,0.25); padding: 13px 16px; flex: 0; }
-.sbtn-close { background: var(--navy3); color: var(--muted); border: 1px solid var(--border); padding: 13px 16px; flex: 0; }
-
-/* ── TUTORIAL ── */
-.tut-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.95);
-  z-index: 200;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
-.tut-overlay.show { display: flex; }
-.tut-card {
-  background: var(--navy2);
-  border: 1px solid var(--border2);
-  border-radius: 20px;
-  padding: 32px 24px 24px;
-  max-width: 340px;
-  width: 100%;
-  text-align: center;
-}
-.tut-icon { font-size: 50px; margin-bottom: 14px; }
-.tut-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
-.tut-text { font-size: 13px; color: var(--white2); line-height: 1.6; margin-bottom: 20px; }
-.tut-dots { display: flex; justify-content: center; gap: 6px; margin-bottom: 18px; }
-.tut-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border2); transition: all 0.2s; }
-.tut-dot.on { background: var(--teal); width: 20px; border-radius: 3px; }
-.tut-next {
-  width: 100%; padding: 13px;
-  background: var(--teal); color: #000;
-  border: none; border-radius: 10px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px; font-weight: 700;
-  cursor: pointer;
-}
-.tut-skip { margin-top: 12px; font-size: 12px; color: var(--muted); cursor: pointer; }
-
-/* ── VOICE TOAST ── */
-.voice-toast {
-  position: fixed;
-  bottom: 90px;
-  left: 50%; transform: translateX(-50%) translateY(10px);
-  background: var(--navy2);
-  border: 1px solid var(--border2);
-  border-radius: 100px;
-  padding: 9px 20px;
-  font-size: 13px; font-weight: 500;
-  color: var(--white);
-  z-index: 150;
-  opacity: 0;
-  transition: opacity 0.25s, transform 0.25s;
-  white-space: nowrap;
-  pointer-events: none;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-}
-.voice-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-/* ── EMPTY ── */
-.empty-state {
-  text-align: center;
-  padding: 50px 20px;
-  display: none;
-}
-.empty-state.show { display: block; }
-.empty-icon { font-size: 44px; margin-bottom: 10px; }
-.empty-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
-.empty-text { font-size: 13px; color: var(--muted); }
-
-/* ── WELCOME STATE ── */
-.welcome-state { padding: 4px 0 20px; }
-.welcome-state.hide { display: none; }
-
-.welcome-map-wrap {
-  position: relative;
-  border-radius: 14px;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  height: 200px;
-  margin-bottom: 80px;
-  background: var(--navy2);
-  pointer-events: none;
-}
-/* Leaflet overrides for dark map */
-#welcomeMapDiv .leaflet-control-zoom,
-#welcomeMapDiv .leaflet-control-attribution { display: none !important; }
-.welcome-map-loading {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: var(--navy2);
-  gap: 12px;
-}
-.welcome-locating {
-  font-size: 11px;
-  color: var(--muted);
-  font-family: 'DM Mono', monospace;
-  letter-spacing: 1px;
-  position: absolute;
-  bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  white-space: nowrap;
-  background: rgba(11,17,32,0.9);
-  padding: 4px 12px;
-  border-radius: 100px;
-  border: 1px solid var(--border);
-}
-.welcome-map-center {
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex; align-items: center; justify-content: center;
-}
-.welcome-pin-ring-1 {
-  position: absolute;
-  width: 60px; height: 60px;
-  border-radius: 50%;
-  border: 1.5px solid var(--teal);
-  opacity: 0.2;
-  animation: w-ring 2.5s ease-in-out infinite;
-}
-.welcome-pin-ring-2 {
-  position: absolute;
-  width: 90px; height: 90px;
-  border-radius: 50%;
-  border: 1px solid var(--teal);
-  opacity: 0.1;
-  animation: w-ring 2.5s ease-in-out infinite 0.4s;
-}
-@keyframes w-ring {
-  0%,100% { transform: scale(1); opacity: inherit; }
-  50% { transform: scale(1.08); opacity: 0.04; }
-}
-.welcome-pin-core {
-  width: 36px; height: 36px;
-  border-radius: 50%;
-  background: var(--teal);
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 0 20px rgba(0,194,168,0.5), 0 0 40px rgba(0,194,168,0.2);
-  z-index: 1;
-  position: relative;
-}
-.welcome-pin-p {
-  font-family: 'DM Mono', monospace;
-  font-size: 16px;
-  font-weight: 500;
-  color: #000;
-}
-.welcome-map-label {
-  position: absolute;
-  bottom: 10px; left: 50%;
-  transform: translateX(-50%);
-  font-size: 11px;
-  color: var(--muted);
-  background: rgba(11,17,32,0.85);
-  padding: 4px 12px;
-  border-radius: 100px;
-  white-space: nowrap;
-  backdrop-filter: blur(4px);
-  border: 1px solid var(--border);
-  font-family: 'DM Mono', monospace;
-}
-
-.welcome-cards {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-  margin-bottom: 14px;
-}
-.welcome-card {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 8px 10px;
-  pointer-events: none;
-  user-select: none;
-}
-.welcome-card-icon { font-size: 20px; flex-shrink: 0; opacity: 0.85; }
-.welcome-card-title { font-size: 12px; font-weight: 600; color: var(--white2); margin-bottom: 1px; }
-.welcome-card-sub { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; }
-
-.welcome-cta {
-  width: 100%;
-  padding: 14px;
-  background: var(--teal);
-  color: #000;
-  border: none;
-  border-radius: 12px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: opacity 0.15s, transform 0.1s;
-  box-shadow: 0 4px 20px rgba(0,194,168,0.3);
-}
-.welcome-cta:active { opacity: 0.85; transform: scale(0.98); }
-
-/* ── IN-APP NAVIGATION PANEL ── */
-.nav-panel {
-  position: fixed;
-  inset: 0;
-  background: var(--navy);
-  z-index: 200;
-  display: flex;
-  flex-direction: column;
-  transform: translateY(100%);
-  transition: transform 0.35s cubic-bezier(0.32,0.72,0,1);
-}
-.nav-panel.open { transform: translateY(0); }
-.nav-panel-header {
-  padding: 14px 16px 12px;
-  background: var(--navy2);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-shrink: 0;
-  z-index: 10;
-}
-.nav-back-btn {
-  width: 36px; height: 36px;
-  border-radius: 9px;
-  background: var(--navy3);
-  border: 1px solid var(--border);
-  color: var(--white);
-  font-size: 18px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-.nav-dest-info { flex: 1; min-width: 0; }
-.nav-dest-name { font-size: 14px; font-weight: 700; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.nav-dest-sub { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 1px; }
-.nav-mode-toggle { display: flex; background: var(--navy3); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; flex-shrink: 0; }
-.nav-mode-btn { padding: 7px 11px; font-size: 14px; background: transparent; border: none; color: var(--muted); cursor: pointer; transition: all 0.15s; }
-.nav-mode-btn.active { background: var(--teal-dim); color: var(--teal); }
-#navMapDiv { flex: 1; width: 100%; min-height: 0; }
-#navMapDiv .leaflet-control-zoom, #navMapDiv .leaflet-control-attribution { display: none !important; }
-.nav-directions-bar { background: var(--navy2); border-top: 1px solid var(--border); flex-shrink: 0; max-height: 38vh; overflow-y: auto; padding-bottom: env(safe-area-inset-bottom); }
-.nav-summary { display: flex; gap: 0; border-bottom: 1px solid var(--border); }
-.nav-summary-stat { flex: 1; padding: 12px 8px; text-align: center; border-right: 1px solid var(--border); }
-.nav-summary-stat:last-child { border-right: none; }
-.nav-summary-val { font-size: 18px; font-weight: 800; font-family: 'DM Mono', monospace; color: var(--teal); line-height: 1; }
-.nav-summary-lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
-.nav-step { display: flex; align-items: flex-start; gap: 12px; padding: 11px 16px; border-bottom: 1px solid var(--border); font-size: 13px; }
-.nav-step:last-child { border-bottom: none; }
-.nav-step-icon { width: 28px; height: 28px; border-radius: 7px; background: var(--navy3); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; margin-top: 1px; }
-.nav-step-text { flex: 1; color: var(--white2); line-height: 1.4; }
-.nav-step-dist { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--muted); flex-shrink: 0; margin-top: 3px; }
-.nav-loading { padding: 30px; text-align: center; color: var(--muted); font-size: 13px; }
-.nav-loading-spinner { width: 28px; height: 28px; border: 2px solid var(--border); border-top-color: var(--teal); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 10px; }
-
-/* ── PULL TO REFRESH ── */
-.ptr-indicator {
-  text-align: center;
-  padding: 10px;
-  font-size: 12px;
-  color: var(--muted);
-  font-family: 'DM Mono', monospace;
-  height: 0;
-  overflow: hidden;
-  transition: height 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-.ptr-indicator.show { height: 44px; }
-.ptr-spinner {
-  width: 16px; height: 16px;
-  border: 2px solid var(--border2);
-  border-top-color: var(--teal);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-  display: none;
-}
-.ptr-indicator.refreshing .ptr-spinner { display: block; }
-
-/* ── BOTTOM NAV ── */
-.bottom-nav {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  height: 62px;
-  background: var(--navy2);
-  border-top: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  z-index: 90;
-  padding-bottom: env(safe-area-inset-bottom);
-}
-.nav-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  cursor: pointer;
-  padding: 8px 0;
-  text-decoration: none;
-  transition: opacity 0.15s;
-}
-.nav-item:active { opacity: 0.7; }
-.nav-icon {
-  font-size: 22px;
-  line-height: 1;
-}
-.nav-label {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--muted);
-  letter-spacing: 0.3px;
-  font-family: 'DM Mono', monospace;
-  text-transform: uppercase;
-}
-.nav-item.active .nav-label { color: var(--teal); }
-.nav-item.active .nav-icon { filter: drop-shadow(0 0 6px rgba(0,194,168,0.6)); }
-.nav-divider { width: 1px; height: 28px; background: var(--border); }
+:root{--navy:#0b1120;--navy2:#111827;--navy3:#1c2637;--navy4:#263044;--border:#2d3a4f;--border2:#384a61;--teal:#00c2a8;--teal-dim:rgba(0,194,168,0.12);--teal-glow:rgba(0,194,168,0.25);--amber:#f59e0b;--amber-dim:rgba(245,158,11,0.12);--red:#ef4444;--red-dim:rgba(239,68,68,0.12);--blue:#3b82f6;--blue-dim:rgba(59,130,246,0.12);--white:#f1f5f9;--white2:#cbd5e1;--muted:#64748b;--muted2:#475569;--green:#22c55e;--green-dim:rgba(34,197,94,0.12);}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:var(--navy);color:var(--white);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+body.low-battery{filter:brightness(0.85);}
+.header{padding:14px 16px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--navy2);position:sticky;top:0;z-index:50;}
+.brand{display:flex;align-items:center;gap:8px;}
+.radar-icon{width:38px;height:38px;position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.radar-ring{position:absolute;border-radius:50%;border:1.5px solid var(--teal);}
+.radar-ring-1{width:38px;height:38px;opacity:0.18;animation:radar-breathe 2.5s ease-in-out infinite;}
+.radar-ring-2{width:26px;height:26px;opacity:0.35;animation:radar-breathe 2.5s ease-in-out infinite 0.3s;}
+@keyframes radar-breathe{0%,100%{transform:scale(1);opacity:inherit;}50%{transform:scale(1.07);opacity:0.08;}}
+.radar-core{width:19px;height:19px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;box-shadow:0 0 10px rgba(0,194,168,0.7),0 0 22px rgba(0,194,168,0.3);z-index:1;}
+.radar-core-p{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;color:#000;line-height:1;}
+.brand-text{display:flex;flex-direction:column;line-height:1;}
+.brand-line1{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);line-height:1.2;font-family:'DM Mono',monospace;}
+.brand-line2{font-size:16px;font-weight:800;letter-spacing:-0.5px;line-height:1.15;color:var(--white);}
+.brand-line2 span{color:var(--teal);}
+.header-actions{display:flex;align-items:center;gap:8px;}
+.battery-badge{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);padding:3px 7px;background:var(--navy3);border:1px solid var(--border);border-radius:6px;display:none;}
+.battery-badge.show{display:block;}
+.battery-badge.low{color:var(--red);border-color:var(--red-dim);background:var(--red-dim);}
+.menu-btn{width:36px;height:36px;border-radius:9px;border:1px solid var(--border);background:var(--navy3);color:var(--white2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s;flex-shrink:0;position:relative;}
+.menu-btn:active{transform:scale(0.93);}
+.menu-btn.open{background:var(--teal-dim);border-color:var(--teal);color:var(--teal);}
+.menu-btn-icon{font-size:18px;line-height:1;}
+.dropdown{position:absolute;top:calc(100% + 8px);right:0;width:230px;background:var(--navy2);border:1px solid var(--border2);border-radius:14px;padding:8px;z-index:200;box-shadow:0 16px 48px rgba(0,0,0,0.6);opacity:0;transform:translateY(-6px) scale(0.97);pointer-events:none;transition:opacity 0.18s,transform 0.18s;}
+.dropdown.open{opacity:1;transform:translateY(0) scale(1);pointer-events:all;}
+.dd-section{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);padding:6px 10px 4px;font-family:'DM Mono',monospace;}
+.dd-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;cursor:pointer;transition:background 0.12s;font-size:13px;font-weight:500;color:var(--white2);}
+.dd-item:active{background:var(--navy4);}
+.dd-item:hover{background:var(--navy3);}
+.dd-item.on{color:var(--teal);}
+.dd-icon{font-size:17px;flex-shrink:0;width:24px;text-align:center;}
+.dd-sep{height:1px;background:var(--border);margin:4px 8px;}
+.dd-unit-row{display:flex;align-items:center;gap:10px;padding:8px 12px;}
+.dd-unit-label{font-size:13px;font-weight:500;color:var(--white2);flex:1;display:flex;align-items:center;gap:10px;}
+.dd-unit-icon{font-size:17px;width:24px;text-align:center;}
+.unit-pill{display:flex;background:var(--navy3);border:1px solid var(--border);border-radius:7px;overflow:hidden;flex-shrink:0;}
+.upill{padding:5px 10px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;border:none;background:transparent;font-family:'DM Mono',monospace;transition:all 0.15s;}
+.upill.active{background:var(--teal);color:#000;}
+.find-section{padding:28px 20px 20px;display:flex;flex-direction:column;align-items:center;gap:16px;background:linear-gradient(180deg,var(--navy2) 0%,var(--navy) 100%);}
+.find-outer{position:relative;display:flex;align-items:center;justify-content:center;}
+.find-ring{position:absolute;width:186px;height:186px;border-radius:50%;border:1.5px solid var(--teal);opacity:0.3;animation:ring-pulse 3s ease-in-out infinite;}
+.find-ring-2{position:absolute;width:210px;height:210px;border-radius:50%;border:1px solid var(--teal);opacity:0.1;animation:ring-pulse 3s ease-in-out infinite 0.5s;}
+@keyframes ring-pulse{0%,100%{transform:scale(1);opacity:0.3;}50%{transform:scale(1.04);opacity:0.15;}}
+.find-btn{width:164px;height:164px;border-radius:50%;border:2px solid var(--teal);background:linear-gradient(145deg,#0d3d35,#0a2e28);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;position:relative;z-index:1;box-shadow:0 0 40px rgba(0,194,168,0.2),inset 0 1px 0 rgba(0,194,168,0.15);transition:transform 0.15s,box-shadow 0.15s;}
+.find-btn:active{transform:scale(0.95);}
+.find-btn.loading{animation:btn-spin 1.2s linear infinite;box-shadow:0 0 60px rgba(0,194,168,0.4);}
+@keyframes btn-spin{0%{filter:hue-rotate(0deg)}100%{filter:hue-rotate(360deg)}}
+.find-p-icon{width:52px;height:52px;background:var(--teal);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#000;font-family:'DM Mono',monospace;box-shadow:0 4px 16px rgba(0,194,168,0.4);}
+.find-btn-label{font-size:11px;font-weight:600;color:var(--teal);letter-spacing:1.5px;text-transform:uppercase;font-family:'DM Mono',monospace;}
+.voice-btn{position:absolute;right:-60px;width:44px;height:44px;border-radius:50%;border:1px solid var(--border2);background:var(--navy3);color:var(--white2);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s;}
+.voice-btn:active{transform:scale(0.9);}
+.voice-btn.listening{background:var(--red-dim);border-color:var(--red);color:var(--red);animation:mic-pulse 1s ease-in-out infinite;}
+@keyframes mic-pulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.4)}50%{box-shadow:0 0 0 10px rgba(239,68,68,0)}}
+.status-bar{width:100%;background:var(--navy3);border:1px solid var(--border);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);min-height:40px;}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--muted);flex-shrink:0;}
+.status-dot.ok{background:var(--teal);box-shadow:0 0 6px var(--teal);animation:blink 2s ease-in-out infinite;}
+.status-dot.err{background:var(--red);}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.toolbar{padding:12px 16px 10px;border-bottom:1px solid var(--border);background:var(--navy2);}
+.filter-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px;}
+.filter-grid .chip:last-child:nth-child(3n+1){grid-column:span 3;}
+.filter-grid .chip:last-child:nth-child(3n+2){grid-column:span 2;}
+.chip{padding:10px 8px;background:var(--navy3);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:all 0.15s;}
+.chip:active{transform:scale(0.97);}
+.chip.active{background:var(--teal-dim);border-color:var(--teal);}
+.chip.active-amber{background:var(--amber-dim);border-color:var(--amber);}
+.chip.active-green{background:var(--green-dim);border-color:var(--green);}
+.chip.active-blue{background:var(--blue-dim);border-color:var(--blue);}
+.chip.active-purple{background:rgba(168,85,247,0.1);border-color:#a855f7;}
+.chip-icon{font-size:18px;flex-shrink:0;}
+.chip-info{min-width:0;}
+.chip-name{font-size:12px;font-weight:600;color:var(--muted);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.chip.active .chip-name{color:var(--teal);}
+.chip.active-amber .chip-name{color:var(--amber);}
+.chip.active-green .chip-name{color:var(--green);}
+.chip.active-blue .chip-name{color:#60a5fa;}
+.chip.active-purple .chip-name{color:#c084fc;}
+.chip-sub{font-size:9px;color:var(--muted2);font-family:'DM Mono',monospace;margin-top:1px;}
+.toolbar-bottom{display:flex;align-items:center;justify-content:flex-end;}
+.view-switch{display:flex;background:var(--navy3);border:1px solid var(--border);border-radius:7px;overflow:hidden;}
+.vsw{padding:6px 12px;font-size:13px;background:transparent;border:none;color:var(--muted);cursor:pointer;transition:all 0.15s;}
+.vsw.active{background:var(--teal-dim);color:var(--teal);}
+.panel{margin:0;padding:0 20px;max-height:0;overflow:hidden;transition:max-height 0.3s ease,padding 0.3s ease;background:var(--navy2);border-bottom:1px solid transparent;}
+.panel.open{max-height:300px;padding:14px 20px;border-bottom-color:var(--border);}
+.panel-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.saved-empty{font-size:13px;color:var(--muted);padding:6px 0;}
+.saved-item{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--navy3);border:1px solid var(--border);border-radius:9px;margin-bottom:6px;cursor:pointer;transition:border-color 0.15s;}
+.saved-item:active{border-color:var(--teal);}
+.saved-item-name{font-size:13px;font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.saved-item-addr{font-size:11px;color:var(--muted);}
+.del-btn{font-size:16px;color:var(--muted2);cursor:pointer;padding:4px;flex-shrink:0;}
+.winter-box{background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.2);border-radius:9px;padding:12px;font-size:12px;color:var(--white2);line-height:1.6;}
+.winter-box strong{color:#60a5fa;}
+.map-container{display:none;margin:12px 20px;border-radius:12px;overflow:hidden;border:1px solid var(--border);position:relative;height:300px;}
+.map-container.show{display:block;}
+#mapCanvas{width:100%;height:100%;display:block;}
+.map-overlay-ui{position:absolute;top:10px;right:10px;}
+.map-btn{padding:5px 10px;background:rgba(11,17,32,0.9);border:1px solid var(--border2);border-radius:7px;font-size:11px;font-weight:600;color:var(--white2);cursor:pointer;}
+.map-legend{position:absolute;bottom:10px;left:10px;display:flex;gap:8px;}
+.map-leg-item{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--white2);background:rgba(11,17,32,0.85);padding:3px 8px;border-radius:100px;}
+.map-leg-dot{width:7px;height:7px;border-radius:50%;}
+.results-container{padding:12px 20px 140px;}
+.results-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.results-count{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.section-lbl{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin:12px 0 7px;padding-left:2px;}
+.spot-card{background:var(--navy2);border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;gap:12px;cursor:pointer;margin-bottom:8px;transition:border-color 0.15s,transform 0.1s;animation:fadeUp 0.3s ease both;position:relative;overflow:hidden;}
+.spot-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--teal);opacity:0;transition:opacity 0.15s;}
+.spot-card:active{transform:scale(0.985);border-color:var(--border2);}
+.spot-card:active::before{opacity:1;}
+.spot-card.fav{border-color:rgba(245,158,11,0.3);}
+.spot-card.fav::before{background:var(--amber);opacity:1;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.spot-type-badge{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.spot-type-badge.garage{background:var(--teal-dim);}
+.spot-type-badge.lot{background:var(--blue-dim);}
+.spot-type-badge.street{background:var(--amber-dim);}
+.spot-type-badge.ev{background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.2);}
+.spot-type-badge.street_parking{background:var(--amber-dim);border:1px solid rgba(245,158,11,0.2);}
+.spot-body{flex:1;min-width:0;}
+.spot-name{font-size:13px;font-weight:600;color:var(--white);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.spot-tags{display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+.tag{font-size:10px;font-family:'DM Mono',monospace;padding:2px 7px;border-radius:5px;font-weight:500;}
+.tag.dist{background:var(--blue-dim);color:#93c5fd;}
+.tag.free{background:var(--green-dim);color:#86efac;}
+.tag.paid{background:var(--amber-dim);color:#fcd34d;}
+.tag.winter{background:rgba(59,130,246,0.1);color:#7dd3fc;}
+.tag.rating{background:var(--navy3);color:var(--white2);}
+.spot-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;}
+.open-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:5px;font-family:'DM Mono',monospace;}
+.open-badge.open{background:var(--green-dim);color:#86efac;}
+.open-badge.closed{background:var(--red-dim);color:#fca5a5;}
+.open-badge.unknown{background:var(--navy3);color:var(--muted);}
+.walk-label{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;}
+.busy-bar{height:3px;border-radius:2px;min-width:30px;max-width:50px;}
+.fav-toggle{font-size:14px;cursor:pointer;line-height:1;color:var(--muted2);transition:color 0.15s;}
+.fav-toggle.on{color:var(--amber);}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;opacity:0;pointer-events:none;transition:opacity 0.25s;backdrop-filter:blur(6px);}
+.overlay.open{opacity:1;pointer-events:all;}
+.sheet{position:fixed;bottom:0;left:0;right:0;background:var(--navy2);border-radius:18px 18px 0 0;border-top:1px solid var(--border2);padding:10px 22px 48px;z-index:101;transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.32,0.72,0,1);max-height:88vh;overflow-y:auto;}
+.sheet.open{transform:translateY(0);}
+.sheet-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 18px;}
+.sheet-header{display:flex;align-items:flex-start;gap:14px;margin-bottom:16px;}
+.sheet-icon-wrap{width:54px;height:54px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;}
+.sheet-icon-wrap.garage{background:var(--teal-dim);border:1px solid rgba(0,194,168,0.2);}
+.sheet-icon-wrap.lot{background:var(--blue-dim);border:1px solid rgba(59,130,246,0.2);}
+.sheet-icon-wrap.street,.sheet-icon-wrap.street_parking{background:var(--amber-dim);border:1px solid rgba(245,158,11,0.2);}
+.sheet-icon-wrap.ev{background:var(--green-dim);border:1px solid rgba(34,197,94,0.2);}
+.sheet-title-block{flex:1;min-width:0;}
+.sheet-name{font-size:18px;font-weight:700;line-height:1.2;margin-bottom:4px;}
+.sheet-addr{font-size:12px;color:var(--muted);line-height:1.4;}
+.sheet-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+.sstat{background:var(--navy3);border:1px solid var(--border);border-radius:10px;padding:12px 8px;text-align:center;}
+.sstat-val{font-size:17px;font-weight:700;margin-bottom:2px;font-family:'DM Mono',monospace;}
+.sstat-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+.sheet-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;}
+.schip{padding:5px 11px;background:var(--navy3);border:1px solid var(--border);border-radius:7px;font-size:11px;color:var(--white2);}
+.sheet-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+.sbtn{flex:1;min-width:120px;padding:13px;border-radius:10px;border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:opacity 0.15s,transform 0.1s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.sbtn:active{opacity:0.85;transform:scale(0.97);}
+.sbtn-primary{background:var(--teal);color:#000;}
+.sbtn-walk{background:var(--blue-dim);color:#93c5fd;border:1px solid rgba(59,130,246,0.3);}
+.sbtn-save{background:var(--navy3);color:var(--amber);border:1px solid rgba(245,158,11,0.25);padding:13px 16px;flex:0;}
+.sbtn-close{background:var(--navy3);color:var(--muted);border:1px solid var(--border);padding:13px 16px;flex:0;}
+.sbtn-pay{width:100%;padding:13px;border-radius:10px;border:1px solid;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:opacity 0.15s;display:flex;align-items:center;justify-content:center;gap:8px;background:transparent;}
+.sbtn-pay:active{opacity:0.8;}
+.tut-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:200;display:none;align-items:center;justify-content:center;padding:24px;}
+.tut-overlay.show{display:flex;}
+.tut-card{background:var(--navy2);border:1px solid var(--border2);border-radius:20px;padding:32px 24px 24px;max-width:340px;width:100%;text-align:center;}
+.tut-icon{font-size:50px;margin-bottom:14px;}
+.tut-title{font-size:20px;font-weight:700;margin-bottom:8px;}
+.tut-text{font-size:13px;color:var(--white2);line-height:1.6;margin-bottom:20px;}
+.tut-dots{display:flex;justify-content:center;gap:6px;margin-bottom:18px;}
+.tut-dot{width:6px;height:6px;border-radius:50%;background:var(--border2);transition:all 0.2s;}
+.tut-dot.on{background:var(--teal);width:20px;border-radius:3px;}
+.tut-next{width:100%;padding:13px;background:var(--teal);color:#000;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;}
+.tut-skip{margin-top:12px;font-size:12px;color:var(--muted);cursor:pointer;}
+.voice-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--navy2);border:1px solid var(--border2);border-radius:100px;padding:9px 20px;font-size:13px;font-weight:500;color:var(--white);z-index:150;opacity:0;transition:opacity 0.25s,transform 0.25s;white-space:nowrap;pointer-events:none;box-shadow:0 8px 30px rgba(0,0,0,0.5);}
+.voice-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.empty-state{text-align:center;padding:50px 20px;display:none;}
+.empty-state.show{display:block;}
+.empty-icon{font-size:44px;margin-bottom:10px;}
+.empty-title{font-size:16px;font-weight:600;margin-bottom:6px;}
+.empty-text{font-size:13px;color:var(--muted);}
+.welcome-state{padding:4px 0 20px;}
+.welcome-state.hide{display:none;}
+.welcome-map-wrap{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--border);height:200px;margin-bottom:20px;background:var(--navy2);pointer-events:none;}
+#welcomeMapDiv .leaflet-control-zoom,#welcomeMapDiv .leaflet-control-attribution{display:none!important;}
+.welcome-map-loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--navy2);gap:12px;}
+.welcome-locating{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:1px;position:absolute;bottom:12px;left:50%;transform:translateX(-50%);white-space:nowrap;background:rgba(11,17,32,0.9);padding:4px 12px;border-radius:100px;border:1px solid var(--border);}
+.welcome-pin-ring-1{position:absolute;width:60px;height:60px;border-radius:50%;border:1.5px solid var(--teal);opacity:0.2;animation:w-ring 2.5s ease-in-out infinite;}
+.welcome-pin-ring-2{position:absolute;width:90px;height:90px;border-radius:50%;border:1px solid var(--teal);opacity:0.1;animation:w-ring 2.5s ease-in-out infinite 0.4s;}
+@keyframes w-ring{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+.welcome-pin-core{width:36px;height:36px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px rgba(0,194,168,0.5),0 0 40px rgba(0,194,168,0.2);z-index:1;position:relative;}
+.welcome-pin-p{font-family:'DM Mono',monospace;font-size:16px;font-weight:500;color:#000;}
+.welcome-cards{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px;}
+.welcome-card{display:flex;align-items:center;gap:9px;padding:8px 10px;pointer-events:none;user-select:none;}
+.welcome-card-icon{font-size:20px;flex-shrink:0;opacity:0.85;}
+.welcome-card-title{font-size:12px;font-weight:600;color:var(--white2);margin-bottom:1px;}
+.welcome-card-sub{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;}
+.welcome-cta{width:100%;padding:14px;background:var(--teal);color:#000;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity 0.15s,transform 0.1s;box-shadow:0 4px 20px rgba(0,194,168,0.3);}
+.welcome-cta:active{opacity:0.85;transform:scale(0.98);}
+.nav-panel{position:fixed;inset:0;background:var(--navy);z-index:200;display:flex;flex-direction:column;transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);}
+.nav-panel.open{transform:translateY(0);}
+.nav-panel-header{padding:14px 16px 12px;background:var(--navy2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.nav-back-btn{width:36px;height:36px;border-radius:9px;background:var(--navy3);border:1px solid var(--border);color:var(--white);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.nav-dest-info{flex:1;min-width:0;}
+.nav-dest-name{font-size:14px;font-weight:700;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.nav-dest-sub{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:1px;}
+.nav-mode-toggle{display:flex;background:var(--navy3);border:1px solid var(--border);border-radius:8px;overflow:hidden;flex-shrink:0;}
+.nav-mode-btn{padding:7px 11px;font-size:14px;background:transparent;border:none;color:var(--muted);cursor:pointer;transition:all 0.15s;}
+.nav-mode-btn.active{background:var(--teal-dim);color:var(--teal);}
+#navMapDiv{flex:1;width:100%;min-height:0;}
+#navMapDiv .leaflet-control-zoom,#navMapDiv .leaflet-control-attribution{display:none!important;}
+.nav-directions-bar{background:var(--navy2);border-top:1px solid var(--border);flex-shrink:0;max-height:38vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom);}
+.nav-summary{display:flex;border-bottom:1px solid var(--border);}
+.nav-summary-stat{flex:1;padding:12px 8px;text-align:center;border-right:1px solid var(--border);}
+.nav-summary-stat:last-child{border-right:none;}
+.nav-summary-val{font-size:18px;font-weight:800;font-family:'DM Mono',monospace;color:var(--teal);line-height:1;}
+.nav-summary-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:3px;}
+.nav-step{display:flex;align-items:flex-start;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border);font-size:13px;}
+.nav-step:last-child{border-bottom:none;}
+.nav-step-icon{width:28px;height:28px;border-radius:7px;background:var(--navy3);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-top:1px;}
+.nav-step-text{flex:1;color:var(--white2);line-height:1.4;}
+.nav-step-dist{font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);flex-shrink:0;margin-top:3px;}
+.nav-loading{padding:30px;text-align:center;color:var(--muted);font-size:13px;}
+.nav-loading-spinner{width:28px;height:28px;border:2px solid var(--border);border-top-color:var(--teal);border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 10px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ptr-indicator{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;height:0;overflow:hidden;transition:height 0.2s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.ptr-indicator.show{height:44px;}
+.ptr-spinner{width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--teal);border-radius:50%;animation:spin 0.7s linear infinite;display:none;}
+.ptr-indicator.refreshing .ptr-spinner{display:block;}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:62px;background:var(--navy2);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;z-index:90;padding-bottom:env(safe-area-inset-bottom);}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;padding:8px 0;text-decoration:none;transition:opacity 0.15s;}
+.nav-item:active{opacity:0.7;}
+.nav-icon{font-size:22px;line-height:1;}
+.nav-label{font-size:10px;font-weight:600;color:var(--muted);letter-spacing:0.3px;font-family:'DM Mono',monospace;text-transform:uppercase;}
+.nav-item.active .nav-label{color:var(--teal);}
+.nav-item.active .nav-icon{filter:drop-shadow(0 0 6px rgba(0,194,168,0.6));}
+.nav-divider{width:1px;height:28px;background:var(--border);}
 </style>
 </head>
 <body>
 
-<!-- TUTORIAL -->
 <div class="tut-overlay" id="tutOverlay">
   <div class="tut-card">
     <div class="tut-icon" id="tutIcon">🅿️</div>
     <div class="tut-title" id="tutTitle">One Touch Parking Finder</div>
-    <div class="tut-text" id="tutText">Find real parking spots near you instantly. Works anywhere, on any device.</div>
+    <div class="tut-text" id="tutText">Find real parking spots near you instantly.</div>
     <div class="tut-dots" id="tutDots"></div>
     <button class="tut-next" id="tutNextBtn" onclick="nextTut()">Get Started →</button>
     <div class="tut-skip" onclick="closeTut()">Skip</div>
   </div>
 </div>
 
-<!-- VOICE TOAST -->
 <div class="voice-toast" id="voiceToast"></div>
 
-<!-- HEADER -->
 <div class="header">
   <div class="brand">
     <div class="radar-icon">
@@ -1167,7 +290,6 @@ body.low-battery { filter: brightness(0.85); }
     <div class="battery-badge" id="battBadge"></div>
     <div class="menu-btn" id="menuBtn" onclick="toggleMenu()">
       <div class="menu-btn-icon">☰</div>
-      <!-- DROPDOWN -->
       <div class="dropdown" id="dropdown">
         <div class="dd-section">Distance</div>
         <div class="dd-unit-row">
@@ -1179,35 +301,25 @@ body.low-battery { filter: brightness(0.85); }
         </div>
         <div class="dd-sep"></div>
         <div class="dd-section">Quick Access</div>
-        <div class="dd-item" id="ddFav" onclick="event.stopPropagation();closeMenu();togglePanel('savedPanel','ddFav')">
-          <span class="dd-icon">⭐</span> Saved Spots
-        </div>
-        <div class="dd-item" id="ddWin" onclick="event.stopPropagation();closeMenu();togglePanel('winterPanel','ddWin')">
-          <span class="dd-icon">❄️</span> Winter Restrictions
-        </div>
+        <div class="dd-item" id="ddFav" onclick="event.stopPropagation();closeMenu();togglePanel('savedPanel','ddFav')"><span class="dd-icon">⭐</span> Saved Spots</div>
+        <div class="dd-item" id="ddWin" onclick="event.stopPropagation();closeMenu();togglePanel('winterPanel','ddWin')"><span class="dd-icon">❄️</span> Winter Restrictions</div>
         <div class="dd-sep"></div>
         <div class="dd-section">Help</div>
-        <div class="dd-item" onclick="event.stopPropagation();closeMenu();showTut()">
-          <span class="dd-icon">📖</span> Tutorial
-        </div>
+        <div class="dd-item" onclick="event.stopPropagation();closeMenu();showTut()"><span class="dd-icon">📖</span> Tutorial</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- SAVED PANEL -->
 <div class="panel" id="savedPanel">
   <div class="panel-title">⭐ Saved Spots</div>
   <div id="savedList"></div>
 </div>
-
-<!-- WINTER PANEL -->
 <div class="panel" id="winterPanel">
   <div class="panel-title">❄️ Winter Parking Restrictions</div>
   <div class="winter-box" id="winterBox">Tap Find Parking first to load winter info for your area.</div>
 </div>
 
-<!-- FIND SECTION -->
 <div class="find-section">
   <div class="find-outer">
     <div class="find-ring"></div>
@@ -1216,7 +328,7 @@ body.low-battery { filter: brightness(0.85); }
       <div class="find-p-icon">P</div>
       <div class="find-btn-label" id="findLabel">Find Parking</div>
     </button>
-    <button class="voice-btn" id="voiceBtn" onclick="startVoice()" title="Voice command">🎙️</button>
+    <button class="voice-btn" id="voiceBtn" onclick="startVoice()">🎙️</button>
   </div>
   <div class="status-bar">
     <div class="status-dot" id="statusDot"></div>
@@ -1224,52 +336,27 @@ body.low-battery { filter: brightness(0.85); }
   </div>
 </div>
 
-<!-- TOOLBAR -->
 <div class="toolbar">
   <div class="filter-grid">
-    <div class="chip active" onclick="setChip(this,'all')">
-      <div class="chip-icon">🅿️</div>
-      <div class="chip-info"><div class="chip-name">All Spots</div><div class="chip-sub">Parking + EV</div></div>
-    </div>
-    <div class="chip" onclick="setChip(this,'garage')">
-      <div class="chip-icon">🏢</div>
-      <div class="chip-info"><div class="chip-name">Garages</div><div class="chip-sub">Covered lots</div></div>
-    </div>
-    <div class="chip" onclick="setChip(this,'lot')">
-      <div class="chip-icon">🚗</div>
-      <div class="chip-info"><div class="chip-name">Lots</div><div class="chip-sub">Surface parking</div></div>
-    </div>
-    <div class="chip" onclick="setChip(this,'free')">
-      <div class="chip-icon">💚</div>
-      <div class="chip-info"><div class="chip-name">Free Only</div><div class="chip-sub">No cost spots</div></div>
-    </div>
-    <div class="chip" onclick="setChip(this,'street')">
-      <div class="chip-icon">🛣️</div>
-      <div class="chip-info"><div class="chip-name">Street Parking</div><div class="chip-sub">Free & metered</div></div>
-    </div>
-    <div class="chip" onclick="setChip(this,'ev')">
-      <div class="chip-icon">⚡</div>
-      <div class="chip-info"><div class="chip-name">EV Charging</div><div class="chip-sub">Charge stations</div></div>
-    </div>
-    <div class="chip" onclick="setChip(this,'nowinter')">
-      <div class="chip-icon">❄️</div>
-      <div class="chip-info"><div class="chip-name">No Restrictions</div><div class="chip-sub">Winter safe</div></div>
-    </div>
+    <div class="chip active" onclick="setChip(this,'all')"><div class="chip-icon">🅿️</div><div class="chip-info"><div class="chip-name">All Spots</div><div class="chip-sub">Parking + EV</div></div></div>
+    <div class="chip" onclick="setChip(this,'garage')"><div class="chip-icon">🏢</div><div class="chip-info"><div class="chip-name">Garages</div><div class="chip-sub">Covered lots</div></div></div>
+    <div class="chip" onclick="setChip(this,'lot')"><div class="chip-icon">🚗</div><div class="chip-info"><div class="chip-name">Lots</div><div class="chip-sub">Surface parking</div></div></div>
+    <div class="chip" onclick="setChip(this,'free')"><div class="chip-icon">💚</div><div class="chip-info"><div class="chip-name">Free Only</div><div class="chip-sub">No cost spots</div></div></div>
+    <div class="chip" onclick="setChip(this,'street')"><div class="chip-icon">🛣️</div><div class="chip-info"><div class="chip-name">Street Parking</div><div class="chip-sub">Free &amp; metered</div></div></div>
+    <div class="chip" onclick="setChip(this,'ev')"><div class="chip-icon">⚡</div><div class="chip-info"><div class="chip-name">EV Charging</div><div class="chip-sub">Charge stations</div></div></div>
+    <div class="chip" onclick="setChip(this,'nowinter')"><div class="chip-icon">❄️</div><div class="chip-info"><div class="chip-name">No Restrictions</div><div class="chip-sub">Winter safe</div></div></div>
   </div>
   <div class="toolbar-bottom">
     <div class="view-switch">
-      <button class="vsw active" id="listVBtn" onclick="setView('list')" title="List view">☰ List</button>
-      <button class="vsw" id="mapVBtn" onclick="setView('map')" title="Map view">⬡ Map</button>
+      <button class="vsw active" id="listVBtn" onclick="setView('list')">☰ List</button>
+      <button class="vsw" id="mapVBtn" onclick="setView('map')">⬡ Map</button>
     </div>
   </div>
 </div>
 
-<!-- MAP VIEW -->
 <div class="map-container" id="mapContainer">
   <canvas id="mapCanvas"></canvas>
-  <div class="map-overlay-ui">
-    <div class="map-btn" onclick="toggleHeat()">🌡 Heat: ON</div>
-  </div>
+  <div class="map-overlay-ui"><div class="map-btn" onclick="toggleHeat()">🌡 Heat: ON</div></div>
   <div class="map-legend">
     <div class="map-leg-item"><div class="map-leg-dot" style="background:#22c55e"></div>Low</div>
     <div class="map-leg-item"><div class="map-leg-dot" style="background:#f59e0b"></div>Med</div>
@@ -1277,64 +364,28 @@ body.low-battery { filter: brightness(0.85); }
   </div>
 </div>
 
-<!-- PULL TO REFRESH INDICATOR -->
-<div class="ptr-indicator" id="ptrIndicator">
-  <div class="ptr-spinner"></div>
-  <span id="ptrText">↓ Pull to refresh</span>
-</div>
+<div class="ptr-indicator" id="ptrIndicator"><div class="ptr-spinner"></div><span id="ptrText">↓ Pull to refresh</span></div>
 
-<!-- RESULTS -->
 <div class="results-container">
-  <div class="results-header">
-    <div class="results-count" id="resultsCount"></div>
-  </div>
-
-  <!-- WELCOME STATE (shown before first search) -->
+  <div class="results-header"><div class="results-count" id="resultsCount"></div></div>
   <div class="welcome-state" id="welcomeState">
-    <div class="welcome-map-wrap" id="welcomeMapWrap">
+    <div class="welcome-map-wrap">
       <div class="welcome-map-loading" id="welcomeMapLoading">
         <div class="welcome-pin-ring-2"></div>
         <div class="welcome-pin-ring-1"></div>
         <div class="welcome-pin-core"><div class="welcome-pin-p">P</div></div>
         <div class="welcome-locating">Locating you…</div>
       </div>
-      <div id="welcomeMapDiv" style="width:100%;height:100%;display:none;"></div>
+      <div id="welcomeMapDiv" style="width:100%;height:100%;display:none;pointer-events:none;"></div>
     </div>
     <div class="welcome-cards">
-      <div class="welcome-card">
-        <div class="welcome-card-icon">🅿️</div>
-        <div class="welcome-card-text">
-          <div class="welcome-card-title">Real Parking</div>
-          <div class="welcome-card-sub">Garages, lots & street</div>
-        </div>
-      </div>
-      <div class="welcome-card">
-        <div class="welcome-card-icon">⚡</div>
-        <div class="welcome-card-text">
-          <div class="welcome-card-title">EV Charging</div>
-          <div class="welcome-card-sub">Live availability</div>
-        </div>
-      </div>
-      <div class="welcome-card">
-        <div class="welcome-card-icon">🧭</div>
-        <div class="welcome-card-text">
-          <div class="welcome-card-title">Navigate</div>
-          <div class="welcome-card-sub">Drive or walk there</div>
-        </div>
-      </div>
-      <div class="welcome-card">
-        <div class="welcome-card-icon">⭐</div>
-        <div class="welcome-card-text">
-          <div class="welcome-card-title">Save Spots</div>
-          <div class="welcome-card-sub">Quick access favourites</div>
-        </div>
-      </div>
+      <div class="welcome-card"><div class="welcome-card-icon">🅿️</div><div><div class="welcome-card-title">Real Parking</div><div class="welcome-card-sub">Garages, lots &amp; street</div></div></div>
+      <div class="welcome-card"><div class="welcome-card-icon">⚡</div><div><div class="welcome-card-title">EV Charging</div><div class="welcome-card-sub">Live availability</div></div></div>
+      <div class="welcome-card"><div class="welcome-card-icon">🧭</div><div><div class="welcome-card-title">Navigate</div><div class="welcome-card-sub">In-app directions</div></div></div>
+      <div class="welcome-card"><div class="welcome-card-icon">⭐</div><div><div class="welcome-card-title">Save Spots</div><div class="welcome-card-sub">Quick access favourites</div></div></div>
     </div>
-    <button class="welcome-cta" onclick="findParking()">
-      <span>📍</span> Tap to Find Parking Near Me
-    </button>
+    <button class="welcome-cta" onclick="findParking()">📍 Tap to Find Parking Near Me</button>
   </div>
-
   <div id="resultsList"></div>
   <div class="empty-state" id="emptyState">
     <div class="empty-icon" id="emptyIcon">🔍</div>
@@ -1343,1062 +394,9 @@ body.low-battery { filter: brightness(0.85); }
   </div>
 </div>
 
-<!-- SHEET OVERLAY -->
 <div class="overlay" id="overlay" onclick="closeSheet()"></div>
-<div class="sheet" id="sheet">
-  <div class="sheet-handle"></div>
-  <div id="sheetBody"></div>
-</div>
+<div class="sheet" id="sheet"><div class="sheet-handle"></div><div id="sheetBody"></div></div>
 
-<script>
-// ── CONFIG ─────────────────────────────────────
-const BACKEND = 'https://one-touch-parking-finder-backend.vercel.app';
-
-// Load real location map on welcome screen
-window.addEventListener('load', () => { loadWelcomeMap(); });
-function loadWelcomeMap() {
-  if (!navigator.geolocation) return;
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      const lat = pos.coords.latitude;
-      const lon = pos.coords.longitude;
-      userLat = lat;
-      userLon = lon;
-      // Auto-detect Canada
-      if (!localStorage.getItem('otpf_unit')) setUnit(isCanada(lat,lon) ? 'km' : 'mi');
-
-      const loading = document.getElementById('welcomeMapLoading');
-
-      // Use Google Maps embed with user's real location
-      const apiKey = ''; // No key needed for embed static view
-      // Init Leaflet dark map directly in the page
-      const mapDiv = document.getElementById('welcomeMapDiv');
-      mapDiv.style.display = 'block';
-      loading.style.display = 'none';
-
-      const wMap = L.map('welcomeMapDiv', {
-        center: [lat, lon],
-        zoom: 15,
-        zoomControl: false,
-        attributionControl: false,
-        dragging: false,
-        scrollWheelZoom: false,
-        doubleClickZoom: false,
-        touchZoom: false,
-        tap: false,
-        keyboard: false,
-        boxZoom: false,
-      });
-      // Prevent map from capturing any touch/pointer events so page scrolls normally
-      wMap.getContainer().style.pointerEvents = 'none';
-      document.getElementById('welcomeMapDiv').style.pointerEvents = 'none';
-
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        maxZoom: 19,
-        subdomains: 'abcd',
-      }).addTo(wMap);
-
-      const markerIcon = L.divIcon({
-        html: '<div style="width:18px;height:18px;background:#00c2a8;border-radius:50%;border:3px solid white;box-shadow:0 0 14px rgba(0,194,168,0.9)"></div>',
-        iconSize: [18, 18],
-        iconAnchor: [9, 9],
-        className: ''
-      });
-      L.marker([lat, lon], { icon: markerIcon }).addTo(wMap);
-
-      // Force map to recalculate size after display
-      setTimeout(() => wMap.invalidateSize(), 100);
-      // Update locating label
-      const lbl = document.getElementById('welcomeMapLoading')?.querySelector('.welcome-locating');
-      if (lbl) lbl.textContent = 'Found your location';
-    },
-    err => {
-      // Keep the animated loading state, just update label
-      const lbl = document.getElementById('welcomeMapLoading')?.querySelector('.welcome-locating');
-      if (lbl) lbl.textContent = 'Allow location for live map';
-    },
-    { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 }
-  );
-}
-
-// ── STATE ──────────────────────────────────────
-let spots = [], evSpots = [], streetSpots = [], userLat = null, userLon = null;
-let autoRefreshTimer = null;
-const AUTO_REFRESH_MS = 3 * 60 * 1000; // 3 minutes
-
-function startAutoRefresh() {
-  clearInterval(autoRefreshTimer);
-  autoRefreshTimer = setInterval(() => {
-    if (userLat && userLon && spots.length > 0) {
-      Promise.all([
-        doFetch(userLat, userLon),
-        fetchEV(userLat, userLon),
-        fetchStreet(userLat, userLon),
-      ]).then(() => {
-        renderList();
-        setStatus('Refreshed just now', 'ok');
-      });
-    }
-  }, AUTO_REFRESH_MS);
-}
-let filter = 'all', view = 'list', useKm = true, showHeat = true;
-let saved = JSON.parse(localStorage.getItem('otpf_saved') || '[]');
-let lowBatt = false;
-let recog = null;
-
-// ── MENU ───────────────────────────────────────
-function toggleMenu() {
-  const btn = document.getElementById('menuBtn');
-  const dd = document.getElementById('dropdown');
-  const isOpen = dd.classList.toggle('open');
-  btn.classList.toggle('open', isOpen);
-}
-// ── PULL TO REFRESH ───────────────────────────
-(function() {
-  let startY = 0, pulling = false, triggered = false;
-  const threshold = 80;
-
-  document.addEventListener('touchstart', e => {
-    if (window.scrollY === 0) {
-      startY = e.touches[0].clientY;
-      pulling = true;
-      triggered = false;
-    }
-  }, { passive: true });
-
-  document.addEventListener('touchmove', e => {
-    if (!pulling) return;
-    const dy = e.touches[0].clientY - startY;
-    if (dy > 10 && window.scrollY === 0) {
-      const ind = document.getElementById('ptrIndicator');
-      const txt = document.getElementById('ptrText');
-      if (dy > threshold && !triggered) {
-        ind.classList.add('show');
-        txt.textContent = '↑ Release to refresh';
-      } else if (dy > 20) {
-        ind.classList.add('show');
-        txt.textContent = '↓ Pull to refresh';
-      }
-    }
-  }, { passive: true });
-
-  document.addEventListener('touchend', e => {
-    if (!pulling) return;
-    pulling = false;
-    const dy = e.changedTouches[0].clientY - startY;
-    const ind = document.getElementById('ptrIndicator');
-    const txt = document.getElementById('ptrText');
-
-    if (dy > threshold && userLat && userLon && !triggered) {
-      triggered = true;
-      ind.classList.add('show', 'refreshing');
-      txt.textContent = 'Refreshing…';
-      Promise.all([
-        doFetch(userLat, userLon),
-        fetchEV(userLat, userLon),
-        fetchStreet(userLat, userLon),
-      ]).then(() => {
-        renderList();
-        ind.classList.remove('show', 'refreshing');
-        txt.textContent = '↓ Pull to refresh';
-        setStatus('Refreshed just now', 'ok');
-      });
-    } else {
-      setTimeout(() => ind.classList.remove('show'), 300);
-    }
-  }, { passive: true });
-})();
-
-function closeMenu() {
-  document.getElementById('dropdown').classList.remove('open');
-  document.getElementById('menuBtn').classList.remove('open');
-}
-// Close menu when tapping outside
-document.addEventListener('click', e => {
-  const btn = document.getElementById('menuBtn');
-  if (btn && !btn.contains(e.target)) closeMenu();
-});
-
-// ── PARKING PAYMENT DEEP LINKS ────────────────
-const OPERATORS = [
-  // Green P (Toronto)
-  { keywords: ['green p', 'greenp', 'toronto parking authority', 'tpa'],
-    name: 'Green P', icon: '🟢',
-    ios: 'greenparkingapp://', android: 'https://play.google.com/store/apps/details?id=com.mti.greenpTO',
-    fallback: 'https://parking.greenp.com', color: '#22c55e' },
-  // PayByPhone
-  { keywords: ['paybyphone', 'pay by phone', 'pbp'],
-    name: 'PayByPhone', icon: '📱',
-    ios: 'paybyphone://', android: 'paybyphone://',
-    fallback: 'https://m.paybyphone.com', color: '#0ea5e9' },
-  // HonkMobile
-  { keywords: ['honk', 'honkmobile'],
-    name: 'HonkMobile', icon: '📳',
-    ios: 'honkmobile://', android: 'honkmobile://',
-    fallback: 'https://www.honkmobile.com/pay', color: '#f59e0b' },
-  // ParkWhiz
-  { keywords: ['parkwhiz'],
-    name: 'ParkWhiz', icon: '🅿️',
-    ios: 'parkwhiz://', android: 'parkwhiz://',
-    fallback: 'https://www.parkwhiz.com', color: '#3b82f6' },
-  // SpotHero
-  { keywords: ['spothero'],
-    name: 'SpotHero', icon: '🦸',
-    ios: 'spothero://', android: 'spothero://',
-    fallback: 'https://spothero.com', color: '#ef4444' },
-  // Impark (Canada)
-  { keywords: ['impark', 'imperial parking'],
-    name: 'Impark', icon: '🅿️',
-    ios: null, android: null,
-    fallback: 'https://www.impark.com', color: '#8b5cf6' },
-  // Indigo / LAZ
-  { keywords: ['indigo', 'laz parking'],
-    name: 'Indigo', icon: '🟣',
-    ios: null, android: null,
-    fallback: 'https://www.indigoneo.com', color: '#a855f7' },
-  // SP+ / Standard Parking
-  { keywords: ['sp+', 'sp plus', 'standard parking'],
-    name: 'SP+', icon: '🅿️',
-    ios: null, android: null,
-    fallback: 'https://www.spplus.com', color: '#64748b' },
-  // ParkNow / EasyPark
-  { keywords: ['parknow', 'easypark', 'park now'],
-    name: 'EasyPark', icon: '🅿️',
-    ios: 'easypark://', android: 'easypark://',
-    fallback: 'https://easypark.net', color: '#06b6d4' },
-  // Precise ParkLink (Canada)
-  { keywords: ['precise', 'parklink', 'precise parklink'],
-    name: 'Precise ParkLink', icon: '🅿️',
-    ios: null, android: null,
-    fallback: 'https://www.preciseparklink.com', color: '#64748b' },
-];
-
-function detectOperator(spotName, spotAddress) {
-  const text = `${spotName} ${spotAddress}`.toLowerCase();
-  for (const op of OPERATORS) {
-    if (op.keywords.some(k => text.includes(k))) return op;
-  }
-  return null;
-}
-
-function getPayUrl(op, spotLat, spotLon, spotName) {
-  // Try to build a location-aware deep link
-  const encodedName = encodeURIComponent(spotName || '');
-  const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
-
-  if (op.name === 'Green P') {
-    return isIOS
-      ? `greenparkingapp://map?lat=${spotLat}&lon=${spotLon}`
-      : `https://parking.greenp.com/map/?lat=${spotLat}&lng=${spotLon}`;
-  }
-  if (op.name === 'PayByPhone') {
-    return `https://m.paybyphone.com/parking`;
-  }
-  if (op.name === 'HonkMobile') {
-    return isIOS ? 'honkmobile://pay' : 'https://www.honkmobile.com/pay';
-  }
-  if (op.name === 'EasyPark') {
-    return isIOS ? 'easypark://pay' : 'https://easypark.net';
-  }
-  return op.fallback;
-}
-
-function openPayment(spotId) {
-  const spot = [...spots, ...streetSpots, ...evSpots].find(s => s.id === spotId);
-  if (!spot) return;
-  const op = detectOperator(spot.name, spot.address);
-  if (!op) {
-    showToast('No payment app detected for this spot');
-    return;
-  }
-  const url = getPayUrl(op, spot.lat, spot.lon, spot.name);
-  window.open(url, '_blank');
-}
-
-// ── TUTORIAL ──────────────────────────────────
-const tutSteps = [
-  { icon:'🅿️', title:'One Touch Parking Finder', text:'Find real nearby parking and EV charging stations in one tap — anywhere, on any device.' },
-  { icon:'📍', title:'One-Tap Location', text:'Hit the big P button — your GPS location is found instantly and nearby spots appear.' },
-  { icon:'🧭', title:'Google Maps Navigation', text:'Tap any spot → Drive There or Walk to open Google Maps with live turn-by-turn directions.' },
-  { icon:'⚡', title:'EV Charging Stations', text:'Tap the EV Charging filter to find nearby chargers — shows charge points, connector types, and live availability.' },
-  { icon:'⭐', title:'Save Favourites', text:'Tap the star on any spot to save it. Your saved spots always appear first in the list.' },
-  { icon:'🎙️', title:'Voice Commands', text:'Tap the mic and say: "find parking", "show free", "EV charging", "navigate", or "show map".' },
-  { icon:'❄️', title:'Winter Restrictions', text:'Tap ❄️ in the header to see snow plow routes and winter parking restrictions for your area.' },
-  { icon:'⬡', title:'Heatmap View', text:'Switch to map view to see a busyness heatmap — green means easy to park, red means busy.' },
-];
-let tutIdx = 0;
-function showTut() {
-  tutIdx = 0; renderTut();
-  document.getElementById('tutOverlay').classList.add('show');
-}
-function renderTut() {
-  const s = tutSteps[tutIdx];
-  document.getElementById('tutIcon').textContent = s.icon;
-  document.getElementById('tutTitle').textContent = s.title;
-  document.getElementById('tutText').textContent = s.text;
-  document.getElementById('tutNextBtn').textContent = tutIdx < tutSteps.length-1 ? 'Next →' : "Let's go!";
-  const dots = document.getElementById('tutDots');
-  dots.innerHTML = tutSteps.map((_,i) => `<div class="tut-dot ${i===tutIdx?'on':''}"></div>`).join('');
-}
-function nextTut() {
-  if (++tutIdx >= tutSteps.length) { closeTut(); return; }
-  renderTut();
-}
-function closeTut() {
-  document.getElementById('tutOverlay').classList.remove('show');
-  localStorage.setItem('otpf_tut','1');
-}
-if (!localStorage.getItem('otpf_tut')) setTimeout(showTut, 700);
-
-// ── BATTERY ────────────────────────────────────
-(async () => {
-  if (!('getBattery' in navigator)) return;
-  const b = await navigator.getBattery();
-  const upd = () => {
-    const pct = Math.round(b.level*100);
-    lowBatt = pct <= 20 && !b.charging;
-    const el = document.getElementById('battBadge');
-    document.body.classList.toggle('low-battery', lowBatt);
-    if (pct <= 40) {
-      el.textContent = (b.charging ? '⚡' : '🪫') + ' ' + pct + '%';
-      el.className = 'battery-badge show' + (lowBatt ? ' low' : '');
-    } else {
-      el.className = 'battery-badge';
-    }
-  };
-  upd();
-  b.addEventListener('levelchange', upd);
-  b.addEventListener('chargingchange', upd);
-})();
-
-// ── UNIT ───────────────────────────────────────
-function setUnit(u) {
-  useKm = u === 'km';
-  document.getElementById('kmBtn').classList.toggle('active', useKm);
-  document.getElementById('miBtn').classList.toggle('active', !useKm);
-  localStorage.setItem('otpf_unit', u);
-  renderList();
-}
-function isCanada(lat, lon) {
-  return lat > 41.7 && lat < 83.2 && lon > -141.1 && lon < -52.3;
-}
-const su = localStorage.getItem('otpf_unit');
-setUnit(su || 'km');
-
-// ── STATUS ─────────────────────────────────────
-function setStatus(msg, t) {
-  document.getElementById('statusText').textContent = msg;
-  document.getElementById('statusDot').className = 'status-dot' + (t ? ' '+t : '');
-}
-
-// ── PANELS ─────────────────────────────────────
-function togglePanel(panelId, btnId) {
-  const panel = document.getElementById(panelId);
-  const isOpen = panel.classList.toggle('open');
-  // Highlight the dd item if provided
-  if (btnId) {
-    const btn = document.getElementById(btnId);
-    if (btn) btn.classList.toggle('on', isOpen);
-  }
-  if (panelId === 'savedPanel' && isOpen) renderSaved();
-  if (panelId === 'winterPanel' && isOpen && userLat) renderWinter();
-}
-
-// ── WINTER ─────────────────────────────────────
-function renderWinter() {
-  const canada = isCanada(userLat, userLon);
-  const mo = new Date().getMonth();
-  const winter = mo <= 2 || mo >= 10;
-  let html = '';
-  if (canada && winter) {
-    html = `<strong>❄️ Winter restrictions are likely active.</strong><br><br>Snow emergency routes in most Canadian cities prohibit parking during and after snowfall. Check your city's website for specific streets and times. Always read posted signs before parking overnight.`;
-  } else if (canada) {
-    html = `<strong>✅ Off-season</strong> — no active winter restrictions expected right now. Still check local permit zones and time limits.`;
-  } else {
-    html = `Check your local municipality for winter parking bylaws. Snow emergency routes are typically enforced during and 24–48 hrs after snowfall.`;
-  }
-  document.getElementById('winterBox').innerHTML = html;
-}
-
-// ── FILTER / VIEW ──────────────────────────────
-function setChip(el, f) {
-  document.querySelectorAll('.chip').forEach(c => {
-    c.className = 'chip';
-  });
-  const clsMap = {
-    all: 'chip active',
-    garage: 'chip active',
-    lot: 'chip active',
-    free: 'chip active-green',
-    paid: 'chip active-amber',
-    street: 'chip active-amber',
-    ev: 'chip active-purple',
-    nowinter: 'chip active-blue',
-  };
-  el.className = clsMap[f] || 'chip active';
-  filter = f;
-  renderList();
-}
-function setView(v) {
-  view = v;
-  document.getElementById('listVBtn').classList.toggle('active', v==='list');
-  document.getElementById('mapVBtn').classList.toggle('active', v==='map');
-  document.getElementById('mapContainer').classList.toggle('show', v==='map');
-  if (v === 'map' && spots.length) setTimeout(() => drawMap(), 50);
-}
-function toggleHeat() {
-  showHeat = !showHeat;
-  document.querySelector('.map-btn').textContent = `🌡 Heat: ${showHeat?'ON':'OFF'}`;
-  drawMap();
-}
-
-// ── FIND PARKING ───────────────────────────────
-function findParking() {
-  const btn = document.getElementById('findBtn');
-  document.getElementById('findLabel').textContent = 'Locating…';
-  btn.classList.add('loading');
-  setStatus('Getting your location…');
-  if (!navigator.geolocation) {
-    setStatus('Geolocation not supported', 'err');
-    btn.classList.remove('loading');
-    return;
-  }
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      userLat = pos.coords.latitude;
-      userLon = pos.coords.longitude;
-      if (!localStorage.getItem('otpf_unit')) setUnit(isCanada(userLat,userLon)?'km':'mi');
-      setStatus('Found you! Searching…', 'ok');
-      Promise.all([
-        doFetch(userLat, userLon),
-        fetchEV(userLat, userLon),
-        fetchStreet(userLat, userLon),
-      ]).then(() => {
-        btn.classList.remove('loading');
-        document.getElementById('findLabel').textContent = 'Refresh';
-        renderList();
-        if (view === 'map') setTimeout(drawMap, 50);
-        setStatus(`Found ${spots.length} parking · ${streetSpots.length} street · ${evSpots.length} EV nearby`, 'ok');
-        startAutoRefresh();
-      }).catch(() => {
-        btn.classList.remove('loading');
-        document.getElementById('findLabel').textContent = 'Find Parking';
-        setStatus('Something went wrong. Try again.', 'err');
-      });
-    },
-    err => {
-      btn.classList.remove('loading');
-      document.getElementById('findLabel').textContent = 'Find Parking';
-      setStatus(err.code===1 ? 'Location blocked — allow access in browser settings' : 'Location failed. Try again.', 'err');
-    },
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-  );
-}
-
-async function fetchEV(lat, lon) {
-  setStatus('Loading EV chargers…', 'ok');
-  try {
-    const res = await fetch(`${BACKEND}/api/parking?lat=${lat}&lon=${lon}&type=ev`);
-    const data = await res.json();
-    if (data.results && data.results.length > 0) {
-      evSpots = data.results.map(p => {
-        const pLat = p.geometry.location.lat;
-        const pLon = p.geometry.location.lng;
-        const dkm = distKm(lat, lon, pLat, pLon);
-        return {
-          id: p.place_id,
-          name: p.name,
-          address: p.vicinity || '',
-          lat: pLat, lon: pLon,
-          dkm, dmi: dkm * 0.621371,
-          walk: Math.round(dkm * 1000 / 80),
-          type: 'ev',
-          open: p.opening_hours ? p.opening_hours.open_now : null,
-          rating: null,
-          isFree: p.is_free || false,
-          numPoints: p.num_points || 1,
-          connectors: p.connectors || [],
-          network: p.network || null,
-          usageCost: p.usage_cost || null,
-          hasWinter: false,
-          busy: Math.random() * 0.5,
-          is_ev: true,
-        };
-      }).sort((a, b) => a.dkm - b.dkm);
-      } else {
-      evSpots = [];
-    }
-  } catch(e) {
-    evSpots = [];
-  }
-}
-
-async function fetchStreet(lat, lon) {
-  setStatus('Loading street parking…', 'ok');
-  try {
-    const res = await fetch(`${BACKEND}/api/parking?lat=${lat}&lon=${lon}&type=street`);
-    const data = await res.json();
-    if (data.results && data.results.length > 0) {
-      streetSpots = data.results.map(p => {
-        const pLat = p.geometry.location.lat;
-        const pLon = p.geometry.location.lng;
-        const dkm = distKm(lat, lon, pLat, pLon);
-        return {
-          id: p.place_id,
-          name: p.name || 'Street Parking',
-          address: p.vicinity || '',
-          lat: pLat, lon: pLon,
-          dkm, dmi: dkm * 0.621371,
-          walk: Math.round(dkm * 1000 / 80),
-          type: 'street_parking',
-          open: true,
-          rating: null,
-          isFree: p.is_free || !p.is_metered,
-          isMetered: p.is_metered || false,
-          maxStay: p.max_stay || null,
-          parkingType: p.parking_type || 'street',
-          hasWinter: false,
-          busy: Math.random() * 0.5,
-          is_street: true,
-        };
-      }).sort((a, b) => a.dkm - b.dkm);
-      if (streetSpots.length > 0) {
-        setStatus(`Found ${streetSpots.length} street parking spots`, 'ok');
-        // render handled by caller
-    } else {
-      streetSpots = [];
-    }
-  } catch(e) {
-    streetSpots = [];
-  }
-}
-
-async function doFetch(lat, lon) {
-  try {
-    const res = await fetch(`${BACKEND}/api/parking?lat=${lat}&lon=${lon}`);
-    const data = await res.json();
-    if (data.results && data.results.length > 0) {
-      spots = data.results.map(p => {
-        const pLat = p.geometry.location.lat;
-        const pLon = p.geometry.location.lng;
-        const dkm = distKm(lat,lon,pLat,pLon);
-        return {
-          id: p.place_id,
-          name: p.name,
-          address: p.vicinity||'',
-          lat: pLat, lon: pLon,
-          dkm, dmi: dkm*0.621371,
-          walk: Math.round(dkm*1000/80),
-          type: inferType(p.name),
-          open: p.opening_hours ? p.opening_hours.open_now : null,
-          rating: p.rating||null,
-          isFree: p.price_level===0 || (p.name||'').toLowerCase().includes('free'),
-          priceLevel: p.price_level||null,
-          hasWinter: Math.random()>0.55,
-          busy: Math.random(),
-        };
-      }).sort((a,b) => a.dkm-b.dkm);
-      } else {
-      spots = [];
-    }
-  } catch(e) {
-    spots = [];
-  }
-}
-
-function inferType(n) {
-  const l=(n||'').toLowerCase();
-  if (l.includes('garage')||l.includes('parkade')||l.includes('deck')) return 'garage';
-  return 'lot';
-}
-function distKm(a,b,c,d) {
-  const R=6371, dL=(c-a)*Math.PI/180, dG=(d-b)*Math.PI/180;
-  const x=Math.sin(dL/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dG/2)**2;
-  return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
-}
-function fmtDist(s) {
-  if (useKm) return s.dkm<1 ? Math.round(s.dkm*1000)+'m' : s.dkm.toFixed(1)+'km';
-  return s.dmi<0.1 ? Math.round(s.dmi*5280)+'ft' : s.dmi.toFixed(2)+'mi';
-}
-function heatColor(b) {
-  if (b<0.4) return '#22c55e';
-  if (b<0.7) return '#f59e0b';
-  return '#ef4444';
-}
-function typeIcon(t){ return {garage:'🏢',lot:'🅿️',street:'🛣️',ev:'⚡',street_parking:'🛣️'}[t]||'🛣️'; }
-function typeName(t){ return {garage:'Garage',lot:'Parking Lot',street:'Street',ev:'EV Charger',street_parking:'Street Parking'}[t]||'Parking'; }
-function isSaved(id){ return saved.some(s=>s.id===id); }
-
-// ── RENDER LIST ────────────────────────────────
-function renderList() {
-  const list = document.getElementById('resultsList');
-  const empty = document.getElementById('emptyState');
-  list.innerHTML=''; empty.classList.remove('show');
-
-  let f;
-  if (filter==='ev') {
-    f = evSpots;
-  } else if (filter==='street') {
-    f = streetSpots;
-  } else if (filter==='all') {
-    // Merge parking + street spots, sort free first then by distance
-    f = [...spots, ...streetSpots];
-    f.sort((a, b) => {
-      if (a.isFree && !b.isFree) return -1;
-      if (!a.isFree && b.isFree) return 1;
-      return a.dkm - b.dkm;
-    });
-  } else {
-    f = spots;
-    if (filter==='garage') f=spots.filter(s=>s.type==='garage');
-    else if (filter==='lot') f=spots.filter(s=>s.type==='lot');
-    else if (filter==='free') {
-      // Free parking + free street spots, closest first
-      f = [...spots.filter(s=>s.isFree), ...streetSpots.filter(s=>s.isFree)];
-      f.sort((a,b) => a.dkm - b.dkm);
-    }
-    else if (filter==='paid') f=spots.filter(s=>!s.isFree);
-    else if (filter==='nowinter') f=spots.filter(s=>!s.hasWinter);
-  }
-
-  if (!f.length) {
-    empty.classList.add('show');
-    document.getElementById('resultsCount').textContent = '';
-    if (filter === 'street') {
-      document.getElementById('emptyIcon').textContent = '🛣️';
-      document.getElementById('emptyTitle').textContent = 'No street parking data here';
-      document.getElementById('emptyText').textContent = 'OpenStreetMap coverage varies by area. This filter works best in busy downtown neighbourhoods. Try a different filter to find nearby parking.';
-    } else {
-      document.getElementById('emptyIcon').textContent = '🔍';
-      document.getElementById('emptyTitle').textContent = 'No spots found';
-      document.getElementById('emptyText').textContent = 'Try a different filter or check location permissions';
-    }
-    return;
-  }
-
-  // Hide welcome state once results appear
-  document.getElementById('welcomeState').classList.add('hide');
-  document.getElementById('resultsCount').textContent = `${f.length} spot${f.length!==1?'s':''} found`;
-
-  const favs = f.filter(s=>isSaved(s.id));
-  const rest = f.filter(s=>!isSaved(s.id));
-
-  if (favs.length) {
-    const lbl = document.createElement('div');
-    lbl.className='section-lbl'; lbl.textContent='⭐ Saved';
-    list.appendChild(lbl);
-    favs.forEach((s,i)=>list.appendChild(makeCard(s,i)));
-  }
-  if (rest.length) {
-    if (favs.length) {
-      const lbl = document.createElement('div');
-      lbl.className='section-lbl'; lbl.textContent='Nearby';
-      list.appendChild(lbl);
-    }
-    rest.forEach((s,i)=>list.appendChild(makeCard(s, i+favs.length)));
-  }
-}
-
-function makeCard(s, i) {
-  const card = document.createElement('div');
-  card.className = 'spot-card' + (isSaved(s.id)?' fav':'');
-  card.style.animationDelay = i*45+'ms';
-
-  const openBadge = s.open===true ? '<div class="open-badge open">Open</div>'
-    : s.open===false ? '<div class="open-badge closed">Closed</div>'
-    : '<div class="open-badge unknown">—</div>';
-
-  const priceTag = s.isFree
-    ? '<span class="tag free">Free</span>'
-    : `<span class="tag paid">${s.priceLevel?'$'.repeat(s.priceLevel):'Paid'}</span>`;
-
-  const winterTag = s.hasWinter ? '<span class="tag winter">❄️ Restricted</span>' : '';
-
-  card.innerHTML = `
-    <div class="spot-type-badge ${s.type}">${typeIcon(s.type)}</div>
-    <div class="spot-body">
-      <div class="spot-name">${s.name}</div>
-      <div class="spot-tags">
-        <span class="tag dist">${fmtDist(s)}</span>
-        ${priceTag}
-        ${s.rating?`<span class="tag rating">⭐ ${s.rating}</span>`:''}
-        ${winterTag}
-      </div>
-    </div>
-    <div class="spot-right">
-      ${openBadge}
-      <div class="walk-label">${s.walk}m walk</div>
-      <div class="busy-bar" style="background:${heatColor(s.busy)};width:${Math.round(s.busy*36)+14}px"></div>
-      <div class="fav-toggle ${isSaved(s.id)?'on':''}" onclick="toggleSave(event,'${s.id}')">${isSaved(s.id)?'⭐':'☆'}</div>
-    </div>
-  `;
-  card.onclick = e => { if (!e.target.classList.contains('fav-toggle')) openSheet(s); };
-  return card;
-}
-
-// ── SAVE ───────────────────────────────────────
-function toggleSave(e, id) {
-  e.stopPropagation();
-  const s = spots.find(x=>x.id===id);
-  if (!s) return;
-  const idx = saved.findIndex(x=>x.id===id);
-  if (idx>=0) saved.splice(idx,1);
-  else saved.push({id:s.id,name:s.name,address:s.address,lat:s.lat,lon:s.lon,type:s.type});
-  localStorage.setItem('otpf_saved', JSON.stringify(saved));
-  renderList();
-  if (document.getElementById('savedPanel').classList.contains('open')) renderSaved();
-}
-
-function renderSaved() {
-  const el = document.getElementById('savedList');
-  if (!saved.length) { el.innerHTML='<div class="saved-empty">No saved spots yet. Tap ☆ on any result to save it.</div>'; return; }
-  el.innerHTML = saved.map(s=>`
-    <div class="saved-item" onclick="driveToSpot(${s.lat},${s.lon})">
-      <div style="font-size:20px">${typeIcon(s.type)}</div>
-      <div style="flex:1;min-width:0">
-        <div class="saved-item-name">${s.name}</div>
-        <div class="saved-item-addr">${s.address}</div>
-      </div>
-      <div class="del-btn" onclick="event.stopPropagation();deleteSaved('${s.id}')">🗑</div>
-    </div>
-  `).join('');
-}
-function deleteSaved(id) {
-  saved = saved.filter(s=>s.id!==id);
-  localStorage.setItem('otpf_saved',JSON.stringify(saved));
-  renderSaved(); renderList();
-}
-
-// ── MAP ────────────────────────────────────────
-function drawMap() {
-  const canvas = document.getElementById('mapCanvas');
-  const cont = document.getElementById('mapContainer');
-  canvas.width = cont.offsetWidth;
-  canvas.height = cont.offsetHeight;
-  const ctx = canvas.getContext('2d');
-  const W=canvas.width, H=canvas.height;
-
-  ctx.fillStyle='#0b1120'; ctx.fillRect(0,0,W,H);
-
-  // Road grid
-  ctx.strokeStyle='#1c2637'; ctx.lineWidth=10;
-  [0.25,0.5,0.75].forEach(r=>{
-    ctx.beginPath();ctx.moveTo(0,H*r);ctx.lineTo(W,H*r);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(W*r,0);ctx.lineTo(W*r,H);ctx.stroke();
-  });
-
-  if (showHeat && userLat) {
-    spots.forEach(s=>{
-      const scale=1200;
-      const cx=W/2+(s.lon-userLon)*scale;
-      const cy=H/2-(s.lat-userLat)*scale;
-      if (cx<-50||cx>W+50||cy<-50||cy>H+50) return;
-      const r=50;
-      const g=ctx.createRadialGradient(cx,cy,0,cx,cy,r);
-      g.addColorStop(0, heatColor(s.busy)+'66');
-      g.addColorStop(1,'transparent');
-      ctx.fillStyle=g;
-      ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();
-    });
-  }
-
-  // Spot dots
-  spots.forEach(s=>{
-    if (!userLat) return;
-    const scale=1200;
-    const cx=W/2+(s.lon-userLon)*scale;
-    const cy=H/2-(s.lat-userLat)*scale;
-    if (cx<0||cx>W||cy<0||cy>H) return;
-    ctx.beginPath();ctx.arc(cx,cy,7,0,Math.PI*2);
-    ctx.fillStyle=heatColor(s.busy);ctx.fill();
-    ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=1.5;ctx.stroke();
-  });
-
-  // You are here
-  ctx.beginPath();ctx.arc(W/2,H/2,18,0,Math.PI*2);
-  ctx.fillStyle='rgba(59,130,246,0.2)';ctx.fill();
-  ctx.beginPath();ctx.arc(W/2,H/2,8,0,Math.PI*2);
-  ctx.fillStyle='#3b82f6';ctx.fill();
-  ctx.strokeStyle='white';ctx.lineWidth=2;ctx.stroke();
-}
-
-// ── SHEET ──────────────────────────────────────
-function openSheet(s) {
-  const b = document.getElementById('sheetBody');
-  const openChip = s.open===true ? '<div class="schip" style="color:#86efac;border-color:#22c55e33">✅ Open Now</div>'
-    : s.open===false ? '<div class="schip" style="color:#fca5a5;border-color:#ef444433">❌ Closed</div>'
-    : '<div class="schip">🕐 Hours Unknown</div>';
-  const priceChip = s.isFree
-    ? '<div class="schip" style="color:#86efac;border-color:#22c55e33">💚 Free Parking</div>'
-    : `<div class="schip" style="color:#fcd34d;border-color:#f59e0b33">💳 ${s.priceLevel?'$'.repeat(s.priceLevel)+'/hr est.':'Paid'}</div>`;
-  const winterChip = s.hasWinter ? '<div class="schip" style="color:#7dd3fc;border-color:#3b82f633">❄️ Winter Restrictions</div>' : '';
-  const busyChip = `<div class="schip">${s.busy<0.4?'🟢 Usually easy':s.busy<0.7?'🟡 Moderate traffic':'🔴 Often busy'}</div>`;
-
-  b.innerHTML = `
-    <div class="sheet-header">
-      <div class="sheet-icon-wrap ${s.type}">${typeIcon(s.type)}</div>
-      <div class="sheet-title-block">
-        <div class="sheet-name">${s.name}</div>
-        <div class="sheet-addr">📍 ${s.address}</div>
-      </div>
-    </div>
-    <div class="sheet-stats">
-      <div class="sstat">
-        <div class="sstat-val" style="color:#60a5fa">${fmtDist(s)}</div>
-        <div class="sstat-lbl">Distance</div>
-      </div>
-      <div class="sstat">
-        <div class="sstat-val" style="color:#5eead4">${s.walk}m</div>
-        <div class="sstat-lbl">Walk</div>
-      </div>
-      <div class="sstat">
-        <div class="sstat-val" style="color:#fcd34d">${s.rating||'—'}</div>
-        <div class="sstat-lbl">Rating</div>
-      </div>
-    </div>
-    <div class="sheet-chips">
-      ${openChip}${priceChip}${busyChip}${winterChip}
-      <div class="schip">${typeName(s.type)}</div>
-      ${s.is_street && s.maxStay ? `<div class="schip">⏱ Max stay: ${s.maxStay}</div>` : ''}
-      ${s.is_street && s.isMetered ? `<div class="schip" style="color:#fcd34d">🅿️ Metered</div>` : ''}
-      ${s.is_street && s.isFree && !s.isMetered ? `<div class="schip" style="color:#86efac">💚 Free Street Parking</div>` : ''}
-      ${s.is_ev && s.numPoints ? `<div class="schip">🔌 ${s.numPoints} charge point${s.numPoints>1?'s':''}</div>` : ''}
-      ${s.is_ev && s.connectors && s.connectors.length ? `<div class="schip">🔋 ${s.connectors.join(', ')}</div>` : ''}
-      ${s.is_ev && s.network ? `<div class="schip">🏢 ${s.network}</div>` : ''}
-      ${s.is_ev && s.usageCost ? `<div class="schip">💰 ${s.usageCost}</div>` : ''}
-    </div>
-    <div class="sheet-btns">
-      <button class="sbtn sbtn-primary" onclick="driveToSpot(${s.lat},${s.lon},`${s.name}`)">🧭 Drive There</button>
-      <button class="sbtn sbtn-walk" onclick="walkToSpot(${s.lat},${s.lon},`${s.name}`)">🚶 Walk</button>
-      <button class="sbtn sbtn-save" onclick="toggleSave(event,'${s.id}')">${isSaved(s.id)?'⭐':'☆'}</button>
-      <button class="sbtn sbtn-close" onclick="closeSheet()">✕</button>
-    </div>
-    ${(()=>{
-      const op = detectOperator(s.name, s.address);
-      return op ? `<button class="sbtn sbtn-pay" style="background:${op.color}22;border-color:${op.color};color:${op.color}" onclick="openPayment('${s.id}')">
-        ${op.icon} Pay with ${op.name} →
-      </button>` : '';
-    })()}
-  `;
-  document.getElementById('overlay').classList.add('open');
-  document.getElementById('sheet').classList.add('open');
-}
-function closeSheet() {
-  document.getElementById('overlay').classList.remove('open');
-  document.getElementById('sheet').classList.remove('open');
-}
-// ── IN-APP NAVIGATION ─────────────────────────
-let navMap = null, navMode = 'drive', navRouteLayer = null;
-let navDestLat = null, navDestLon = null;
-
-function driveToSpot(lat, lon, name) {
-  closeSheet();
-  openNav(lat, lon, name || 'Parking Spot', 'drive');
-}
-function walkToSpot(lat, lon, name) {
-  closeSheet();
-  openNav(lat, lon, name || 'Parking Spot', 'walk');
-}
-
-function openNav(destLat, destLon, name, mode) {
-  navDestLat = destLat; navDestLon = destLon; navMode = mode || 'drive';
-  document.getElementById('navDestName').textContent = name;
-  document.getElementById('navDestSub').textContent = mode === 'drive' ? 'Driving directions' : 'Walking directions';
-  document.getElementById('navDriveBtn').classList.toggle('active', mode === 'drive');
-  document.getElementById('navWalkBtn').classList.toggle('active', mode === 'walk');
-  document.getElementById('navDirectionsBar').innerHTML = '<div class="nav-loading"><div class="nav-loading-spinner"></div>Calculating route...</div>';
-  document.getElementById('navPanel').classList.add('open');
-
-  setTimeout(() => {
-    if (navMap) { navMap.remove(); navMap = null; }
-    navMap = L.map('navMapDiv', { zoomControl: false, attributionControl: false });
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, subdomains: 'abcd' }).addTo(navMap);
-
-    if (userLat && userLon) {
-      L.marker([userLat, userLon], { icon: L.divIcon({ html: '<div style="width:14px;height:14px;background:#00c2a8;border-radius:50%;border:3px solid white;box-shadow:0 0 10px rgba(0,194,168,0.8)"></div>', iconSize:[14,14], iconAnchor:[7,7], className:'' }) }).addTo(navMap);
-    }
-    L.marker([destLat, destLon], { icon: L.divIcon({ html: '<div style="width:16px;height:16px;background:#ef4444;border-radius:50%;border:3px solid white;box-shadow:0 0 10px rgba(239,68,68,0.8)"></div>', iconSize:[16,16], iconAnchor:[8,8], className:'' }) }).addTo(navMap);
-    navMap.setView(userLat ? [userLat, userLon] : [destLat, destLon], 14);
-    navMap.invalidateSize();
-    fetchRoute(userLat, userLon, destLat, destLon, mode);
-  }, 120);
-}
-
-function setNavMode(mode) {
-  navMode = mode;
-  document.getElementById('navDriveBtn').classList.toggle('active', mode === 'drive');
-  document.getElementById('navWalkBtn').classList.toggle('active', mode === 'walk');
-  document.getElementById('navDestSub').textContent = mode === 'drive' ? 'Driving directions' : 'Walking directions';
-  document.getElementById('navDirectionsBar').innerHTML = '<div class="nav-loading"><div class="nav-loading-spinner"></div>Recalculating...</div>';
-  if (navRouteLayer) { navMap.removeLayer(navRouteLayer); navRouteLayer = null; }
-  fetchRoute(userLat, userLon, navDestLat, navDestLon, mode);
-}
-
-async function fetchRoute(fromLat, fromLon, toLat, toLon, mode) {
-  if (!fromLat || !fromLon) {
-    document.getElementById('navDirectionsBar').innerHTML = '<div class="nav-loading">Enable location for turn-by-turn directions</div>';
-    navMap.setView([toLat, toLon], 15);
-    return;
-  }
-  try {
-    const profile = mode === 'walk' ? 'foot' : 'car';
-    const url = 'https://router.project-osrm.org/route/v1/' + profile + '/' + fromLon + ',' + fromLat + ';' + toLon + ',' + toLat + '?steps=true&geometries=geojson&overview=full';
-    const res = await fetch(url);
-    const data = await res.json();
-    if (!data.routes || !data.routes.length) throw new Error('No route');
-
-    const route = data.routes[0];
-    const coords = route.geometry.coordinates.map(function(c){ return [c[1], c[0]]; });
-    const distKm = (route.distance / 1000).toFixed(1);
-    const durationMin = Math.round(route.duration / 60);
-
-    if (navRouteLayer) navMap.removeLayer(navRouteLayer);
-    navRouteLayer = L.polyline(coords, { color: '#00c2a8', weight: 5, opacity: 0.85 }).addTo(navMap);
-    navMap.fitBounds(navRouteLayer.getBounds().pad(0.15));
-
-    renderDirections(route.legs[0].steps || [], distKm, durationMin, mode);
-  } catch(e) {
-    document.getElementById('navDirectionsBar').innerHTML = '<div class="nav-loading">Could not load route. Check your connection.</div>';
-  }
-}
-
-function renderDirections(steps, distKm, durationMin, mode) {
-  const icons = { 'turn-left':'&#8624;', 'turn-right':'&#8625;', 'turn-slight-left':'&#8598;', 'turn-slight-right':'&#8599;', 'roundabout':'&#8635;', 'rotary':'&#8635;', 'uturn':'&#8617;', 'straight':'&#8679;', 'merge':'&#8679;', 'depart': mode==='walk'?'&#x1F6B6;':'&#x1F697;', 'arrive':'&#x1F3C1;' };
-  const h = Math.floor(durationMin/60), m = durationMin%60;
-  const timeStr = h > 0 ? h+'h '+m+'m' : m+' min';
-
-  let html = '<div class="nav-summary">';
-  html += '<div class="nav-summary-stat"><div class="nav-summary-val">'+timeStr+'</div><div class="nav-summary-lbl">Est. time</div></div>';
-  html += '<div class="nav-summary-stat"><div class="nav-summary-val">'+distKm+'</div><div class="nav-summary-lbl">km</div></div>';
-  html += '<div class="nav-summary-stat"><div class="nav-summary-val">'+steps.length+'</div><div class="nav-summary-lbl">steps</div></div>';
-  html += '</div>';
-
-  steps.forEach(function(step) {
-    if (!step.maneuver) return;
-    const type = step.maneuver.type || 'straight';
-    const modifier = step.maneuver.modifier || '';
-    const key = modifier ? type+'-'+modifier.replace(/ /g,'-') : type;
-    const icon = icons[key] || icons[type] || '&#8679;';
-    const dist = step.distance < 1000 ? Math.round(step.distance)+'m' : (step.distance/1000).toFixed(1)+'km';
-    let text = step.name ? type.replace(/-/g,' ')+' onto '+step.name : type.replace(/-/g,' ');
-    if (type === 'depart') text = step.name ? 'Head towards '+step.name : 'Depart';
-    if (type === 'arrive') text = 'You have arrived';
-    text = text.charAt(0).toUpperCase() + text.slice(1);
-    html += '<div class="nav-step"><div class="nav-step-icon">'+icon+'</div><div class="nav-step-text">'+text+'</div><div class="nav-step-dist">'+dist+'</div></div>';
-  });
-
-  document.getElementById('navDirectionsBar').innerHTML = html;
-}
-
-function closeNav() {
-  document.getElementById('navPanel').classList.remove('open');
-  if (navMap) { navMap.remove(); navMap = null; }
-}
-
-// ── VOICE ──────────────────────────────────────
-function toast(msg) {
-  const t = document.getElementById('voiceToast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(t._timer);
-  t._timer = setTimeout(() => t.classList.remove('show'), 2800);
-}
-
-function startVoice() {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) {
-    toast('❌ Voice not supported in this browser. Try Chrome or Safari.');
-    return;
-  }
-
-  // If already listening, stop
-  if (recog) {
-    recog.stop();
-    recog = null;
-    document.getElementById('voiceBtn').classList.remove('listening');
-    return;
-  }
-
-  recog = new SR();
-  recog.continuous = false;
-  recog.interimResults = false;
-  recog.lang = 'en-US';
-  recog.maxAlternatives = 3;
-
-  document.getElementById('voiceBtn').classList.add('listening');
-  toast('🎙️ Listening… speak now');
-
-  recog.onresult = (e) => {
-    const cmd = e.results[0][0].transcript.toLowerCase().trim();
-    toast(`"${cmd}"`);
-    handleCmd(cmd);
-  };
-
-  recog.onerror = (e) => {
-    document.getElementById('voiceBtn').classList.remove('listening');
-    recog = null;
-    if (e.error === 'not-allowed') {
-      toast('❌ Microphone blocked — allow mic in browser settings');
-    } else if (e.error === 'no-speech') {
-      toast('❌ No speech detected. Try again.');
-    } else {
-      toast('❌ Voice error: ' + e.error);
-    }
-  };
-
-  recog.onend = () => {
-    document.getElementById('voiceBtn').classList.remove('listening');
-    recog = null;
-  };
-
-  // Start with a slight delay to ensure UI updates first
-  setTimeout(() => {
-    try { recog.start(); }
-    catch(e) { toast('❌ Could not start mic. Try again.'); recog = null; }
-  }, 100);
-}
-
-function handleCmd(cmd) {
-  if (/find|search|parking|park/.test(cmd)) {
-    findParking();
-    toast('✅ Searching for parking…');
-  } else if (/free/.test(cmd)) {
-    setChip(document.querySelectorAll('.chip')[3], 'free');
-    toast('✅ Showing free spots');
-  } else if (/paid|meter|cost/.test(cmd)) {
-    setChip(document.querySelectorAll('.chip')[4], 'paid');
-    toast('✅ Showing paid spots');
-  } else if (/map/.test(cmd)) {
-    setView('map'); toast('✅ Map view');
-  } else if (/list/.test(cmd)) {
-    setView('list'); toast('✅ List view');
-  } else if (/nearest|closest|first/.test(cmd)) {
-    if (spots.length) openSheet(spots[0]);
-    else toast('❌ No spots loaded yet');
-  } else if (/navigate|drive|direction/.test(cmd)) {
-    if (spots.length) driveToSpot(spots[0].lat, spots[0].lon);
-    else toast('❌ No spots loaded yet');
-  } else if (/walk/.test(cmd)) {
-    if (spots.length) walkToSpot(spots[0].lat, spots[0].lon);
-    else toast('❌ No spots loaded yet');
-  } else if (/km|kilomet/.test(cmd)) {
-    setUnit('km'); toast('✅ Switched to kilometres');
-  } else if (/mile/.test(cmd)) {
-    setUnit('mi'); toast('✅ Switched to miles');
-  } else if (/save|star|favourite/.test(cmd)) {
-    if (spots.length) { toggleSave({stopPropagation:()=>{}}, spots[0].id); toast('✅ Saved nearest spot'); }
-    else toast('❌ No spots loaded yet');
-  } else if (/winter|snow/.test(cmd)) {
-    togglePanel('winterPanel','winHBtn'); toast('✅ Winter panel toggled');
-  } else if (/help|tutorial/.test(cmd)) {
-    showTut();
-  } else {
-    toast('🤷 Try: "find parking", "show free", "navigate", "show map", "save nearest"');
-  }
-}
-</script>
-
-<!-- IN-APP NAVIGATION PANEL -->
 <div class="nav-panel" id="navPanel">
   <div class="nav-panel-header">
     <div class="nav-back-btn" onclick="closeNav()">&#8592;</div>
@@ -2413,25 +411,511 @@ function handleCmd(cmd) {
   </div>
   <div id="navMapDiv"></div>
   <div class="nav-directions-bar" id="navDirectionsBar">
-    <div class="nav-loading">
-      <div class="nav-loading-spinner"></div>
-      Calculating route...
-    </div>
+    <div class="nav-loading"><div class="nav-loading-spinner"></div>Calculating route...</div>
   </div>
 </div>
 
-<!-- BOTTOM NAV -->
 <nav class="bottom-nav">
-  <a class="nav-item active" href="index.html">
-    <div class="nav-icon">🅿️</div>
-    <div class="nav-label">Parking</div>
-  </a>
+  <a class="nav-item active" href="index.html"><div class="nav-icon">🅿️</div><div class="nav-label">Parking</div></a>
   <div class="nav-divider"></div>
-  <a class="nav-item" href="ev-planner.html">
-    <div class="nav-icon">⚡</div>
-    <div class="nav-label">EV Planner</div>
-  </a>
+  <a class="nav-item" href="ev-planner.html"><div class="nav-icon">⚡</div><div class="nav-label">EV Planner</div></a>
 </nav>
 
+<script>
+const BACKEND = 'https://one-touch-parking-finder-backend.vercel.app';
+
+// STATE
+let spots = [], evSpots = [], streetSpots = [];
+let userLat = null, userLon = null;
+let filter = 'all', view = 'list', useKm = true, showHeat = true;
+let saved = JSON.parse(localStorage.getItem('otpf_saved') || '[]');
+let lowBatt = false, recog = null, autoRefreshTimer = null;
+const AUTO_REFRESH_MS = 3 * 60 * 1000;
+
+// WELCOME MAP
+window.addEventListener('load', loadWelcomeMap);
+function loadWelcomeMap() {
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(pos => {
+    const lat = pos.coords.latitude, lon = pos.coords.longitude;
+    userLat = lat; userLon = lon;
+    if (!localStorage.getItem('otpf_unit')) setUnit(isCanada(lat, lon) ? 'km' : 'mi');
+    document.getElementById('welcomeMapLoading').style.display = 'none';
+    const mapDiv = document.getElementById('welcomeMapDiv');
+    mapDiv.style.display = 'block';
+    const wMap = L.map('welcomeMapDiv', { center:[lat,lon], zoom:15, zoomControl:false, attributionControl:false, dragging:false, scrollWheelZoom:false, doubleClickZoom:false, touchZoom:false, tap:false, keyboard:false, boxZoom:false });
+    wMap.getContainer().style.pointerEvents = 'none';
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom:19, subdomains:'abcd' }).addTo(wMap);
+    L.marker([lat,lon], { icon: L.divIcon({ html:'<div style="width:18px;height:18px;background:#00c2a8;border-radius:50%;border:3px solid white;box-shadow:0 0 14px rgba(0,194,168,0.9)"></div>', iconSize:[18,18], iconAnchor:[9,9], className:'' }) }).addTo(wMap);
+    setTimeout(() => wMap.invalidateSize(), 100);
+  }, () => {
+    const lbl = document.querySelector('.welcome-locating');
+    if (lbl) lbl.textContent = 'Allow location for live map';
+  }, { enableHighAccuracy:true, timeout:8000, maximumAge:30000 });
+}
+
+// AUTO REFRESH
+function startAutoRefresh() {
+  clearInterval(autoRefreshTimer);
+  autoRefreshTimer = setInterval(() => {
+    if (userLat && userLon && spots.length > 0) {
+      Promise.all([doFetch(userLat,userLon), fetchEV(userLat,userLon), fetchStreet(userLat,userLon)])
+        .then(() => { renderList(); setStatus('Refreshed just now','ok'); });
+    }
+  }, AUTO_REFRESH_MS);
+}
+
+// PULL TO REFRESH
+(function(){
+  let startY=0, pulling=false, triggered=false;
+  document.addEventListener('touchstart', e => { if(window.scrollY===0){startY=e.touches[0].clientY;pulling=true;triggered=false;} }, {passive:true});
+  document.addEventListener('touchmove', e => {
+    if(!pulling) return;
+    const dy=e.touches[0].clientY-startY;
+    if(dy>10 && window.scrollY===0){
+      const ind=document.getElementById('ptrIndicator'), txt=document.getElementById('ptrText');
+      ind.classList.add('show');
+      txt.textContent = dy>80 ? '↑ Release to refresh' : '↓ Pull to refresh';
+    }
+  }, {passive:true});
+  document.addEventListener('touchend', e => {
+    if(!pulling) return;
+    pulling=false;
+    const dy=e.changedTouches[0].clientY-startY;
+    const ind=document.getElementById('ptrIndicator'), txt=document.getElementById('ptrText');
+    if(dy>80 && userLat && userLon && !triggered){
+      triggered=true;
+      ind.classList.add('show','refreshing');
+      txt.textContent='Refreshing…';
+      Promise.all([doFetch(userLat,userLon),fetchEV(userLat,userLon),fetchStreet(userLat,userLon)])
+        .then(()=>{ renderList(); ind.classList.remove('show','refreshing'); txt.textContent='↓ Pull to refresh'; setStatus('Refreshed just now','ok'); });
+    } else { setTimeout(()=>ind.classList.remove('show'),300); }
+  }, {passive:true});
+})();
+
+// MENU
+function toggleMenu() {
+  const btn=document.getElementById('menuBtn'), dd=document.getElementById('dropdown');
+  btn.classList.toggle('open', dd.classList.toggle('open'));
+}
+function closeMenu() {
+  document.getElementById('dropdown').classList.remove('open');
+  document.getElementById('menuBtn').classList.remove('open');
+}
+document.addEventListener('click', e => { if(!document.getElementById('menuBtn').contains(e.target)) closeMenu(); });
+
+// PAYMENT OPERATORS
+const OPERATORS = [
+  {keywords:['green p','greenp','toronto parking authority','tpa'],name:'Green P',icon:'🟢',fallback:'https://parking.greenp.com',color:'#22c55e'},
+  {keywords:['paybyphone','pay by phone','pbp'],name:'PayByPhone',icon:'📱',fallback:'https://m.paybyphone.com',color:'#0ea5e9'},
+  {keywords:['honk','honkmobile'],name:'HonkMobile',icon:'📳',fallback:'https://www.honkmobile.com/pay',color:'#f59e0b'},
+  {keywords:['parkwhiz'],name:'ParkWhiz',icon:'🅿️',fallback:'https://www.parkwhiz.com',color:'#3b82f6'},
+  {keywords:['spothero'],name:'SpotHero',icon:'🦸',fallback:'https://spothero.com',color:'#ef4444'},
+  {keywords:['impark','imperial parking'],name:'Impark',icon:'🅿️',fallback:'https://www.impark.com',color:'#8b5cf6'},
+  {keywords:['indigo','laz parking'],name:'Indigo',icon:'🟣',fallback:'https://www.indigoneo.com',color:'#a855f7'},
+  {keywords:['sp+','sp plus','standard parking'],name:'SP+',icon:'🅿️',fallback:'https://www.spplus.com',color:'#64748b'},
+  {keywords:['parknow','easypark','park now'],name:'EasyPark',icon:'🅿️',fallback:'https://easypark.net',color:'#06b6d4'},
+  {keywords:['precise','parklink'],name:'Precise ParkLink',icon:'🅿️',fallback:'https://www.preciseparklink.com',color:'#64748b'},
+];
+function detectOperator(name, addr) {
+  const text = (name+' '+addr).toLowerCase();
+  return OPERATORS.find(op => op.keywords.some(k => text.includes(k))) || null;
+}
+function openPayment(spotId) {
+  const spot = [...spots,...streetSpots,...evSpots].find(s=>s.id===spotId);
+  if(!spot) return;
+  const op = detectOperator(spot.name, spot.address);
+  if(!op){ toast('No payment app detected for this spot'); return; }
+  const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+  let url = op.fallback;
+  if(op.name==='Green P') url = isIOS ? 'greenparkingapp://map?lat='+spot.lat+'&lon='+spot.lon : 'https://parking.greenp.com/map/?lat='+spot.lat+'&lng='+spot.lon;
+  else if(op.name==='PayByPhone') url = 'https://m.paybyphone.com/parking';
+  else if(op.name==='HonkMobile') url = isIOS ? 'honkmobile://pay' : op.fallback;
+  else if(op.name==='EasyPark') url = isIOS ? 'easypark://pay' : op.fallback;
+  window.open(url,'_blank');
+}
+
+// TUTORIAL
+const tutSteps = [
+  {icon:'🅿️',title:'One Touch Parking Finder',text:'Find real nearby parking and EV charging stations in one tap — anywhere, on any device.'},
+  {icon:'📍',title:'One-Tap Location',text:'Hit the big P button — your GPS location is found instantly and nearby spots appear.'},
+  {icon:'🧭',title:'In-App Navigation',text:'Tap any spot then Drive There or Walk for full turn-by-turn directions without leaving the app.'},
+  {icon:'⚡',title:'EV Charging Stations',text:'Tap the EV Charging filter to find nearby chargers — shows charge points, connector types, and availability.'},
+  {icon:'⭐',title:'Save Favourites',text:'Tap the star on any spot to save it. Your saved spots always appear first in the list.'},
+  {icon:'🎙️',title:'Voice Commands',text:'Tap the mic and say: "find parking", "show free", "EV charging", "navigate", or "show map".'},
+  {icon:'❄️',title:'Winter Restrictions',text:'Open the menu to see snow plow routes and winter parking restrictions for your area.'},
+  {icon:'⬡',title:'Heatmap View',text:'Switch to map view to see a busyness heatmap — green means easy to park, red means busy.'},
+];
+let tutIdx=0;
+function showTut(){ tutIdx=0; renderTut(); document.getElementById('tutOverlay').classList.add('show'); }
+function renderTut(){
+  const s=tutSteps[tutIdx];
+  document.getElementById('tutIcon').textContent=s.icon;
+  document.getElementById('tutTitle').textContent=s.title;
+  document.getElementById('tutText').textContent=s.text;
+  document.getElementById('tutNextBtn').textContent=tutIdx<tutSteps.length-1?'Next →':"Let's go!";
+  document.getElementById('tutDots').innerHTML=tutSteps.map((_,i)=>'<div class="tut-dot '+(i===tutIdx?'on':'')+'"></div>').join('');
+}
+function nextTut(){ if(++tutIdx>=tutSteps.length){closeTut();return;} renderTut(); }
+function closeTut(){ document.getElementById('tutOverlay').classList.remove('show'); localStorage.setItem('otpf_tut','1'); }
+if(!localStorage.getItem('otpf_tut')) setTimeout(showTut,700);
+
+// BATTERY
+(async()=>{
+  if(!('getBattery' in navigator)) return;
+  const b=await navigator.getBattery();
+  const upd=()=>{
+    const pct=Math.round(b.level*100); lowBatt=pct<=20&&!b.charging;
+    const el=document.getElementById('battBadge');
+    document.body.classList.toggle('low-battery',lowBatt);
+    if(pct<=40){el.textContent=(b.charging?'⚡':'🪫')+' '+pct+'%';el.className='battery-badge show'+(lowBatt?' low':'');}
+    else{el.className='battery-badge';}
+  };
+  upd(); b.addEventListener('levelchange',upd); b.addEventListener('chargingchange',upd);
+})();
+
+// UNIT
+function setUnit(u){
+  useKm=u==='km';
+  document.getElementById('kmBtn').classList.toggle('active',useKm);
+  document.getElementById('miBtn').classList.toggle('active',!useKm);
+  localStorage.setItem('otpf_unit',u);
+  renderList();
+}
+function isCanada(lat,lon){ return lat>41.7&&lat<83.2&&lon>-141.1&&lon<-52.3; }
+setUnit(localStorage.getItem('otpf_unit')||'km');
+
+// STATUS
+function setStatus(msg,t){
+  document.getElementById('statusText').textContent=msg;
+  document.getElementById('statusDot').className='status-dot'+(t?' '+t:'');
+}
+
+// PANELS
+function togglePanel(panelId,btnId){
+  const panel=document.getElementById(panelId);
+  const isOpen=panel.classList.toggle('open');
+  if(btnId) document.getElementById(btnId).classList.toggle('on',isOpen);
+  if(panelId==='savedPanel'&&isOpen) renderSaved();
+  if(panelId==='winterPanel'&&isOpen&&userLat) renderWinter();
+}
+function renderWinter(){
+  const canada=isCanada(userLat,userLon), mo=new Date().getMonth(), winter=mo<=2||mo>=10;
+  let html='';
+  if(canada&&winter) html='<strong>❄️ Winter restrictions are likely active.</strong><br><br>Snow emergency routes in most Canadian cities prohibit parking during and after snowfall. Check your city\'s website for specific streets and times.';
+  else if(canada) html='<strong>✅ Off-season</strong> — no active winter restrictions expected. Still check local permit zones and time limits.';
+  else html='Check your local municipality for winter parking bylaws. Snow emergency routes are typically enforced during and 24–48 hrs after snowfall.';
+  document.getElementById('winterBox').innerHTML=html;
+}
+
+// FILTER / VIEW
+function setChip(el,f){
+  document.querySelectorAll('.chip').forEach(c=>{ c.className='chip'; });
+  const m={all:'chip active',garage:'chip active',lot:'chip active',free:'chip active-green',street:'chip active-amber',ev:'chip active-purple',nowinter:'chip active-blue'};
+  el.className=m[f]||'chip active';
+  filter=f; renderList();
+  if(f==='ev'&&userLat&&evSpots.length===0) fetchEV(userLat,userLon).then(renderList);
+  if(f==='street'&&userLat&&streetSpots.length===0) fetchStreet(userLat,userLon).then(renderList);
+}
+function setView(v){
+  view=v;
+  document.getElementById('listVBtn').classList.toggle('active',v==='list');
+  document.getElementById('mapVBtn').classList.toggle('active',v==='map');
+  document.getElementById('mapContainer').classList.toggle('show',v==='map');
+  if(v==='map'&&spots.length) setTimeout(drawMap,50);
+}
+function toggleHeat(){ showHeat=!showHeat; document.querySelector('.map-btn').textContent='🌡 Heat: '+(showHeat?'ON':'OFF'); drawMap(); }
+
+// FIND PARKING
+function findParking(){
+  const btn=document.getElementById('findBtn');
+  document.getElementById('findLabel').textContent='Locating…';
+  btn.classList.add('loading');
+  setStatus('Getting your location…');
+  if(!navigator.geolocation){ setStatus('Geolocation not supported','err'); btn.classList.remove('loading'); return; }
+  navigator.geolocation.getCurrentPosition(pos=>{
+    userLat=pos.coords.latitude; userLon=pos.coords.longitude;
+    if(!localStorage.getItem('otpf_unit')) setUnit(isCanada(userLat,userLon)?'km':'mi');
+    setStatus('Found you! Searching…','ok');
+    Promise.all([doFetch(userLat,userLon), fetchEV(userLat,userLon), fetchStreet(userLat,userLon)])
+      .then(()=>{
+        btn.classList.remove('loading');
+        document.getElementById('findLabel').textContent='Refresh';
+        renderList();
+        if(view==='map') setTimeout(drawMap,50);
+        setStatus('Found '+spots.length+' parking · '+streetSpots.length+' street · '+evSpots.length+' EV nearby','ok');
+        startAutoRefresh();
+      }).catch(()=>{
+        btn.classList.remove('loading');
+        document.getElementById('findLabel').textContent='Find Parking';
+        setStatus('Something went wrong. Try again.','err');
+      });
+  }, err=>{
+    btn.classList.remove('loading');
+    document.getElementById('findLabel').textContent='Find Parking';
+    setStatus(err.code===1?'Location blocked — allow access in browser settings':'Location failed. Try again.','err');
+  }, {enableHighAccuracy:true,timeout:10000,maximumAge:0});
+}
+
+// FETCH FUNCTIONS
+async function doFetch(lat,lon){
+  try{
+    const res=await fetch(BACKEND+'/api/parking?lat='+lat+'&lon='+lon);
+    const data=await res.json();
+    if(data.results&&data.results.length>0){
+      spots=data.results.map(p=>{
+        const pLat=p.geometry.location.lat, pLon=p.geometry.location.lng, dkm=distKm(lat,lon,pLat,pLon);
+        return {id:p.place_id,name:p.name,address:p.vicinity||'',lat:pLat,lon:pLon,dkm,dmi:dkm*0.621371,walk:Math.round(dkm*1000/80),type:inferType(p.name),open:p.opening_hours?p.opening_hours.open_now:null,rating:p.rating||null,isFree:p.price_level===0||(p.name||'').toLowerCase().includes('free'),priceLevel:p.price_level||null,hasWinter:Math.random()>0.55,busy:Math.random()};
+      }).sort((a,b)=>a.dkm-b.dkm);
+    } else { spots=[]; }
+  } catch(e){ spots=[]; }
+}
+
+async function fetchEV(lat,lon){
+  try{
+    const res=await fetch(BACKEND+'/api/parking?lat='+lat+'&lon='+lon+'&type=ev');
+    const data=await res.json();
+    if(data.results&&data.results.length>0){
+      evSpots=data.results.map(p=>{
+        const pLat=p.geometry.location.lat, pLon=p.geometry.location.lng, dkm=distKm(lat,lon,pLat,pLon);
+        return {id:p.place_id,name:p.name,address:p.vicinity||'',lat:pLat,lon:pLon,dkm,dmi:dkm*0.621371,walk:Math.round(dkm*1000/80),type:'ev',open:p.opening_hours?p.opening_hours.open_now:null,rating:null,isFree:false,numPoints:p.num_points||1,connectors:p.connectors||[],network:p.network||null,usageCost:p.usage_cost||null,hasWinter:false,busy:Math.random()*0.5,is_ev:true};
+      }).sort((a,b)=>a.dkm-b.dkm);
+    } else { evSpots=[]; }
+  } catch(e){ evSpots=[]; }
+}
+
+async function fetchStreet(lat,lon){
+  try{
+    const res=await fetch(BACKEND+'/api/parking?lat='+lat+'&lon='+lon+'&type=street');
+    const data=await res.json();
+    if(data.results&&data.results.length>0){
+      streetSpots=data.results.map(p=>{
+        const pLat=p.geometry.location.lat, pLon=p.geometry.location.lng, dkm=distKm(lat,lon,pLat,pLon);
+        return {id:p.place_id,name:p.name||'Street Parking',address:p.vicinity||'',lat:pLat,lon:pLon,dkm,dmi:dkm*0.621371,walk:Math.round(dkm*1000/80),type:'street_parking',open:true,rating:null,isFree:p.is_free||!p.is_metered,isMetered:p.is_metered||false,maxStay:p.max_stay||null,parkingType:p.parking_type||'street',hasWinter:false,busy:Math.random()*0.5,is_street:true};
+      }).sort((a,b)=>a.dkm-b.dkm);
+    } else { streetSpots=[]; }
+  } catch(e){ streetSpots=[]; }
+}
+
+// HELPERS
+function inferType(n){ const l=(n||'').toLowerCase(); return(l.includes('garage')||l.includes('parkade')||l.includes('deck'))?'garage':'lot'; }
+function distKm(a,b,c,d){ const R=6371,dL=(c-a)*Math.PI/180,dG=(d-b)*Math.PI/180,x=Math.sin(dL/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dG/2)**2; return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x)); }
+function fmtDist(s){ return useKm?(s.dkm<1?Math.round(s.dkm*1000)+'m':s.dkm.toFixed(1)+'km'):(s.dmi<0.1?Math.round(s.dmi*5280)+'ft':s.dmi.toFixed(2)+'mi'); }
+function heatColor(b){ return b<0.4?'#22c55e':b<0.7?'#f59e0b':'#ef4444'; }
+function typeIcon(t){ return {garage:'🏢',lot:'🅿️',street:'🛣️',ev:'⚡',street_parking:'🛣️'}[t]||'🅿️'; }
+function typeName(t){ return {garage:'Garage',lot:'Parking Lot',street:'Street',ev:'EV Charger',street_parking:'Street Parking'}[t]||'Parking'; }
+function isSaved(id){ return saved.some(s=>s.id===id); }
+
+// RENDER LIST
+function renderList(){
+  const list=document.getElementById('resultsList'), empty=document.getElementById('emptyState');
+  list.innerHTML=''; empty.classList.remove('show');
+  let f;
+  if(filter==='ev') f=evSpots;
+  else if(filter==='street') f=streetSpots;
+  else if(filter==='all'){ f=[...spots,...streetSpots]; f.sort((a,b)=>{ if(a.isFree&&!b.isFree)return -1; if(!a.isFree&&b.isFree)return 1; return a.dkm-b.dkm; }); }
+  else if(filter==='garage') f=spots.filter(s=>s.type==='garage');
+  else if(filter==='lot') f=spots.filter(s=>s.type==='lot');
+  else if(filter==='free'){ f=[...spots.filter(s=>s.isFree),...streetSpots.filter(s=>s.isFree)]; f.sort((a,b)=>a.dkm-b.dkm); }
+  else if(filter==='nowinter') f=spots.filter(s=>!s.hasWinter);
+  else f=spots;
+
+  if(!f.length){
+    empty.classList.add('show');
+    document.getElementById('resultsCount').textContent='';
+    if(filter==='street'){
+      document.getElementById('emptyIcon').textContent='🛣️';
+      document.getElementById('emptyTitle').textContent='No street parking data here';
+      document.getElementById('emptyText').textContent='OpenStreetMap coverage varies by area. Works best in busy downtown neighbourhoods.';
+    } else {
+      document.getElementById('emptyIcon').textContent='🔍';
+      document.getElementById('emptyTitle').textContent='No spots found';
+      document.getElementById('emptyText').textContent='Try a different filter or check location permissions';
+    }
+    return;
+  }
+  document.getElementById('welcomeState').classList.add('hide');
+  document.getElementById('resultsCount').textContent=f.length+' spot'+(f.length!==1?'s':'')+' found';
+  const favs=f.filter(s=>isSaved(s.id)), rest=f.filter(s=>!isSaved(s.id));
+  if(favs.length){ const l=document.createElement('div'); l.className='section-lbl'; l.textContent='⭐ Saved'; list.appendChild(l); favs.forEach((s,i)=>list.appendChild(makeCard(s,i))); }
+  if(rest.length){ if(favs.length){ const l=document.createElement('div'); l.className='section-lbl'; l.textContent='Nearby'; list.appendChild(l); } rest.forEach((s,i)=>list.appendChild(makeCard(s,i+favs.length))); }
+}
+
+function makeCard(s,i){
+  const card=document.createElement('div');
+  card.className='spot-card'+(isSaved(s.id)?' fav':'');
+  card.style.animationDelay=i*45+'ms';
+  const openBadge=s.open===true?'<div class="open-badge open">Open</div>':s.open===false?'<div class="open-badge closed">Closed</div>':'<div class="open-badge unknown">—</div>';
+  const priceTag=s.isFree?'<span class="tag free">Free</span>':'<span class="tag paid">'+(s.priceLevel?'$'.repeat(s.priceLevel):'Paid')+'</span>';
+  const winterTag=s.hasWinter?'<span class="tag winter">❄️ Restricted</span>':'';
+  card.innerHTML='<div class="spot-type-badge '+s.type+'">'+typeIcon(s.type)+'</div><div class="spot-body"><div class="spot-name">'+s.name+'</div><div class="spot-tags"><span class="tag dist">'+fmtDist(s)+'</span>'+priceTag+(s.rating?'<span class="tag rating">⭐ '+s.rating+'</span>':'')+winterTag+'</div></div><div class="spot-right">'+openBadge+'<div class="walk-label">'+s.walk+'m walk</div><div class="busy-bar" style="background:'+heatColor(s.busy)+';width:'+(Math.round(s.busy*36)+14)+'px"></div><div class="fav-toggle '+(isSaved(s.id)?'on':'')+'" onclick="toggleSave(event,\''+s.id+'\')">'+(isSaved(s.id)?'⭐':'☆')+'</div></div>';
+  card.onclick=e=>{ if(!e.target.classList.contains('fav-toggle')) openSheet(s); };
+  return card;
+}
+
+// SAVE
+function toggleSave(e,id){
+  e.stopPropagation();
+  const s=[...spots,...streetSpots,...evSpots].find(x=>x.id===id);
+  if(!s) return;
+  const idx=saved.findIndex(x=>x.id===id);
+  if(idx>=0) saved.splice(idx,1);
+  else saved.push({id:s.id,name:s.name,address:s.address,lat:s.lat,lon:s.lon,type:s.type});
+  localStorage.setItem('otpf_saved',JSON.stringify(saved));
+  renderList();
+  if(document.getElementById('savedPanel').classList.contains('open')) renderSaved();
+}
+function renderSaved(){
+  const el=document.getElementById('savedList');
+  if(!saved.length){ el.innerHTML='<div class="saved-empty">No saved spots yet. Tap ☆ on any result to save it.</div>'; return; }
+  el.innerHTML=saved.map(s=>'<div class="saved-item" onclick="driveToSpot('+s.lat+','+s.lon+')"><div style="font-size:20px">'+typeIcon(s.type)+'</div><div style="flex:1;min-width:0"><div class="saved-item-name">'+s.name+'</div><div class="saved-item-addr">'+s.address+'</div></div><div class="del-btn" onclick="event.stopPropagation();deleteSaved(\''+s.id+'\')">🗑</div></div>').join('');
+}
+function deleteSaved(id){ saved=saved.filter(s=>s.id!==id); localStorage.setItem('otpf_saved',JSON.stringify(saved)); renderSaved(); renderList(); }
+
+// MAP
+function drawMap(){
+  const canvas=document.getElementById('mapCanvas'), cont=document.getElementById('mapContainer');
+  canvas.width=cont.offsetWidth; canvas.height=cont.offsetHeight;
+  const ctx=canvas.getContext('2d'), W=canvas.width, H=canvas.height;
+  ctx.fillStyle='#0b1120'; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#1c2637'; ctx.lineWidth=10;
+  [0.25,0.5,0.75].forEach(r=>{ ctx.beginPath(); ctx.moveTo(0,H*r); ctx.lineTo(W,H*r); ctx.stroke(); ctx.beginPath(); ctx.moveTo(W*r,0); ctx.lineTo(W*r,H); ctx.stroke(); });
+  if(showHeat&&userLat){ spots.forEach(s=>{ const sc=1200,cx=W/2+(s.lon-userLon)*sc,cy=H/2-(s.lat-userLat)*sc; if(cx<-50||cx>W+50||cy<-50||cy>H+50)return; const g=ctx.createRadialGradient(cx,cy,0,cx,cy,50); g.addColorStop(0,heatColor(s.busy)+'66'); g.addColorStop(1,'transparent'); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(cx,cy,50,0,Math.PI*2); ctx.fill(); }); }
+  spots.forEach(s=>{ if(!userLat)return; const sc=1200,cx=W/2+(s.lon-userLon)*sc,cy=H/2-(s.lat-userLat)*sc; if(cx<0||cx>W||cy<0||cy>H)return; ctx.beginPath(); ctx.arc(cx,cy,7,0,Math.PI*2); ctx.fillStyle=heatColor(s.busy); ctx.fill(); ctx.strokeStyle='rgba(255,255,255,0.3)'; ctx.lineWidth=1.5; ctx.stroke(); });
+  ctx.beginPath(); ctx.arc(W/2,H/2,18,0,Math.PI*2); ctx.fillStyle='rgba(59,130,246,0.2)'; ctx.fill();
+  ctx.beginPath(); ctx.arc(W/2,H/2,8,0,Math.PI*2); ctx.fillStyle='#3b82f6'; ctx.fill(); ctx.strokeStyle='white'; ctx.lineWidth=2; ctx.stroke();
+}
+
+// SHEET
+function openSheet(s){
+  const b=document.getElementById('sheetBody');
+  const openChip=s.open===true?'<div class="schip" style="color:#86efac;border-color:#22c55e33">✅ Open Now</div>':s.open===false?'<div class="schip" style="color:#fca5a5;border-color:#ef444433">❌ Closed</div>':'<div class="schip">🕐 Hours Unknown</div>';
+  const priceChip=s.isFree?'<div class="schip" style="color:#86efac;border-color:#22c55e33">💚 Free Parking</div>':'<div class="schip" style="color:#fcd34d;border-color:#f59e0b33">💳 '+(s.priceLevel?'$'.repeat(s.priceLevel)+'/hr est.':'Paid')+'</div>';
+  const winterChip=s.hasWinter?'<div class="schip" style="color:#7dd3fc;border-color:#3b82f633">❄️ Winter Restrictions</div>':'';
+  const busyChip='<div class="schip">'+(s.busy<0.4?'🟢 Usually easy':s.busy<0.7?'🟡 Moderate traffic':'🔴 Often busy')+'</div>';
+  const op=detectOperator(s.name,s.address);
+  const payBtn=op?'<button class="sbtn-pay" style="border-color:'+op.color+';color:'+op.color+';background:'+op.color+'22" onclick="openPayment(\''+s.id+'\')">'+op.icon+' Pay with '+op.name+' →</button>':'';
+
+  b.innerHTML='<div class="sheet-header"><div class="sheet-icon-wrap '+s.type+'">'+typeIcon(s.type)+'</div><div class="sheet-title-block"><div class="sheet-name">'+s.name+'</div><div class="sheet-addr">📍 '+s.address+'</div></div></div>'
+    +'<div class="sheet-stats"><div class="sstat"><div class="sstat-val" style="color:#60a5fa">'+fmtDist(s)+'</div><div class="sstat-lbl">Distance</div></div><div class="sstat"><div class="sstat-val" style="color:#5eead4">'+s.walk+'m</div><div class="sstat-lbl">Walk</div></div><div class="sstat"><div class="sstat-val" style="color:#fcd34d">'+(s.rating||'—')+'</div><div class="sstat-lbl">Rating</div></div></div>'
+    +'<div class="sheet-chips">'+openChip+priceChip+busyChip+winterChip+'<div class="schip">'+typeName(s.type)+'</div>'
+    +(s.is_street&&s.maxStay?'<div class="schip">⏱ Max stay: '+s.maxStay+'</div>':'')
+    +(s.is_street&&s.isMetered?'<div class="schip" style="color:#fcd34d">🅿️ Metered</div>':'')
+    +(s.is_street&&s.isFree&&!s.isMetered?'<div class="schip" style="color:#86efac">💚 Free Street Parking</div>':'')
+    +(s.is_ev&&s.numPoints?'<div class="schip">🔌 '+s.numPoints+' charge point'+(s.numPoints>1?'s':'')+'</div>':'')
+    +(s.is_ev&&s.connectors&&s.connectors.length?'<div class="schip">🔋 '+s.connectors.join(', ')+'</div>':'')
+    +'</div>'
+    +'<div class="sheet-btns">'
+    +'<button class="sbtn sbtn-primary" onclick="driveToSpot('+s.lat+','+s.lon+')">🧭 Drive There</button>'
+    +'<button class="sbtn sbtn-walk" onclick="walkToSpot('+s.lat+','+s.lon+')">🚶 Walk</button>'
+    +'<button class="sbtn sbtn-save" onclick="toggleSave(event,\''+s.id+'\')">'+(isSaved(s.id)?'⭐':'☆')+'</button>'
+    +'<button class="sbtn sbtn-close" onclick="closeSheet()">✕</button>'
+    +'</div>'+payBtn;
+
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('sheet').classList.add('open');
+}
+function closeSheet(){ document.getElementById('overlay').classList.remove('open'); document.getElementById('sheet').classList.remove('open'); }
+
+// IN-APP NAVIGATION
+let navMap=null, navMode='drive', navRouteLayer=null, navDestLat=null, navDestLon=null;
+function driveToSpot(lat,lon){ closeSheet(); openNav(lat,lon,'Parking Spot','drive'); }
+function walkToSpot(lat,lon){ closeSheet(); openNav(lat,lon,'Parking Spot','walk'); }
+function openNav(destLat,destLon,name,mode){
+  navDestLat=destLat; navDestLon=destLon; navMode=mode||'drive';
+  document.getElementById('navDestName').textContent=name;
+  document.getElementById('navDestSub').textContent=mode==='drive'?'Driving directions':'Walking directions';
+  document.getElementById('navDriveBtn').classList.toggle('active',mode==='drive');
+  document.getElementById('navWalkBtn').classList.toggle('active',mode==='walk');
+  document.getElementById('navDirectionsBar').innerHTML='<div class="nav-loading"><div class="nav-loading-spinner"></div>Calculating route...</div>';
+  document.getElementById('navPanel').classList.add('open');
+  setTimeout(()=>{
+    if(navMap){ navMap.remove(); navMap=null; }
+    navMap=L.map('navMapDiv',{zoomControl:false,attributionControl:false});
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd'}).addTo(navMap);
+    if(userLat&&userLon) L.marker([userLat,userLon],{icon:L.divIcon({html:'<div style="width:14px;height:14px;background:#00c2a8;border-radius:50%;border:3px solid white;box-shadow:0 0 10px rgba(0,194,168,0.8)"></div>',iconSize:[14,14],iconAnchor:[7,7],className:''})}).addTo(navMap);
+    L.marker([destLat,destLon],{icon:L.divIcon({html:'<div style="width:16px;height:16px;background:#ef4444;border-radius:50%;border:3px solid white;box-shadow:0 0 10px rgba(239,68,68,0.8)"></div>',iconSize:[16,16],iconAnchor:[8,8],className:''})}).addTo(navMap);
+    navMap.setView(userLat?[userLat,userLon]:[destLat,destLon],14);
+    navMap.invalidateSize();
+    fetchRoute(userLat,userLon,destLat,destLon,mode);
+  },120);
+}
+function setNavMode(mode){
+  navMode=mode;
+  document.getElementById('navDriveBtn').classList.toggle('active',mode==='drive');
+  document.getElementById('navWalkBtn').classList.toggle('active',mode==='walk');
+  document.getElementById('navDestSub').textContent=mode==='drive'?'Driving directions':'Walking directions';
+  document.getElementById('navDirectionsBar').innerHTML='<div class="nav-loading"><div class="nav-loading-spinner"></div>Recalculating...</div>';
+  if(navRouteLayer){ navMap.removeLayer(navRouteLayer); navRouteLayer=null; }
+  fetchRoute(userLat,userLon,navDestLat,navDestLon,mode);
+}
+async function fetchRoute(fromLat,fromLon,toLat,toLon,mode){
+  if(!fromLat||!fromLon){ document.getElementById('navDirectionsBar').innerHTML='<div class="nav-loading">Enable location for turn-by-turn directions</div>'; navMap.setView([toLat,toLon],15); return; }
+  try{
+    const profile=mode==='walk'?'foot':'car';
+    const url='https://router.project-osrm.org/route/v1/'+profile+'/'+fromLon+','+fromLat+';'+toLon+','+toLat+'?steps=true&geometries=geojson&overview=full';
+    const res=await fetch(url);
+    const data=await res.json();
+    if(!data.routes||!data.routes.length) throw new Error('No route');
+    const route=data.routes[0];
+    const coords=route.geometry.coordinates.map(c=>[c[1],c[0]]);
+    const distKmVal=(route.distance/1000).toFixed(1);
+    const durMin=Math.round(route.duration/60);
+    if(navRouteLayer) navMap.removeLayer(navRouteLayer);
+    navRouteLayer=L.polyline(coords,{color:'#00c2a8',weight:5,opacity:0.85}).addTo(navMap);
+    navMap.fitBounds(navRouteLayer.getBounds().pad(0.15));
+    renderDirections(route.legs[0].steps||[],distKmVal,durMin,mode);
+  } catch(e){ document.getElementById('navDirectionsBar').innerHTML='<div class="nav-loading">Could not load route. Check your connection.</div>'; }
+}
+function renderDirections(steps,distKm,durMin,mode){
+  const icons={'turn-left':'&#8624;','turn-right':'&#8625;','turn-slight-left':'&#8598;','turn-slight-right':'&#8599;','roundabout':'&#8635;','rotary':'&#8635;','uturn':'&#8617;','straight':'&#8679;','merge':'&#8679;','depart':mode==='walk'?'&#x1F6B6;':'&#x1F697;','arrive':'&#x1F3C1;'};
+  const h=Math.floor(durMin/60), m=durMin%60, timeStr=h>0?h+'h '+m+'m':m+' min';
+  let html='<div class="nav-summary"><div class="nav-summary-stat"><div class="nav-summary-val">'+timeStr+'</div><div class="nav-summary-lbl">Est. time</div></div><div class="nav-summary-stat"><div class="nav-summary-val">'+distKm+'</div><div class="nav-summary-lbl">km</div></div><div class="nav-summary-stat"><div class="nav-summary-val">'+steps.length+'</div><div class="nav-summary-lbl">steps</div></div></div>';
+  steps.forEach(step=>{
+    if(!step.maneuver) return;
+    const type=step.maneuver.type||'straight', modifier=step.maneuver.modifier||'', key=modifier?type+'-'+modifier.replace(/ /g,'-'):type;
+    const icon=icons[key]||icons[type]||'&#8679;';
+    const dist=step.distance<1000?Math.round(step.distance)+'m':(step.distance/1000).toFixed(1)+'km';
+    let text=step.name?type.replace(/-/g,' ')+' onto '+step.name:type.replace(/-/g,' ');
+    if(type==='depart') text=step.name?'Head towards '+step.name:'Depart';
+    if(type==='arrive') text='You have arrived';
+    text=text.charAt(0).toUpperCase()+text.slice(1);
+    html+='<div class="nav-step"><div class="nav-step-icon">'+icon+'</div><div class="nav-step-text">'+text+'</div><div class="nav-step-dist">'+dist+'</div></div>';
+  });
+  document.getElementById('navDirectionsBar').innerHTML=html;
+}
+function closeNav(){ document.getElementById('navPanel').classList.remove('open'); if(navMap){ navMap.remove(); navMap=null; } }
+
+// VOICE
+function toast(msg){ const t=document.getElementById('voiceToast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._timer); t._timer=setTimeout(()=>t.classList.remove('show'),2800); }
+function startVoice(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){ toast('❌ Voice not supported. Try Chrome or Safari.'); return; }
+  if(recog){ recog.stop(); recog=null; document.getElementById('voiceBtn').classList.remove('listening'); return; }
+  recog=new SR(); recog.continuous=false; recog.interimResults=false; recog.lang='en-US';
+  document.getElementById('voiceBtn').classList.add('listening');
+  toast('🎙️ Listening… speak now');
+  recog.onresult=e=>{ const cmd=e.results[0][0].transcript.toLowerCase().trim(); toast('"'+cmd+'"'); handleCmd(cmd); };
+  recog.onerror=e=>{ document.getElementById('voiceBtn').classList.remove('listening'); recog=null; toast(e.error==='not-allowed'?'❌ Microphone blocked':e.error==='no-speech'?'❌ No speech detected':'❌ Voice error: '+e.error); };
+  recog.onend=()=>{ document.getElementById('voiceBtn').classList.remove('listening'); recog=null; };
+  setTimeout(()=>{ try{ recog.start(); } catch(e){ toast('❌ Could not start mic.'); recog=null; } },100);
+}
+function handleCmd(cmd){
+  if(/find|search|parking|park/.test(cmd)){ findParking(); toast('✅ Searching for parking…'); }
+  else if(/free/.test(cmd)){ setChip(document.querySelectorAll('.chip')[3],'free'); toast('✅ Showing free spots'); }
+  else if(/map/.test(cmd)){ setView('map'); toast('✅ Map view'); }
+  else if(/list/.test(cmd)){ setView('list'); toast('✅ List view'); }
+  else if(/nearest|closest|first/.test(cmd)){ if(spots.length) openSheet(spots[0]); else toast('❌ No spots loaded yet'); }
+  else if(/navigate|drive|direction/.test(cmd)){ if(spots.length) driveToSpot(spots[0].lat,spots[0].lon); else toast('❌ No spots loaded yet'); }
+  else if(/walk/.test(cmd)){ if(spots.length) walkToSpot(spots[0].lat,spots[0].lon); else toast('❌ No spots loaded yet'); }
+  else if(/km|kilomet/.test(cmd)){ setUnit('km'); toast('✅ Switched to kilometres'); }
+  else if(/mile/.test(cmd)){ setUnit('mi'); toast('✅ Switched to miles'); }
+  else if(/ev|electric|charg/.test(cmd)){ setChip(document.querySelectorAll('.chip')[5],'ev'); toast('✅ Showing EV chargers'); }
+  else if(/save|star|favour/.test(cmd)){ if(spots.length){ toggleSave({stopPropagation:()=>{}},spots[0].id); toast('✅ Saved nearest spot'); } else toast('❌ No spots loaded yet'); }
+  else if(/winter|snow/.test(cmd)){ togglePanel('winterPanel','ddWin'); toast('✅ Winter panel toggled'); }
+  else if(/help|tutorial/.test(cmd)){ showTut(); }
+  else{ toast('🤷 Try: "find parking", "show free", "navigate", "show map"'); }
+}
+</script>
 </body>
 </html>
