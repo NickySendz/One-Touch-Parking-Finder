@@ -3,196 +3,178 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>EV Trip Planner — One Touch Parking</title>
+<title>EV Trip Planner &mdash; One Touch Parking Finder</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#07060f">
 <style>
-:root {
-  --navy:#0b1120; --navy2:#111827; --navy3:#1c2637; --navy4:#263044;
-  --border:#2d3a4f; --border2:#384a61;
-  --teal:#00c2a8; --teal-dim:rgba(0,194,168,0.12);
-  --amber:#f59e0b; --amber-dim:rgba(245,158,11,0.12);
-  --red:#ef4444; --red-dim:rgba(239,68,68,0.12);
-  --blue:#3b82f6; --blue-dim:rgba(59,130,246,0.12);
-  --green:#22c55e; --green-dim:rgba(34,197,94,0.12);
-  --purple:#a855f7; --purple-dim:rgba(168,85,247,0.12);
-  --white:#f1f5f9; --white2:#cbd5e1; --muted:#64748b; --muted2:#475569;
-}
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{background:var(--navy);color:var(--white);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;padding-bottom:80px;}
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+:root{--bg:#07060f;--bg2:#0e0c1a;--bg3:#151228;--bg4:#1d1935;--border:rgba(168,85,247,0.12);--border2:rgba(168,85,247,0.22);--p1:#a855f7;--p2:#c084fc;--p3:#d8b4fe;--pink:#ec4899;--pdim:rgba(168,85,247,0.12);--pinkdim:rgba(236,72,153,0.1);--green:#22c55e;--greendim:rgba(34,197,94,0.12);--amber:#f59e0b;--amberdim:rgba(245,158,11,0.12);--red:#ef4444;--reddim:rgba(239,68,68,0.12);--blue:#60a5fa;--bluedim:rgba(96,165,250,0.12);--white:#f5f3ff;--white2:#c4b5fd;--muted:#7c6fa0;--muted2:#5b4f7a;--grad:linear-gradient(135deg,#a855f7 0%,#ec4899 100%);--glow:0 0 30px rgba(168,85,247,0.25),0 0 60px rgba(168,85,247,0.1);--glow-sm:0 0 12px rgba(168,85,247,0.3);}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--white);font-family:'Outfit',sans-serif;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;padding-bottom:80px;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:0.4;}
 
-/* ── HEADER ── */
-.header{padding:14px 16px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--navy2);position:sticky;top:0;z-index:50;}
-.brand{display:flex;align-items:center;gap:8px;}
-.radar-icon{width:38px;height:38px;position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.radar-ring{position:absolute;border-radius:50%;border:1.5px solid var(--teal);}
-.radar-ring-1{width:38px;height:38px;opacity:0.18;animation:radar-breathe 2.5s ease-in-out infinite;}
-.radar-ring-2{width:26px;height:26px;opacity:0.35;animation:radar-breathe 2.5s ease-in-out infinite 0.3s;}
-@keyframes radar-breathe{0%,100%{transform:scale(1);opacity:inherit;}50%{transform:scale(1.07);opacity:0.08;}}
-.radar-core{width:19px;height:19px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;box-shadow:0 0 10px rgba(0,194,168,0.7),0 0 22px rgba(0,194,168,0.3);z-index:1;}
-.radar-core-p{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;color:#000;line-height:1;}
-.brand-text{display:flex;flex-direction:column;gap:0;line-height:1;}
-.brand-line1{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);line-height:1.2;font-family:'DM Mono',monospace;}
-.brand-line2{font-size:16px;font-weight:800;letter-spacing:-0.5px;line-height:1.15;color:var(--white);}
-.brand-line2 span{color:var(--teal);}
-.header-badge{padding:4px 10px;background:var(--purple-dim);border:1px solid var(--purple);border-radius:6px;font-size:11px;font-weight:700;color:var(--purple);font-family:'DM Mono',monospace;}
+/* HEADER */
+.header{padding:14px 18px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:rgba(14,12,26,0.92);backdrop-filter:blur(20px);position:sticky;top:0;z-index:50;}
+.brand{display:flex;align-items:center;gap:10px;}
+.logo-mark{width:36px;height:36px;border-radius:10px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:#fff;box-shadow:var(--glow-sm),inset 0 1px 0 rgba(255,255,255,0.2);flex-shrink:0;}
+.brand-text{display:flex;flex-direction:column;line-height:1;}
+.brand-eyebrow{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-family:'JetBrains Mono',monospace;line-height:1.3;}
+.brand-name{font-size:15px;font-weight:800;letter-spacing:-0.4px;line-height:1.15;color:var(--white);}
+.brand-name span{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.header-badge{padding:4px 11px;background:var(--pdim);border:1px solid var(--border2);border-radius:8px;font-size:11px;font-weight:700;color:var(--p2);font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:5px;}
 
-/* ── SECTIONS ── */
-.section{padding:16px;}
+/* SECTIONS */
+.section{padding:18px 18px 4px;}
 .section+.section{border-top:1px solid var(--border);}
-.section-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;font-family:'DM Mono',monospace;}
+.section-title{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:6px;}
 
-/* ── CARDS ── */
-.card{background:var(--navy2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;}
-.card-title{font-size:13px;font-weight:700;color:var(--white);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;}
 
-/* ── INPUTS ── */
+/* INPUTS */
 .input-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
 .input-wrap{flex:1;position:relative;}
-.input-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none;}
-.inp{width:100%;background:var(--navy3);border:1px solid var(--border);border-radius:9px;padding:10px 12px 10px 36px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--white);outline:none;transition:border-color 0.15s;}
-.inp:focus{border-color:var(--teal);}
+.input-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none;display:flex;align-items:center;}
+.inp{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:11px 12px 11px 38px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--white);outline:none;transition:border-color 0.15s;}
+.inp:focus{border-color:var(--border2);box-shadow:0 0 0 3px rgba(168,85,247,0.08);}
 .inp::placeholder{color:var(--muted);}
-.inp-bare{width:100%;background:var(--navy3);border:1px solid var(--border);border-radius:9px;padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--white);outline:none;transition:border-color 0.15s;}
-.inp-bare:focus{border-color:var(--teal);}
-.inp-bare option{background:var(--navy2);}
-.add-stop-btn{padding:9px 14px;background:var(--navy3);border:1px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;transition:all 0.15s;}
-.add-stop-btn:active{background:var(--navy4);}
+.inp-bare{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:11px 12px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--white);outline:none;transition:border-color 0.15s;}
+.inp-bare:focus{border-color:var(--border2);}
+.inp-bare option{background:var(--bg2);}
+.add-stop-btn{padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;transition:all 0.15s;display:flex;align-items:center;gap:5px;}
+.add-stop-btn:active{background:var(--bg4);}
 
-/* ── VEHICLE SELECTOR ── */
+/* VEHICLE */
 .vehicle-search-wrap{position:relative;margin-bottom:8px;}
-.vehicle-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--navy2);border:1px solid var(--border2);border-radius:10px;max-height:220px;overflow-y:auto;z-index:100;display:none;box-shadow:0 8px 30px rgba(0,0,0,0.5);}
+.vehicle-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;max-height:220px;overflow-y:auto;z-index:100;display:none;box-shadow:0 16px 50px rgba(0,0,0,0.7),var(--glow);}
 .vehicle-dropdown.show{display:block;}
 .vehicle-opt{padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border);transition:background 0.1s;}
 .vehicle-opt:last-child{border-bottom:none;}
-.vehicle-opt:active{background:var(--navy3);}
+.vehicle-opt:active{background:var(--bg3);}
 .vehicle-opt-name{font-weight:600;color:var(--white);}
-.vehicle-opt-specs{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px;}
-.selected-vehicle{background:var(--teal-dim);border:1px solid var(--teal);border-radius:10px;padding:12px 14px;display:none;margin-bottom:10px;}
-.sel-v-name{font-size:14px;font-weight:700;color:var(--teal);margin-bottom:4px;}
-.sel-v-specs{display:flex;gap:10px;flex-wrap:wrap;}
-.sel-v-spec{font-size:10px;font-family:'DM Mono',monospace;color:var(--white2);background:rgba(0,0,0,0.2);padding:2px 8px;border-radius:4px;}
+.vehicle-opt-specs{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:2px;}
+.selected-vehicle{background:var(--pdim);border:1px solid var(--border2);border-radius:12px;padding:12px 14px;display:none;margin-bottom:10px;}
+.sel-v-name{font-size:14px;font-weight:700;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;}
+.sel-v-specs{display:flex;gap:8px;flex-wrap:wrap;}
+.sel-v-spec{font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--white2);background:rgba(0,0,0,0.3);padding:3px 9px;border-radius:5px;}
 
-/* ── SLIDERS ── */
-.slider-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
-.slider-label{font-size:12px;color:var(--white2);min-width:110px;}
-.slider-val{font-size:12px;font-family:'DM Mono',monospace;color:var(--teal);min-width:44px;text-align:right;}
-input[type=range]{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--border2);outline:none;}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--teal);cursor:pointer;box-shadow:0 0 6px rgba(0,194,168,0.5);}
+/* SLIDERS */
+.slider-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.slider-label{font-size:12px;color:var(--white2);min-width:116px;display:flex;align-items:center;gap:6px;}
+.slider-val{font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--p2);min-width:54px;text-align:right;}
+input[type=range]{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--bg4);outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--grad);cursor:pointer;box-shadow:0 0 8px rgba(168,85,247,0.5);}
 
-/* ── TOGGLES ── */
-.toggle-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+/* TOGGLES */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .toggle-label{font-size:13px;color:var(--white2);display:flex;align-items:center;gap:8px;}
-.toggle{width:40px;height:22px;background:var(--border2);border-radius:100px;position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;}
-.toggle.on{background:var(--teal);}
-.toggle::after{content:'';position:absolute;width:16px;height:16px;background:white;border-radius:50%;top:3px;left:3px;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.3);}
-.toggle.on::after{left:21px;}
+.toggle{width:42px;height:24px;background:var(--bg4);border:1px solid var(--border);border-radius:100px;position:relative;cursor:pointer;transition:all 0.2s;flex-shrink:0;}
+.toggle.on{background:var(--p1);border-color:var(--p1);}
+.toggle::after{content:'';position:absolute;width:16px;height:16px;background:white;border-radius:50%;top:3px;left:3px;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.4);}
+.toggle.on::after{left:22px;}
 
-/* ── TABS ── */
-.tabs{display:flex;background:var(--navy3);border-radius:10px;padding:3px;gap:2px;margin-bottom:14px;}
-.tab{flex:1;padding:8px;text-align:center;border-radius:8px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:all 0.15s;}
-.tab.active{background:var(--navy2);color:var(--teal);box-shadow:0 1px 4px rgba(0,0,0,0.3);}
+/* CONNECTOR BTNS */
+.connector-btn{padding:6px 13px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;transition:all 0.15s;font-family:'JetBrains Mono',monospace;}
+.connector-btn.active{background:var(--pdim);border-color:var(--border2);color:var(--p2);}
 
-/* ── PLAN BTN ── */
-.plan-btn{width:100%;padding:15px;background:var(--teal);color:#000;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:800;cursor:pointer;transition:opacity 0.15s,transform 0.1s;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 20px rgba(0,194,168,0.3);}
+/* PLAN BUTTON */
+.plan-btn{width:100%;padding:16px;background:var(--grad);color:#fff;border:none;border-radius:14px;font-family:'Outfit',sans-serif;font-size:15px;font-weight:800;cursor:pointer;transition:opacity 0.15s,transform 0.1s;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 4px 24px rgba(168,85,247,0.4),0 1px 0 rgba(255,255,255,0.1) inset;letter-spacing:0.2px;}
 .plan-btn:active{opacity:0.85;transform:scale(0.98);}
 .plan-btn:disabled{opacity:0.4;cursor:not-allowed;}
 
-/* ── RESULTS ── */
+/* RESULTS */
 .results-section{display:none;}
 .results-section.show{display:block;}
 
-/* Route summary bar */
-.route-summary{background:var(--navy2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;}
-.route-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
-.rstat{text-align:center;}
-.rstat-val{font-size:17px;font-weight:800;font-family:'DM Mono',monospace;line-height:1;}
-.rstat-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:3px;}
+/* ROUTE SUMMARY */
+.route-summary{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;}
+.route-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
+.rstat{text-align:center;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 6px;}
+.rstat-val{font-size:16px;font-weight:800;font-family:'JetBrains Mono',monospace;line-height:1;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.rstat-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:4px;}
 
-/* Charging stop cards */
-.stop-card{background:var(--navy2);border:1px solid var(--border);border-radius:12px;padding:13px;margin-bottom:8px;position:relative;overflow:hidden;}
-.stop-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;}
-.stop-card.type-start::before{background:var(--teal);}
+/* STOP CARDS */
+.stop-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:8px;position:relative;overflow:hidden;}
+.stop-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px;}
+.stop-card.type-start::before{background:var(--p1);}
 .stop-card.type-charge::before{background:var(--amber);}
 .stop-card.type-dest::before{background:var(--green);}
-.stop-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
-.stop-badge{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
-.stop-badge.start{background:var(--teal-dim);}
-.stop-badge.charge{background:var(--amber-dim);}
-.stop-badge.dest{background:var(--green-dim);}
+.stop-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.stop-badge{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.stop-badge.start{background:var(--pdim);}
+.stop-badge.charge{background:var(--amberdim);}
+.stop-badge.dest{background:var(--greendim);}
 .stop-name{font-size:13px;font-weight:700;}
-.stop-addr{font-size:11px;color:var(--muted);}
-.stop-stats{display:flex;gap:8px;flex-wrap:wrap;}
-.stop-stat{font-size:10px;font-family:'DM Mono',monospace;padding:3px 8px;border-radius:5px;background:var(--navy3);color:var(--white2);}
-.stop-stat.soc{color:var(--teal);}
-.stop-stat.time{color:var(--amber);}
-.stop-stat.dist{color:var(--blue);}
+.stop-addr{font-size:11px;color:var(--muted);margin-top:2px;}
+.stop-stats{display:flex;gap:6px;flex-wrap:wrap;}
+.stop-stat{font-size:10px;font-family:'JetBrains Mono',monospace;padding:3px 8px;border-radius:5px;background:var(--bg3);color:var(--white2);}
+.stop-stat.soc{color:var(--p2);}.stop-stat.time{color:var(--amber);}.stop-stat.dist{color:var(--blue);}
 .stop-connector{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
-.connector-tag{font-size:9px;padding:2px 7px;background:var(--purple-dim);border:1px solid var(--purple-dim);border-radius:4px;color:#c084fc;}
+.connector-tag{font-size:9px;padding:2px 7px;background:var(--pdim);border:1px solid rgba(168,85,247,0.2);border-radius:4px;color:var(--p2);font-family:'JetBrains Mono',monospace;}
 
-/* Battery arc */
-.battery-arc-wrap{display:flex;align-items:center;gap:12px;margin:12px 0;}
-.battery-arc{position:relative;width:70px;height:70px;flex-shrink:0;}
-.battery-arc svg{width:70px;height:70px;transform:rotate(-90deg);}
-.arc-bg{fill:none;stroke:var(--border2);stroke-width:6;}
-.arc-fill{fill:none;stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset 0.8s ease;}
-.arc-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;font-family:'DM Mono',monospace;}
+/* LEG LINE */
+.leg-line{display:flex;align-items:center;gap:10px;padding:5px 14px;margin-bottom:4px;}
+.leg-dot-line{width:2px;height:28px;background:var(--border);margin-left:13px;border-radius:1px;}
+.leg-info{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
 
-/* Leg connector */
-.leg-line{display:flex;align-items:center;gap:10px;padding:6px 14px;margin-bottom:4px;}
-.leg-dot-line{width:2px;height:30px;background:var(--border2);margin-left:13px;}
-.leg-info{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;}
-
-/* Map */
-.trip-map{border-radius:12px;overflow:hidden;border:1px solid var(--border);height:260px;margin-bottom:12px;}
+/* TRIP MAP */
+.trip-map{border-radius:14px;overflow:hidden;border:1px solid var(--border);height:260px;margin-bottom:12px;}
 #tripMapDiv{width:100%;height:100%;}
 .leaflet-control-zoom,.leaflet-control-attribution{display:none!important;}
 
-/* Cost breakdown */
-.cost-table{width:100%;border-collapse:collapse;}
-.cost-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;}
+/* COST TABLE */
+.cost-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px;}
 .cost-row:last-child{border-bottom:none;font-weight:700;color:var(--white);}
 .cost-label{color:var(--white2);}
-.cost-val{font-family:'DM Mono',monospace;color:var(--teal);}
+.cost-val{font-family:'JetBrains Mono',monospace;color:var(--p2);}
 
-/* CO2 */
-.co2-bar{background:var(--green-dim);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px;}
+/* CO2 BAR */
+.co2-bar{background:var(--greendim);border:1px solid rgba(34,197,94,0.2);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px;}
 .co2-icon{font-size:28px;}
 .co2-text{flex:1;}
 .co2-main{font-size:14px;font-weight:700;color:var(--green);}
 .co2-sub{font-size:11px;color:var(--muted);margin-top:2px;}
 
-/* Share btn */
-.share-btn{width:100%;padding:13px;background:var(--navy3);border:1px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:var(--white2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;}
-.share-btn:active{background:var(--navy4);}
+/* SHARE BTN */
+.share-btn{width:100%;padding:13px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;color:var(--white2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;transition:border-color 0.15s;}
+.share-btn:active{border-color:var(--border2);}
 
-/* Amenities */
-.amenity-card{background:var(--navy3);border-radius:9px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px;}
+/* AMENITIES */
+.amenity-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:11px 13px;margin-bottom:7px;display:flex;align-items:center;gap:10px;}
 .amenity-icon{font-size:18px;flex-shrink:0;}
-.amenity-name{font-size:12px;font-weight:600;}
-.amenity-detail{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;}
+.amenity-name{font-size:13px;font-weight:600;}
+.amenity-detail{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:1px;}
 
-/* Loading */
-.loading-state{text-align:center;padding:40px 20px;display:none;}
+/* LOADING */
+.loading-state{text-align:center;padding:44px 20px;display:none;}
 .loading-state.show{display:block;}
-.loading-spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--teal);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 14px;}
+.loading-spinner{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--p1);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px;}
 @keyframes spin{to{transform:rotate(360deg)}}
-.loading-text{font-size:13px;color:var(--muted);}
+.loading-text{font-size:13px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
 
-/* Toast */
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--navy2);border:1px solid var(--border2);border-radius:100px;padding:9px 20px;font-size:13px;font-weight:500;color:var(--white);z-index:200;opacity:0;transition:opacity 0.25s,transform 0.25s;white-space:nowrap;pointer-events:none;box-shadow:0 8px 30px rgba(0,0,0,0.5);}
+/* TOAST */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--bg2);border:1px solid var(--border2);border-radius:100px;padding:9px 20px;font-size:13px;font-weight:500;color:var(--white);z-index:200;opacity:0;transition:opacity 0.25s,transform 0.25s;white-space:nowrap;pointer-events:none;box-shadow:0 8px 30px rgba(0,0,0,0.6),var(--glow-sm);}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-/* ── BOTTOM NAV ── */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:62px;background:var(--navy2);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;z-index:90;padding-bottom:env(safe-area-inset-bottom);}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;padding:8px 0;text-decoration:none;transition:opacity 0.15s;}
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:62px;background:rgba(14,12,26,0.95);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;z-index:90;padding-bottom:env(safe-area-inset-bottom);}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;padding:8px 0;text-decoration:none;color:var(--muted);transition:opacity 0.15s;}
 .nav-item:active{opacity:0.7;}
-.nav-icon{font-size:22px;line-height:1;}
-.nav-label{font-size:10px;font-weight:600;color:var(--muted);letter-spacing:0.3px;font-family:'DM Mono',monospace;text-transform:uppercase;}
-.nav-item.active .nav-label{color:var(--teal);}
-.nav-item.active .nav-icon{filter:drop-shadow(0 0 6px rgba(0,194,168,0.6));}
+.nav-icon{display:flex;align-items:center;justify-content:center;}
+.nav-label{font-size:10px;font-weight:600;letter-spacing:1px;font-family:'JetBrains Mono',monospace;text-transform:uppercase;}
+.nav-item.active{color:var(--p2);}.nav-item.active .nav-icon{filter:drop-shadow(0 0 6px rgba(168,85,247,0.7));}
 .nav-divider{width:1px;height:28px;background:var(--border);}
+
+/* EV HERO */
+.ev-hero{padding:28px 20px 24px;background:linear-gradient(180deg,var(--bg2) 0%,var(--bg) 100%);position:relative;overflow:hidden;border-bottom:1px solid var(--border);}
+.ev-hero::before{content:'';position:absolute;top:-80px;right:-60px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(168,85,247,0.07) 0%,transparent 70%);pointer-events:none;}
+.ev-hero-inner{display:flex;align-items:center;gap:16px;}
+.ev-orb{width:64px;height:64px;border-radius:18px;background:var(--grad);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(168,85,247,0.45);flex-shrink:0;}
+.ev-hero-text{}
+.ev-hero-title{font-size:20px;font-weight:800;letter-spacing:-0.4px;margin-bottom:3px;}
+.ev-hero-sub{font-size:12px;color:var(--muted);}
 </style>
 </head>
 <body>
@@ -202,120 +184,116 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <!-- HEADER -->
 <div class="header">
   <div class="brand">
-    <div class="radar-icon">
-      <div class="radar-ring radar-ring-1"></div>
-      <div class="radar-ring radar-ring-2"></div>
-      <div class="radar-core"><div class="radar-core-p">P</div></div>
-    </div>
+    <div class="logo-mark">P</div>
     <div class="brand-text">
-      <div class="brand-line1">One Touch</div>
-      <div class="brand-line2">Parking <span>Finder</span></div>
+      <div class="brand-eyebrow">One Touch</div>
+      <div class="brand-name">Parking <span>Finder</span></div>
     </div>
   </div>
-  <div class="header-badge">⚡ EV Planner</div>
+  <div class="header-badge"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg> EV Planner</div>
 </div>
 
-<!-- ── TRIP SETUP ── -->
-<div class="section">
-  <div class="section-title">Route</div>
+<!-- EV HERO -->
+<div class="ev-hero">
+  <div class="ev-hero-inner">
+    <div class="ev-orb"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg></div>
+    <div class="ev-hero-text">
+      <div class="ev-hero-title">EV Trip Planner</div>
+      <div class="ev-hero-sub">Calculate range, charging stops &amp; total cost</div>
+    </div>
+  </div>
+</div>
 
-  <!-- Origin -->
+<!-- ROUTE -->
+<div class="section">
+  <div class="section-title"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg> Route</div>
   <div class="input-row">
     <div class="input-wrap">
-      <div class="input-icon">🟢</div>
+      <div class="input-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="#22c55e" stroke="#22c55e" stroke-width="2"><circle cx="12" cy="12" r="5"/></svg></div>
       <input class="inp" id="originInput" placeholder="Starting point" autocomplete="off"/>
     </div>
-    <button class="add-stop-btn" onclick="useMyLocation()">📍 Me</button>
+    <button class="add-stop-btn" onclick="useMyLocation()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg> Me</button>
   </div>
-
-  <!-- Waypoints container -->
   <div id="waypointsContainer"></div>
-
-  <!-- Destination -->
   <div class="input-row">
     <div class="input-wrap">
-      <div class="input-icon">🔴</div>
+      <div class="input-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" stroke-width="2"><circle cx="12" cy="12" r="5"/></svg></div>
       <input class="inp" id="destInput" placeholder="Destination" autocomplete="off"/>
     </div>
-    <button class="add-stop-btn" onclick="addWaypoint()">+ Stop</button>
+    <button class="add-stop-btn" onclick="addWaypoint()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg> Stop</button>
   </div>
 </div>
 
-<!-- ── VEHICLE ── -->
+<!-- VEHICLE -->
 <div class="section">
-  <div class="section-title">Vehicle</div>
+  <div class="section-title"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17H5v-5l2.5-7h9L19 12v5Z"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="17.5" r="2.5"/></svg> Vehicle</div>
   <div class="vehicle-search-wrap">
-    <input class="inp-bare" id="vehicleSearch" placeholder="Search EV model (e.g. Tesla Model 3)..." autocomplete="off" oninput="searchVehicles(this.value)" onfocus="searchVehicles(this.value)"/>
+    <input class="inp-bare" id="vehicleSearch" placeholder="Search EV model (e.g. Tesla Model 3)&hellip;" autocomplete="off" oninput="searchVehicles(this.value)" onfocus="searchVehicles(this.value)"/>
     <div class="vehicle-dropdown" id="vehicleDropdown"></div>
   </div>
   <div class="selected-vehicle" id="selectedVehicle">
     <div class="sel-v-name" id="selVName"></div>
     <div class="sel-v-specs" id="selVSpecs"></div>
   </div>
-
-  <!-- SOC -->
   <div class="slider-row">
-    <div class="slider-label">🔋 Current charge</div>
+    <div class="slider-label"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="10" x="2" y="7" rx="2" ry="2"/><line x1="22" x2="22" y1="11" y2="13"/></svg> Current charge</div>
     <input type="range" id="socSlider" min="5" max="100" value="80" oninput="updateSlider('soc',this.value,'%')">
     <div class="slider-val" id="socVal">80%</div>
   </div>
-  <div class="input-row" style="margin-bottom:0">
-    <div style="font-size:12px;color:var(--white2);min-width:120px;">🛡 Safety cushion</div>
+  <div class="input-row" style="margin-bottom:4px">
+    <div style="font-size:12px;color:var(--white2);min-width:120px;display:flex;align-items:center;gap:6px;">&#x1F6E1; Safety cushion</div>
     <select class="inp-bare" id="bufferSlider" style="flex:1">
-      <option value="5">Risky — arrive nearly empty</option>
-      <option value="10" selected>Normal — arrive with a little left</option>
-      <option value="20">Cautious — always keep extra range</option>
-      <option value="30">Very safe — large buffer always</option>
+      <option value="5">Risky &mdash; arrive nearly empty</option>
+      <option value="10" selected>Normal &mdash; arrive with a little left</option>
+      <option value="20">Cautious &mdash; always keep extra range</option>
+      <option value="30">Very safe &mdash; large buffer always</option>
     </select>
   </div>
 </div>
 
-<!-- ── CONDITIONS ── -->
+<!-- CONDITIONS -->
 <div class="section">
-  <div class="section-title">Conditions</div>
-
+  <div class="section-title"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg> Conditions</div>
   <div class="slider-row">
-    <div class="slider-label">🌡 Temperature</div>
-    <input type="range" id="tempSlider" min="-30" max="45" value="20" oninput="updateSlider('temp',this.value,'°C')">
-    <div class="slider-val" id="tempVal">20°C</div>
+    <div class="slider-label"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg> Temperature</div>
+    <input type="range" id="tempSlider" min="-30" max="45" value="20" oninput="updateSlider('temp',this.value,'&deg;C')">
+    <div class="slider-val" id="tempVal">20&deg;C</div>
   </div>
   <div class="slider-row">
-    <div class="slider-label">💨 Wind speed</div>
+    <div class="slider-label"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></svg> Wind speed</div>
     <input type="range" id="windSlider" min="0" max="80" value="10" oninput="updateSlider('wind',this.value,' km/h')">
     <div class="slider-val" id="windVal">10 km/h</div>
   </div>
   <div class="slider-row">
-    <div class="slider-label">🚗 Highway speed</div>
+    <div class="slider-label"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0-2 0"/><path d="M12 2a10 10 0 0 1 7.38 16.75"/><path d="m16.8 7.6-2.57 2.57"/></svg> Highway speed</div>
     <input type="range" id="speedSlider" min="80" max="140" value="110" oninput="updateSlider('speed',this.value,' km/h')">
     <div class="slider-val" id="speedVal">110 km/h</div>
   </div>
   <div class="slider-row">
-    <div class="slider-label">⚖️ Load / cargo</div>
+    <div class="slider-label">&#x2696;&#xFE0F; Load / cargo</div>
     <input type="range" id="loadSlider" min="0" max="5" value="0" oninput="updateSlider('load',this.value,'')">
     <div class="slider-val" id="loadVal">None</div>
   </div>
-
   <div class="toggle-row">
-    <div class="toggle-label">❄️ HVAC / heat on</div>
+    <div class="toggle-label">&#x2744;&#xFE0F; HVAC / heat on</div>
     <div class="toggle" id="hvacToggle" onclick="toggleSwitch('hvac')"></div>
   </div>
   <div class="toggle-row">
-    <div class="toggle-label">🚐 Towing mode</div>
+    <div class="toggle-label">&#x1F690; Towing mode</div>
     <div class="toggle" id="towToggle" onclick="toggleSwitch('tow')"></div>
   </div>
-  <div class="toggle-row">
-    <div class="toggle-label">🔌 Precondition battery</div>
+  <div class="toggle-row" style="margin-bottom:4px">
+    <div class="toggle-label">&#x1F50C; Precondition battery</div>
     <div class="toggle" id="precondToggle" onclick="toggleSwitch('precond')"></div>
   </div>
 </div>
 
-<!-- ── CHARGER PREFERENCES ── -->
+<!-- CHARGER PREFS -->
 <div class="section">
-  <div class="section-title">Charger Preferences</div>
-
-  <div class="input-row" style="margin-bottom:10px">
-    <div style="font-size:12px;color:var(--white2);min-width:110px;">Min charge speed</div>
-    <select class="inp-bare" id="minSpeedSelect">
+  <div class="section-title"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg> Charger Preferences</div>
+  <div class="input-row" style="margin-bottom:12px">
+    <div style="font-size:12px;color:var(--white2);min-width:120px;">Min charge speed</div>
+    <select class="inp-bare" id="minSpeedSelect" style="flex:1">
       <option value="0">Any speed</option>
       <option value="50">50 kW+ (Fast)</option>
       <option value="100">100 kW+ (Rapid)</option>
@@ -323,98 +301,82 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       <option value="250">250 kW+ (HPC)</option>
     </select>
   </div>
-
   <div style="font-size:12px;color:var(--white2);margin-bottom:8px;">Connector types</div>
-  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;" id="connectorFilters">
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;" id="connectorFilters">
     <div class="connector-btn active" onclick="toggleConnector(this,'CCS')">CCS</div>
     <div class="connector-btn active" onclick="toggleConnector(this,'CHAdeMO')">CHAdeMO</div>
     <div class="connector-btn active" onclick="toggleConnector(this,'Tesla')">Tesla</div>
     <div class="connector-btn active" onclick="toggleConnector(this,'Type2')">Type 2</div>
     <div class="connector-btn active" onclick="toggleConnector(this,'J1772')">J1772</div>
   </div>
-
   <div style="font-size:12px;color:var(--white2);margin-bottom:8px;">Electricity cost</div>
   <div class="slider-row">
-    <div class="slider-label">💰 Rate</div>
-    <input type="range" id="rateSlider" min="5" max="80" value="15" oninput="updateSlider('rate',this.value,'¢/kWh')">
-    <div class="slider-val" id="rateVal">15¢/kWh</div>
+    <div class="slider-label">&#x1F4B0; Rate</div>
+    <input type="range" id="rateSlider" min="5" max="80" value="15" oninput="updateSlider('rate',this.value,'&cent;/kWh')">
+    <div class="slider-val" id="rateVal">15&cent;/kWh</div>
   </div>
-
   <div style="font-size:12px;color:var(--white2);margin-bottom:8px;">Departure time</div>
-  <input class="inp-bare" type="datetime-local" id="departureTime" style="margin-bottom:0"/>
+  <input class="inp-bare" type="datetime-local" id="departureTime" style="margin-bottom:4px"/>
 </div>
 
 <!-- PLAN BUTTON -->
-<div style="padding:16px;">
+<div style="padding:18px 18px 14px;">
   <button class="plan-btn" id="planBtn" onclick="planTrip()">
-    ⚡ Plan My EV Trip
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg> Plan My EV Trip
   </button>
 </div>
 
 <!-- LOADING -->
 <div class="loading-state" id="loadingState">
   <div class="loading-spinner"></div>
-  <div class="loading-text" id="loadingText">Calculating optimal route…</div>
+  <div class="loading-text" id="loadingText">Calculating optimal route&hellip;</div>
 </div>
 
-<!-- ── RESULTS ── -->
+<!-- RESULTS -->
 <div class="results-section" id="resultsSection">
 
   <div class="section">
-    <div class="section-title">Trip Summary</div>
+    <div class="section-title"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Trip Summary</div>
     <div class="route-summary">
       <div class="route-stats" id="routeStats"></div>
       <div class="co2-bar" id="co2Bar"></div>
     </div>
   </div>
 
-  <!-- Map -->
-  <div style="padding:0 16px 16px;">
-    <div class="trip-map">
-      <div id="tripMapDiv"></div>
-    </div>
+  <div style="padding:0 18px 16px;">
+    <div class="trip-map"><div id="tripMapDiv"></div></div>
   </div>
 
-  <!-- Charging stops -->
   <div class="section">
-    <div class="section-title">Route Breakdown</div>
+    <div class="section-title"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg> Route Breakdown</div>
     <div id="stopsContainer"></div>
   </div>
 
-  <!-- Cost breakdown -->
   <div class="section">
-    <div class="section-title">Trip Cost</div>
-    <div class="card">
-      <div id="costBreakdown"></div>
-    </div>
+    <div class="section-title">&#x1F4B3; Trip Cost</div>
+    <div class="card"><div id="costBreakdown"></div></div>
   </div>
 
-  <!-- Amenities -->
   <div class="section" id="amenitiesSection">
-    <div class="section-title">While You Charge</div>
+    <div class="section-title">&#x2615; While You Charge</div>
     <div id="amenitiesList"></div>
   </div>
 
-  <!-- Share -->
-  <div style="padding:0 16px 16px;">
-    <button class="share-btn" onclick="shareTrip()">🔗 Share Trip Plan</button>
+  <div style="padding:0 18px 18px;">
+    <button class="share-btn" onclick="shareTrip()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="22"/></svg> Share Trip Plan</button>
   </div>
-</div>
 
-<style>
-.connector-btn{padding:5px 12px;background:var(--navy3);border:1px solid var(--border);border-radius:6px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;transition:all 0.15s;}
-.connector-btn.active{background:var(--purple-dim);border-color:var(--purple);color:#c084fc;}
-</style>
+</div>
 
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav">
   <a class="nav-item" href="index.html">
-    <div class="nav-icon">🅿️</div>
+    <div class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9 17V7h4a3 3 0 0 1 0 6H9"/></svg></div>
     <div class="nav-label">Parking</div>
   </a>
   <div class="nav-divider"></div>
   <a class="nav-item active" href="ev-planner.html">
-    <div class="nav-icon">⚡</div>
+    <div class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg></div>
     <div class="nav-label">EV Planner</div>
   </a>
 </nav>
