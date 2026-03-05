@@ -210,6 +210,46 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .nav-label{font-size:10px;font-weight:600;letter-spacing:1px;font-family:'JetBrains Mono',monospace;text-transform:uppercase;}
 .nav-item.active{color:var(--p2);}.nav-item.active .nav-icon{filter:drop-shadow(0 0 6px rgba(168,85,247,0.7));}
 .nav-divider{width:1px;height:28px;background:var(--border);}
+
+/* Sheet top bar with close X */
+.sheet-topbar{display:flex;align-items:center;justify-content:flex-end;margin-bottom:14px;margin-top:-4px;}
+.sheet-close-btn{width:32px;height:32px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s;flex-shrink:0;}
+.sheet-close-btn:active{background:var(--reddim);border-color:var(--red);color:var(--red);}
+
+/* Drag handle bigger tap target */
+.sheet-handle{cursor:grab;padding:8px 0 4px;}
+.sheet-handle:active{cursor:grabbing;}
+
+/* Busy hours chart */
+.busy-chart{margin-bottom:16px;}
+.busy-chart-title{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;font-family:'JetBrains Mono',monospace;}
+.busy-bars{display:flex;align-items:flex-end;gap:3px;height:40px;}
+.busy-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.busy-bar-fill{width:100%;border-radius:3px 3px 0 0;transition:height 0.3s ease;min-height:3px;}
+.busy-bar-label{font-size:8px;color:var(--muted2);font-family:'JetBrains Mono',monospace;}
+
+/* Price estimator */
+.price-est-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;padding:10px 12px;background:var(--amberdim);border:1px solid rgba(245,158,11,0.2);border-radius:10px;}
+.price-est-icon{display:flex;align-items:center;color:var(--amber);flex-shrink:0;}
+.price-est-text{font-size:13px;color:var(--white2);}
+.price-est-val{font-weight:700;color:var(--amber);}
+
+/* Maps buttons */
+.maps-row{display:flex;gap:7px;margin-bottom:10px;}
+.map-open-btn{flex:1;padding:10px 8px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;color:var(--white2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.15s;}
+.map-open-btn:active{border-color:var(--border2);background:var(--bg4);}
+.map-open-btn.apple{border-color:rgba(255,255,255,0.1);}
+.map-open-btn.google{border-color:rgba(66,133,244,0.25);color:#60a5fa;}
+
+/* Car pin saved banner */
+.car-pin-banner{margin-bottom:16px;padding:12px 14px;background:var(--greendim);border:1px solid rgba(34,197,94,0.25);border-radius:12px;display:flex;align-items:center;gap:10px;}
+.car-pin-banner.empty{background:var(--bg3);border-color:var(--border);}
+.car-pin-icon{display:flex;align-items:center;color:var(--green);flex-shrink:0;}
+.car-pin-text{flex:1;min-width:0;}
+.car-pin-title{font-size:13px;font-weight:600;color:var(--white2);}
+.car-pin-sub{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:2px;}
+.car-pin-action{font-size:11px;font-weight:700;color:var(--green);cursor:pointer;flex-shrink:0;padding:4px 8px;background:rgba(34,197,94,0.1);border-radius:6px;}
+.car-pin-action.clear{color:var(--muted);background:transparent;}
 </style>
 </head>
 <body>
@@ -316,6 +356,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 <div class="ptr-indicator" id="ptrIndicator"><div class="ptr-spinner"></div><span id="ptrText">Pull to refresh</span></div>
 
 <div class="results-container">
+  <div id="carPinBanner"></div>
   <div class="results-header"><div class="results-count" id="resultsCount"></div></div>
   <div class="welcome-state" id="welcomeState">
     <div class="welcome-map-wrap">
@@ -716,7 +757,42 @@ function openSheet(s){
   const op=detectOperator(s.name,s.address);
   const payBtn=op?`<button class="sbtn-pay" style="border-color:${op.color};color:${op.color};background:${op.color}22" onclick="openPayment('${s.id}')">${IC.card} Pay with ${op.name}</button>`:'';
   const savIc=isSaved(s.id)?IC.bookmarkFill:IC.bookmark;
+
+  // Price estimator
+  let priceEstHtml='';
+  if(!s.isFree&&s.priceLevel){
+    const rates=[0,3,6,12,20];
+    const rate=rates[s.priceLevel]||4;
+    priceEstHtml=`<div class="price-est-row"><div class="price-est-icon">${IC.card}</div><div class="price-est-text">Est. cost: <span class="price-est-val">$${rate}/hr · ~$${rate*2} for 2hrs</span></div></div>`;
+  } else if(s.isFree){
+    priceEstHtml=`<div class="price-est-row" style="background:var(--greendim);border-color:rgba(34,197,94,0.2)"><div class="price-est-icon" style="color:var(--green)">${IC.check}</div><div class="price-est-text" style="color:#86efac"><span class="price-est-val" style="color:#86efac">Free to park here</span></div></div>`;
+  }
+
+  // Busy hours chart — simulate realistic pattern based on spot busyness seed
+  const hours=['6','8','10','12','14','16','18','20'];
+  const seed=s.busy;
+  const pattern=[0.2,0.4,0.6,0.9,0.7,0.85,0.95,0.5].map(v=>Math.min(1,v*(0.7+seed*0.6)));
+  const now=new Date().getHours();
+  const nowIdx=hours.findIndex((h,i)=>parseInt(h)>now)-1;
+  const barsHtml=hours.map((h,i)=>{
+    const pct=pattern[i];
+    const col=pct<0.4?'var(--green)':pct<0.7?'var(--amber)':'var(--red)';
+    const isNow=i===Math.max(0,nowIdx);
+    return `<div class="busy-bar-col"><div class="busy-bar-fill" style="height:${Math.round(pct*36)+4}px;background:${col};opacity:${isNow?1:0.55};${isNow?'outline:1.5px solid '+col+';outline-offset:1px':''}"></div><div class="busy-bar-label" style="${isNow?'color:var(--white2)':''}">${h}</div></div>`;
+  }).join('');
+  const busyChartHtml=`<div class="busy-chart"><div class="busy-chart-title">Typical Busyness by Hour</div><div class="busy-bars">${barsHtml}</div></div>`;
+
+  // Maps buttons
+  const isIOS=/iPhone|iPad|iPod/.test(navigator.userAgent);
+  const appleMapsUrl=`maps://?daddr=${s.lat},${s.lon}&dirflg=d`;
+  const googleMapsUrl=`https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lon}&travelmode=driving`;
+  const mapsRowHtml=`<div class="maps-row">
+    <button class="map-open-btn apple" onclick="window.open('${appleMapsUrl}','_blank')">🗺 Apple Maps</button>
+    <button class="map-open-btn google" onclick="window.open('${googleMapsUrl}','_blank')">🌐 Google Maps</button>
+  </div>`;
+
   b.innerHTML=
+    `<div class="sheet-topbar"><button class="sheet-close-btn" onclick="closeSheet()">${IC.x}</button></div>`+
     `<div class="sheet-header"><div class="sheet-icon-wrap ${s.type}">${typeIcon(s.type)}</div>`+
     `<div class="sheet-title-block"><div class="sheet-name">${s.name}</div>`+
     `<div class="sheet-addr">${IC.pin} ${s.address}</div></div></div>`+
@@ -724,6 +800,7 @@ function openSheet(s){
     `<div class="sstat"><div class="sstat-val" style="color:#60a5fa">${fmtDist(s)}</div><div class="sstat-lbl">Distance</div></div>`+
     `<div class="sstat"><div class="sstat-val" style="color:#5eead4">${s.walk}m</div><div class="sstat-lbl">Walk</div></div>`+
     `<div class="sstat"><div class="sstat-val" style="color:#fcd34d">${s.rating||'&mdash;'}</div><div class="sstat-lbl">Rating</div></div></div>`+
+    priceEstHtml+
     `<div class="sheet-chips">${openChip}${priceChip}${busyChip}${winterChip}<div class="schip">${typeName(s.type)}</div>`+
     (s.is_street&&s.maxStay?`<div class="schip">Max stay: ${s.maxStay}</div>`:'')+
     (s.is_street&&s.isMetered?'<div class="schip" style="color:#fcd34d">Metered</div>':'')+
@@ -731,12 +808,14 @@ function openSheet(s){
     (s.is_ev&&s.numPoints?`<div class="schip">${s.numPoints} charge point${s.numPoints>1?'s':''}</div>`:'')+
     (s.is_ev&&s.connectors&&s.connectors.length?`<div class="schip">${s.connectors.join(', ')}</div>`:'')+
     `</div>`+
+    busyChartHtml+
     `<div class="sheet-btns">`+
     `<button class="sbtn sbtn-primary" onclick="driveToSpot(${s.lat},${s.lon})">${IC.nav} Drive</button>`+
     `<button class="sbtn sbtn-walk" onclick="walkToSpot(${s.lat},${s.lon})">${IC.walk} Walk</button>`+
     `<button class="sbtn sbtn-save" onclick="toggleSave(event,'${s.id}')">${savIc}</button>`+
-    `<button class="sbtn sbtn-close" onclick="closeSheet()">${IC.x}</button>`+
-    `</div>${payBtn}`;
+    `</div>`+
+    mapsRowHtml+
+    payBtn;
   document.getElementById('overlay').classList.add('open');
   document.getElementById('sheet').classList.add('open');
 }
@@ -843,6 +922,105 @@ function handleCmd(cmd){
   else if(/help|tutorial/.test(cmd)){showTut();}
   else{toast('Try: "find parking", "show free", "navigate", "show map"');}
 }
+
+
+// ── DRAG TO CLOSE SHEET ──
+(function(){
+  let startY=0, currentY=0, isDragging=false;
+  const getSheet=()=>document.getElementById('sheet');
+  const getHandle=()=>document.querySelector('.sheet-handle');
+
+  function onStart(clientY){
+    const sheet=getSheet();
+    if(!sheet.classList.contains('open'))return;
+    startY=clientY; currentY=clientY; isDragging=true;
+    sheet.style.transition='none';
+  }
+  function onMove(clientY){
+    if(!isDragging)return;
+    currentY=clientY;
+    const dy=Math.max(0,currentY-startY);
+    getSheet().style.transform=`translateY(${dy}px)`;
+  }
+  function onEnd(){
+    if(!isDragging)return;
+    isDragging=false;
+    const dy=currentY-startY;
+    const sheet=getSheet();
+    sheet.style.transition='';
+    sheet.style.transform='';
+    if(dy>80)closeSheet();
+  }
+
+  document.addEventListener('touchstart',e=>{
+    const handle=document.querySelector('.sheet-handle');
+    const header=document.querySelector('.sheet-topbar');
+    if(handle&&handle.contains(e.target))onStart(e.touches[0].clientY);
+    else if(header&&header.contains(e.target))onStart(e.touches[0].clientY);
+  },{passive:true});
+  document.addEventListener('touchmove',e=>{if(isDragging)onMove(e.touches[0].clientY);},{passive:true});
+  document.addEventListener('touchend',()=>onEnd());
+
+  // Mouse drag for desktop
+  document.addEventListener('mousedown',e=>{
+    const handle=document.querySelector('.sheet-handle');
+    const header=document.querySelector('.sheet-topbar');
+    if((handle&&handle.contains(e.target))||(header&&header.contains(e.target)))onStart(e.clientY);
+  });
+  document.addEventListener('mousemove',e=>{if(isDragging)onMove(e.clientY);});
+  document.addEventListener('mouseup',()=>onEnd());
+})();
+
+// ── CAR PIN ──
+let carPin=JSON.parse(localStorage.getItem('otpf_carpin')||'null');
+
+function saveCarPin(){
+  if(!userLat||!userLon){toast('Find your location first');return;}
+  carPin={lat:userLat,lon:userLon,time:Date.now(),addr:'Your parked location'};
+  // Try reverse geocode for address
+  fetch('https://nominatim.openstreetmap.org/reverse?lat='+userLat+'&lon='+userLon+'&format=json')
+    .then(r=>r.json()).then(d=>{
+      carPin.addr=d.display_name?d.display_name.split(',').slice(0,2).join(','):'Current location';
+      localStorage.setItem('otpf_carpin',JSON.stringify(carPin));
+      renderCarPin();toast('🚗 Car location saved!');
+    }).catch(()=>{localStorage.setItem('otpf_carpin',JSON.stringify(carPin));renderCarPin();toast('🚗 Car location saved!');});
+}
+
+function clearCarPin(){
+  carPin=null;
+  localStorage.removeItem('otpf_carpin');
+  renderCarPin();
+  toast('Car pin cleared');
+}
+
+function navToCarPin(){
+  if(!carPin)return;
+  openNav(carPin.lat,carPin.lon,'My Parked Car','walk');
+}
+
+function renderCarPin(){
+  const el=document.getElementById('carPinBanner');
+  if(!el)return;
+  if(carPin){
+    const mins=Math.round((Date.now()-carPin.time)/60000);
+    const timeStr=mins<60?mins+'m ago':Math.floor(mins/60)+'h ago';
+    el.innerHTML=`<div class="car-pin-banner" onclick="navToCarPin()">
+      <div class="car-pin-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17H5v-5l2.5-7h9L19 12v5Z"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="17.5" r="2.5"/></svg></div>
+      <div class="car-pin-text"><div class="car-pin-title">My Parked Car</div><div class="car-pin-sub">${carPin.addr} &middot; ${timeStr}</div></div>
+      <span class="car-pin-action">Navigate</span>
+      <span class="car-pin-action clear" onclick="event.stopPropagation();clearCarPin()">✕</span>
+    </div>`;
+  } else {
+    el.innerHTML=`<div class="car-pin-banner empty">
+      <div class="car-pin-icon" style="color:var(--muted)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17H5v-5l2.5-7h9L19 12v5Z"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="17.5" r="2.5"/></svg></div>
+      <div class="car-pin-text"><div class="car-pin-title" style="color:var(--muted)">Save Car Location</div><div class="car-pin-sub">Tap to mark where you parked</div></div>
+      <span class="car-pin-action" onclick="saveCarPin()">Save</span>
+    </div>`;
+  }
+}
+
+// Init car pin on load
+window.addEventListener('load',()=>{setTimeout(renderCarPin,100);});
 </script>
 </body>
 </html>
