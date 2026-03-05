@@ -123,11 +123,24 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .welcome-pin-ring-2{position:absolute;width:90px;height:90px;border-radius:50%;border:1px solid var(--p1);opacity:0.1;animation:w-ring 2.5s ease-in-out infinite 0.4s;}
 @keyframes w-ring{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
 .welcome-pin-core{width:36px;height:36px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;box-shadow:var(--glow-sm);z-index:1;position:relative;font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:#fff;}
-.welcome-cards{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:16px;}
-.welcome-card{display:flex;align-items:center;gap:9px;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;pointer-events:none;user-select:none;}
-.welcome-card-icon{display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--p2);}
-.welcome-card-title{font-size:12px;font-weight:600;color:var(--white2);margin-bottom:1px;}
-.welcome-card-sub{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+.saved-preview{margin-bottom:14px;}
+.saved-preview-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.saved-preview-title{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:6px;}
+.saved-preview-manage{font-size:11px;font-weight:600;color:var(--p2);cursor:pointer;padding:3px 8px;background:var(--pdim);border-radius:6px;}
+.saved-preview-empty{padding:18px 14px;background:var(--bg2);border:1px dashed var(--border);border-radius:12px;text-align:center;}
+.saved-preview-empty-icon{margin-bottom:6px;color:var(--muted2);display:flex;justify-content:center;}
+.saved-preview-empty-text{font-size:12px;color:var(--muted);line-height:1.5;}
+.saved-preview-empty-text span{color:var(--p2);}
+.saved-preview-item{display:flex;align-items:center;gap:11px;padding:11px 13px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;margin-bottom:6px;cursor:pointer;transition:border-color 0.15s,transform 0.1s;}
+.saved-preview-item:active{border-color:var(--border2);transform:scale(0.98);}
+.saved-preview-badge{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.saved-preview-badge.garage{background:var(--pdim);color:var(--p2);}
+.saved-preview-badge.lot{background:var(--bluedim);color:var(--blue);}
+.saved-preview-badge.street,.saved-preview-badge.street_parking{background:var(--amberdim);color:var(--amber);}
+.saved-preview-badge.ev{background:var(--greendim);color:var(--green);}
+.saved-preview-name{font-size:13px;font-weight:600;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;}
+.saved-preview-addr{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'JetBrains Mono',monospace;}
+.saved-preview-nav{display:flex;align-items:center;color:var(--p2);flex-shrink:0;}
 .welcome-cta{width:100%;padding:15px;background:var(--grad);color:#fff;border:none;border-radius:14px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity 0.15s,transform 0.1s;box-shadow:0 4px 24px rgba(168,85,247,0.4);letter-spacing:0.3px;}
 .welcome-cta:active{opacity:0.85;transform:scale(0.98);}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:100;opacity:0;pointer-events:none;transition:opacity 0.25s;backdrop-filter:blur(8px);}
@@ -368,12 +381,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
       </div>
       <div id="welcomeMapDiv" style="width:100%;height:100%;display:none;pointer-events:none;"></div>
     </div>
-    <div class="welcome-cards">
-      <div class="welcome-card"><div class="welcome-card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9 17V7h4a3 3 0 0 1 0 6H9"/></svg></div><div><div class="welcome-card-title">Real Parking</div><div class="welcome-card-sub">Garages, lots &amp; street</div></div></div>
-      <div class="welcome-card"><div class="welcome-card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg></div><div><div class="welcome-card-title">EV Charging</div><div class="welcome-card-sub">Live availability</div></div></div>
-      <div class="welcome-card"><div class="welcome-card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg></div><div><div class="welcome-card-title">Navigate</div><div class="welcome-card-sub">In-app directions</div></div></div>
-      <div class="welcome-card"><div class="welcome-card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg></div><div><div class="welcome-card-title">Save Spots</div><div class="welcome-card-sub">Quick access</div></div></div>
-    </div>
+    <div class="saved-preview" id="welcomeSavedPreview"></div>
     <button class="welcome-cta" onclick="findParking()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg> Find Parking Near Me</button>
   </div>
   <div id="resultsList"></div>
@@ -446,7 +454,7 @@ let saved=JSON.parse(localStorage.getItem('otpf_saved')||'[]');
 let lowBatt=false,recog=null,autoRefreshTimer=null;
 const AUTO_REFRESH_MS=3*60*1000;
 
-window.addEventListener('load',loadWelcomeMap);
+window.addEventListener('load',()=>{loadWelcomeMap();renderWelcomeSaved();});
 function loadWelcomeMap(){
   if(!navigator.geolocation)return;
   navigator.geolocation.getCurrentPosition(pos=>{
@@ -723,6 +731,7 @@ function toggleSave(e,id){
   else saved.push({id:s.id,name:s.name,address:s.address,lat:s.lat,lon:s.lon,type:s.type});
   localStorage.setItem('otpf_saved',JSON.stringify(saved));
   renderList();
+  renderWelcomeSaved();
   if(document.getElementById('savedPanel').classList.contains('open'))renderSaved();
 }
 function renderSaved(){
@@ -733,7 +742,47 @@ function renderSaved(){
     <div style="flex:1;min-width:0"><div class="saved-item-name">${s.name}</div><div class="saved-item-addr">${s.address}</div></div>
     <div class="del-btn" onclick="event.stopPropagation();deleteSaved('${s.id}')">${IC.trash}</div></div>`).join('');
 }
-function deleteSaved(id){saved=saved.filter(s=>s.id!==id);localStorage.setItem('otpf_saved',JSON.stringify(saved));renderSaved();renderList();}
+function deleteSaved(id){saved=saved.filter(s=>s.id!==id);localStorage.setItem('otpf_saved',JSON.stringify(saved));renderSaved();renderList();renderWelcomeSaved();}
+
+// ── WELCOME SAVED PREVIEW ──
+function renderWelcomeSaved(){
+  const el=document.getElementById('welcomeSavedPreview');
+  if(!el)return;
+  const IC_BM='<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>';
+  const IC_NAV='<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>';
+  const IC_CAR='<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17H5v-5l2.5-7h9L19 12v5Z"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="17.5" r="2.5"/></svg>';
+  if(!saved.length){
+    el.innerHTML=`<div class="saved-preview">
+      <div class="saved-preview-header">
+        <div class="saved-preview-title">${IC_BM} Saved Spots</div>
+      </div>
+      <div class="saved-preview-empty">
+        <div class="saved-preview-empty-icon">${IC_BM}</div>
+        <div class="saved-preview-empty-text">No saved spots yet.<br>Tap <span>&#9733;</span> on any result to save it here.</div>
+      </div>
+    </div>`;
+    return;
+  }
+  const preview=saved.slice(0,3);
+  const items=preview.map(s=>`
+    <div class="saved-preview-item" onclick="driveToSpot(${s.lat},${s.lon})">
+      <div class="saved-preview-badge ${s.type||'lot'}">${typeIcon(s.type||'lot')}</div>
+      <div style="flex:1;min-width:0">
+        <div class="saved-preview-name">${s.name}</div>
+        <div class="saved-preview-addr">${s.address||'Saved location'}</div>
+      </div>
+      <div class="saved-preview-nav">${IC_NAV}</div>
+    </div>`).join('');
+  const more=saved.length>3?`<div style="text-align:center;font-size:11px;color:var(--muted);padding:4px 0;font-family:'JetBrains Mono',monospace;">+${saved.length-3} more &middot; tap Saved in menu</div>`:'';
+  el.innerHTML=`<div class="saved-preview">
+    <div class="saved-preview-header">
+      <div class="saved-preview-title">${IC_BM} Saved Spots</div>
+      <div class="saved-preview-manage" onclick="togglePanel('savedPanel','ddFav')">Manage</div>
+    </div>
+    ${items}${more}
+  </div>`;
+}
+
 
 function drawMap(){
   const canvas=document.getElementById('mapCanvas'),cont=document.getElementById('mapContainer');
