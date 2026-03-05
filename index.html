@@ -299,6 +299,50 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .loc-blocked-banner strong{color:var(--red);}
 .loc-blocked-steps{margin-top:6px;padding-left:14px;font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
 .loc-blocked-steps li{margin-bottom:3px;}
+
+.privacy-panel{position:fixed;inset:0;background:var(--bg);z-index:300;display:flex;flex-direction:column;transform:translateX(100%);transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);}
+.privacy-panel.open{transform:translateX(0);}
+.privacy-header{padding:14px 18px 12px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);background:rgba(14,12,26,0.95);backdrop-filter:blur(20px);flex-shrink:0;}
+.privacy-back{width:36px;height:36px;border-radius:10px;background:var(--bg3);border:1px solid var(--border);color:var(--white2);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:border-color 0.15s;}
+.privacy-back:active{border-color:var(--border2);}
+.privacy-body{flex:1;overflow-y:auto;padding:0 0 60px;}
+.prv-hero{padding:28px 22px 24px;background:linear-gradient(180deg,var(--bg2) 0%,var(--bg) 100%);border-bottom:1px solid var(--border);position:relative;overflow:hidden;}
+.prv-hero::before{content:'';position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(168,85,247,0.07) 0%,transparent 70%);pointer-events:none;}
+.prv-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;background:var(--pdim);border:1px solid var(--border2);border-radius:100px;font-size:10px;font-weight:700;color:var(--p2);letter-spacing:1.5px;text-transform:uppercase;font-family:'JetBrains Mono',monospace;margin-bottom:12px;}
+.prv-title{font-size:26px;font-weight:800;letter-spacing:-0.5px;line-height:1.15;margin-bottom:8px;}
+.prv-title span{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.prv-sub{font-size:13px;color:var(--muted);line-height:1.6;}
+.prv-updated{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:4px 11px;background:var(--bg3);border:1px solid var(--border);border-radius:100px;font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+.prv-updated-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);}
+.prv-content{padding:0 20px;max-width:680px;margin:0 auto;}
+.prv-ok-box{margin:20px 0 4px;padding:14px 16px;background:var(--greendim);border:1px solid rgba(34,197,94,0.2);border-radius:12px;font-size:13px;color:#86efac;line-height:1.6;}
+.prv-section{padding:22px 0 4px;border-bottom:1px solid var(--border);}
+.prv-section:last-child{border-bottom:none;}
+.prv-section-num{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);font-family:'JetBrains Mono',monospace;margin-bottom:5px;}
+.prv-section-title{font-size:17px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:9px;}
+.prv-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.prv-icon.p{background:var(--pdim);color:var(--p2);}
+.prv-icon.g{background:var(--greendim);color:var(--green);}
+.prv-icon.a{background:var(--amberdim);color:var(--amber);}
+.prv-p{font-size:13px;color:var(--white2);line-height:1.75;margin-bottom:10px;}
+.prv-p:last-child{margin-bottom:0;}
+.prv-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px;}
+.prv-table th{text-align:left;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);font-family:'JetBrains Mono',monospace;padding:7px 10px;border-bottom:1px solid var(--border);}
+.prv-table td{color:var(--white2);padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.5;}
+.prv-table tr:last-child td{border-bottom:none;}
+.prv-table td:first-child{font-weight:600;color:var(--white);font-size:11px;}
+.prv-pill{display:inline-block;font-size:9px;font-family:'JetBrains Mono',monospace;padding:2px 7px;border-radius:4px;}
+.prv-pill.no{background:var(--greendim);color:#86efac;}
+.prv-pill.local{background:var(--pdim);color:var(--p2);}
+.prv-ul{padding-left:16px;margin:8px 0 10px;}
+.prv-ul li{font-size:13px;color:var(--white2);line-height:1.75;margin-bottom:3px;}
+.prv-ul li strong{color:var(--white);}
+.prv-warn{margin:12px 0;padding:12px 14px;background:var(--amberdim);border:1px solid rgba(245,158,11,0.2);border-radius:10px;font-size:12px;color:#fcd34d;line-height:1.6;}
+.prv-contact{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:18px;margin-top:22px;display:flex;align-items:flex-start;gap:14px;}
+.prv-contact-icon{width:44px;height:44px;border-radius:12px;background:var(--grad);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:var(--glow-sm);}
+.prv-contact-title{font-size:14px;font-weight:700;margin-bottom:3px;}
+.prv-contact-sub{font-size:11px;color:var(--muted);line-height:1.5;}
+.prv-contact-email{display:inline-block;margin-top:8px;padding:5px 12px;background:var(--pdim);border:1px solid var(--border2);border-radius:7px;font-size:11px;font-weight:600;color:var(--p2);font-family:'JetBrains Mono',monospace;}
 </style>
 </head>
 <body>
@@ -344,7 +388,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
         <div class="dd-sep"></div>
         <div class="dd-section">Help</div>
         <div class="dd-item" onclick="event.stopPropagation();closeMenu();showTut()"><span class="dd-icon"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg></span>Tutorial</div>
-        <div class="dd-item" onclick="event.stopPropagation();closeMenu();window.open('privacy.html','_blank')"><span class="dd-icon"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>Privacy Policy</div>
+        <div class="dd-item" onclick="event.stopPropagation();closeMenu();openPrivacy()"><span class="dd-icon"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>Privacy Policy</div>
       </div>
     </div>
   </div>
@@ -1266,6 +1310,113 @@ findParking=function(){
   document.getElementById('locBlockedBanner').classList.remove('show');
   _origFindParking.apply(this,arguments);
 };
+
+// ── PRIVACY PANEL ──
+function openPrivacy(){document.getElementById('privacyPanel').classList.add('open');}
+function closePrivacy(){document.getElementById('privacyPanel').classList.remove('open');}
 </script>
+
+<div class="privacy-panel" id="privacyPanel">
+  <div class="privacy-header">
+    <div class="privacy-back" onclick="closePrivacy()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></div>
+    <div class="logo-mark">P</div>
+    <div class="brand-text">
+      <div class="brand-eyebrow">One Touch</div>
+      <div class="brand-name">Parking <span>Finder</span></div>
+    </div>
+  </div>
+  <div class="privacy-body">
+    <div class="prv-hero">
+      <div class="prv-badge"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Legal</div>
+      <h1 class="prv-title">Privacy <span>Policy</span></h1>
+      <p class="prv-sub">What we collect, how we use it, and your choices.</p>
+      <div class="prv-updated"><div class="prv-updated-dot"></div>Effective January 1, 2025 &nbsp;&middot;&nbsp; v1.0</div>
+    </div>
+    <div class="prv-content">
+      <div class="prv-ok-box">&#x2705; <strong>Short version:</strong> We do not sell your data. We do not store your location on our servers. Everything is processed locally on your device or fetched in real time and discarded.</div>
+
+      <div class="prv-section">
+        <div class="prv-section-num">01</div>
+        <div class="prv-section-title"><div class="prv-icon p"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>Who We Are</div>
+        <p class="prv-p">One Touch Parking Finder is a mobile web app that helps drivers find parking and EV charging. It is operated independently and available as a Progressive Web App (PWA). Questions? See Section 09.</p>
+      </div>
+
+      <div class="prv-section">
+        <div class="prv-section-num">02</div>
+        <div class="prv-section-title"><div class="prv-icon p"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>What Data We Collect</div>
+        <table class="prv-table">
+          <thead><tr><th>Data</th><th>Collected?</th><th>Where It Goes</th></tr></thead>
+          <tbody>
+            <tr><td>GPS Location</td><td><span class="prv-pill local">Device only</span></td><td>Used to fetch nearby results. Never stored on our servers.</td></tr>
+            <tr><td>Search Queries</td><td><span class="prv-pill local">Device only</span></td><td>Saved in browser localStorage for history. Never leaves your device.</td></tr>
+            <tr><td>Saved Spots</td><td><span class="prv-pill local">Device only</span></td><td>localStorage only. Never synced to a server.</td></tr>
+            <tr><td>Car Pin</td><td><span class="prv-pill local">Device only</span></td><td>localStorage only. Never transmitted.</td></tr>
+            <tr><td>Name / Email</td><td><span class="prv-pill no">Not collected</span></td><td>No accounts, no sign-up, no login.</td></tr>
+            <tr><td>Payment Info</td><td><span class="prv-pill no">Not collected</span></td><td>Payment buttons open third-party apps. We never handle payment data.</td></tr>
+            <tr><td>Analytics / Ads</td><td><span class="prv-pill no">Not collected</span></td><td>No analytics SDK, no trackers, no advertising.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="prv-section">
+        <div class="prv-section-num">03</div>
+        <div class="prv-section-title"><div class="prv-icon g"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>How We Use Your Data</div>
+        <p class="prv-p">Your location is used only to query our parking API for nearby results. Coordinates are sent over HTTPS and not logged or retained by our backend. All preferences are stored exclusively in your browser's localStorage.</p>
+        <div class="prv-warn">&#x26A0;&#xFE0F; If you clear your browser data or uninstall the app, all saved spots and preferences are permanently deleted — we have no server backup.</div>
+      </div>
+
+      <div class="prv-section">
+        <div class="prv-section-num">04</div>
+        <div class="prv-section-title"><div class="prv-icon a"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>Third-Party Services</div>
+        <ul class="prv-ul">
+          <li><strong>OpenStreetMap / Nominatim</strong> — Address search &amp; reverse geocoding. Coordinates sent to their servers.</li>
+          <li><strong>OSRM</strong> — Walking and driving directions. Origin &amp; destination coordinates transmitted.</li>
+          <li><strong>CartoDB / Carto</strong> — Map tile provider. Approximate location inferred from tile requests.</li>
+          <li><strong>Open-Meteo</strong> — EV Planner weather auto-fill. Coordinates sent to retrieve local conditions.</li>
+          <li><strong>Google Maps / Apple Maps</strong> — Opened optionally via deep link. Only destination coordinates passed.</li>
+          <li><strong>Parking Operators</strong> — PayByPhone, HonkMobile etc. opened via deep link. No personal data shared.</li>
+        </ul>
+      </div>
+
+      <div class="prv-section">
+        <div class="prv-section-num">05</div>
+        <div class="prv-section-title"><div class="prv-icon g"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>Your Rights &amp; Choices</div>
+        <ul class="prv-ul">
+          <li><strong>Location access</strong> — Deny or revoke at any time in device settings. The search bar works without GPS.</li>
+          <li><strong>Clear all local data</strong> — Clear browser site data for this app to erase everything instantly.</li>
+          <li><strong>Saved spots</strong> — Delete individually inside the app at any time.</li>
+        </ul>
+        <p class="prv-p">Residents of the EU (GDPR), California (CCPA), and Canada (PIPEDA) have additional rights regarding personal data. As we store no personal data on our servers, these impose minimal obligations — but we are committed to full compliance. Contact us with any questions.</p>
+      </div>
+
+      <div class="prv-section">
+        <div class="prv-section-num">06</div>
+        <div class="prv-section-title"><div class="prv-icon a"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>Children's Privacy</div>
+        <p class="prv-p">This app is not directed at children under 13. We do not knowingly collect information from children. Contact us immediately if you believe a child has submitted personal data.</p>
+      </div>
+
+      <div class="prv-section">
+        <div class="prv-section-num">07</div>
+        <div class="prv-section-title"><div class="prv-icon p"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>Changes to This Policy</div>
+        <p class="prv-p">We may update this policy from time to time. The effective date at the top will always reflect the latest version. For significant changes we will display a notice in the app. Continued use after changes constitutes acceptance.</p>
+      </div>
+
+      <div class="prv-section">
+        <div class="prv-section-num">08</div>
+        <div class="prv-section-title"><div class="prv-icon g"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21.2 8.4c.5.38.8.97.8 1.6v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V10a2 2 0 0 1 .8-1.6l8-6a2 2 0 0 1 2.4 0l8 6Z"/><path d="m22 10-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 10"/></svg></div>Contact Us</div>
+        <div class="prv-contact">
+          <div class="prv-contact-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21.2 8.4c.5.38.8.97.8 1.6v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V10a2 2 0 0 1 .8-1.6l8-6a2 2 0 0 1 2.4 0l8 6Z"/><path d="m22 10-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 10"/></svg></div>
+          <div>
+            <div class="prv-contact-title">One Touch Parking Finder</div>
+            <div class="prv-contact-sub">We aim to respond within 5 business days.<br>Please include "Privacy" in the subject line.</div>
+            <div class="prv-contact-email">privacy@onetouchparking.app</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
