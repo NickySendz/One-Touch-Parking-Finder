@@ -263,6 +263,42 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .car-pin-sub{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:2px;}
 .car-pin-action{font-size:11px;font-weight:700;color:var(--green);cursor:pointer;flex-shrink:0;padding:4px 8px;background:rgba(34,197,94,0.1);border-radius:6px;}
 .car-pin-action.clear{color:var(--muted);background:transparent;}
+
+/* Search bar */
+.search-bar-wrap{padding:10px 18px 0;position:relative;}
+.search-bar{display:flex;align-items:center;gap:0;background:var(--bg3);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color 0.15s,box-shadow 0.15s;}
+.search-bar:focus-within{border-color:var(--border2);box-shadow:0 0 0 3px rgba(168,85,247,0.08);}
+.search-bar-icon{padding:0 12px;color:var(--muted);display:flex;align-items:center;flex-shrink:0;}
+.search-inp{flex:1;background:transparent;border:none;outline:none;padding:12px 0;font-family:'Outfit',sans-serif;font-size:14px;color:var(--white);min-width:0;}
+.search-inp::placeholder{color:var(--muted);}
+.search-clear{padding:0 12px;color:var(--muted);display:none;align-items:center;cursor:pointer;flex-shrink:0;transition:color 0.15s;}
+.search-clear.show{display:flex;}
+.search-clear:active{color:var(--white);}
+.search-loc-btn{padding:0 13px;border-left:1px solid var(--border);color:var(--p2);display:flex;align-items:center;cursor:pointer;height:100%;transition:background 0.15s;flex-shrink:0;}
+.search-loc-btn:active{background:var(--pdim);}
+
+/* Search suggestions dropdown */
+.search-suggestions{position:absolute;top:calc(100% + 4px);left:18px;right:18px;background:var(--bg2);border:1px solid var(--border2);border-radius:14px;z-index:60;box-shadow:0 16px 50px rgba(0,0,0,0.7),var(--glow);overflow:hidden;display:none;}
+.search-suggestions.show{display:block;}
+.search-suggestion{display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background 0.12s;}
+.search-suggestion:last-child{border-bottom:none;}
+.search-suggestion:active{background:var(--bg3);}
+.search-sug-icon{width:32px;height:32px;border-radius:9px;background:var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--muted);flex-shrink:0;}
+.search-sug-name{font-size:13px;font-weight:600;color:var(--white);margin-bottom:2px;}
+.search-sug-addr{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+.search-sug-dist{font-size:10px;color:var(--p2);font-family:'JetBrains Mono',monospace;flex-shrink:0;margin-left:auto;padding-left:8px;}
+.search-loading{padding:16px;text-align:center;font-size:12px;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:8px;}
+.search-loading-dot{width:5px;height:5px;border-radius:50%;background:var(--p1);animation:sdot 1.2s ease-in-out infinite;}
+.search-loading-dot:nth-child(2){animation-delay:0.2s;}
+.search-loading-dot:nth-child(3){animation-delay:0.4s;}
+@keyframes sdot{0%,80%,100%{transform:scale(0.6);opacity:0.4;}40%{transform:scale(1);opacity:1;}}
+
+/* Location blocked banner */
+.loc-blocked-banner{display:none;margin:10px 18px 0;padding:11px 14px;background:var(--reddim);border:1px solid rgba(239,68,68,0.25);border-radius:11px;font-size:12px;color:#fca5a5;line-height:1.5;}
+.loc-blocked-banner.show{display:block;}
+.loc-blocked-banner strong{color:var(--red);}
+.loc-blocked-steps{margin-top:6px;padding-left:14px;font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+.loc-blocked-steps li{margin-bottom:3px;}
 </style>
 </head>
 <body>
@@ -308,6 +344,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
         <div class="dd-sep"></div>
         <div class="dd-section">Help</div>
         <div class="dd-item" onclick="event.stopPropagation();closeMenu();showTut()"><span class="dd-icon"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg></span>Tutorial</div>
+        <div class="dd-item" onclick="event.stopPropagation();closeMenu();window.open('privacy.html','_blank')"><span class="dd-icon"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>Privacy Policy</div>
       </div>
     </div>
   </div>
@@ -336,6 +373,27 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
     <div class="status-dot" id="statusDot"></div>
     <span id="statusText">Tap the button to find parking near you</span>
   </div>
+</div>
+
+<div class="search-bar-wrap">
+  <div class="search-bar">
+    <div class="search-bar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></div>
+    <input class="search-inp" id="searchInp" placeholder="Search an address or place&hellip;" autocomplete="off"
+      oninput="onSearchInput(this.value)"
+      onfocus="onSearchFocus()"
+      onkeydown="onSearchKey(event)"/>
+    <div class="search-clear" id="searchClear" onclick="clearSearch()"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></div>
+    <div class="search-loc-btn" onclick="findParking()" title="Use my location"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg></div>
+  </div>
+  <div class="search-suggestions" id="searchSuggestions"></div>
+</div>
+<div class="loc-blocked-banner" id="locBlockedBanner">
+  <strong>Location access blocked.</strong> To use GPS parking search:<br>
+  <ul class="loc-blocked-steps">
+    <li>iOS: Settings &rarr; Privacy &rarr; Location Services &rarr; Safari/Chrome &rarr; Allow</li>
+    <li>Android: Settings &rarr; Apps &rarr; Browser &rarr; Permissions &rarr; Location &rarr; Allow</li>
+  </ul>
+  You can still search by typing an address above.
 </div>
 
 <div class="toolbar">
@@ -626,7 +684,8 @@ function findParking(){
     }).catch(()=>{btn.classList.remove('loading');document.getElementById('findLabel').textContent='Find Parking';setStatus('Something went wrong. Try again.','err');});
   },err=>{
     btn.classList.remove('loading');document.getElementById('findLabel').textContent='Find Parking';
-    setStatus(err.code===1?'Location blocked — allow access in settings':'Location failed. Try again.','err');
+    setStatus(err.code===1?'Location blocked — use search bar above':'Location failed. Try again.','err');
+    if(err.code===1)document.getElementById('locBlockedBanner').classList.add('show');
   },{enableHighAccuracy:true,timeout:10000,maximumAge:0});
 }
 
@@ -1070,6 +1129,143 @@ function renderCarPin(){
 
 // Init car pin on load
 window.addEventListener('load',()=>{setTimeout(renderCarPin,100);});
+
+
+// ── ADDRESS SEARCH ──
+let searchTimer=null;
+let searchHistory=JSON.parse(localStorage.getItem('otpf_searchhist')||'[]');
+
+function onSearchInput(val){
+  const clear=document.getElementById('searchClear');
+  clear.classList.toggle('show', val.length>0);
+  clearTimeout(searchTimer);
+  if(!val.trim()){hideSuggestions();return;}
+  if(val.length<2)return;
+  showSearchLoading();
+  searchTimer=setTimeout(()=>geocodeSearch(val),350);
+}
+
+function onSearchFocus(){
+  const val=document.getElementById('searchInp').value.trim();
+  if(!val&&searchHistory.length){showHistory();return;}
+  if(val.length>=2)geocodeSearch(val);
+}
+
+function onSearchKey(e){
+  if(e.key==='Enter'){
+    const val=document.getElementById('searchInp').value.trim();
+    if(val)geocodeSearch(val,true);
+    document.getElementById('searchInp').blur();
+  }
+  if(e.key==='Escape'){clearSearch();}
+}
+
+function clearSearch(){
+  document.getElementById('searchInp').value='';
+  document.getElementById('searchClear').classList.remove('show');
+  hideSuggestions();
+}
+
+function hideSuggestions(){
+  document.getElementById('searchSuggestions').classList.remove('show');
+}
+
+function showSearchLoading(){
+  const el=document.getElementById('searchSuggestions');
+  el.innerHTML='<div class="search-loading"><div class="search-loading-dot"></div><div class="search-loading-dot"></div><div class="search-loading-dot"></div></div>';
+  el.classList.add('show');
+}
+
+function showHistory(){
+  const el=document.getElementById('searchSuggestions');
+  if(!searchHistory.length){hideSuggestions();return;}
+  const IC_H='<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>';
+  el.innerHTML=searchHistory.slice(0,4).map(h=>`
+    <div class="search-suggestion" onclick="selectSearchResult(${h.lat},${h.lon},'${h.name.replace(/'/g,"\'")}')">
+      <div class="search-sug-icon">${IC_H}</div>
+      <div style="flex:1;min-width:0">
+        <div class="search-sug-name">${h.name}</div>
+        <div class="search-sug-addr">${h.addr}</div>
+      </div>
+    </div>`).join('');
+  el.classList.add('show');
+}
+
+async function geocodeSearch(query, immediate=false){
+  try{
+    const url='https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(query)+'&format=json&limit=5&addressdetails=1';
+    const r=await fetch(url,{headers:{'Accept-Language':'en'}});
+    const results=await r.json();
+    if(!results.length){
+      document.getElementById('searchSuggestions').innerHTML='<div class="search-loading" style="color:var(--muted)">No results found</div>';
+      return;
+    }
+    const IC_P='<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>';
+    const el=document.getElementById('searchSuggestions');
+    el.innerHTML=results.map(r=>{
+      const name=r.display_name.split(',').slice(0,2).join(',');
+      const addr=r.display_name.split(',').slice(2,4).join(',').trim();
+      const lat=parseFloat(r.lat),lon=parseFloat(r.lon);
+      const dist=userLat?Math.round(distKm(userLat,userLon,lat,lon)*10)/10:null;
+      const distStr=dist!==null?(useKm?dist+'km':Math.round(dist*0.621371*10)/10+'mi'):'';
+      return `<div class="search-suggestion" onclick="selectSearchResult(${lat},${lon},'${name.replace(/'/g,"\'")}')">
+        <div class="search-sug-icon">${IC_P}</div>
+        <div style="flex:1;min-width:0">
+          <div class="search-sug-name">${name}</div>
+          <div class="search-sug-addr">${addr}</div>
+        </div>
+        ${distStr?`<div class="search-sug-dist">${distStr}</div>`:''}
+      </div>`;
+    }).join('');
+    el.classList.add('show');
+    if(immediate&&results.length){
+      const r=results[0];
+      selectSearchResult(parseFloat(r.lat),parseFloat(r.lon),r.display_name.split(',').slice(0,2).join(','));
+    }
+  }catch(e){hideSuggestions();}
+}
+
+function selectSearchResult(lat,lon,name){
+  userLat=lat; userLon=lon;
+  document.getElementById('searchInp').value=name;
+  document.getElementById('searchClear').classList.add('show');
+  hideSuggestions();
+  document.getElementById('searchInp').blur();
+
+  // Save to history
+  const addr=name;
+  searchHistory=searchHistory.filter(h=>h.name!==name).slice(0,3);
+  searchHistory.unshift({lat,lon,name,addr});
+  localStorage.setItem('otpf_searchhist',JSON.stringify(searchHistory));
+
+  // Fetch parking for searched location
+  const btn=document.getElementById('findBtn');
+  document.getElementById('findLabel').textContent='Searching…';
+  btn.classList.add('loading');
+  setStatus('Searching near '+name.split(',')[0]+'…','ok');
+  if(!localStorage.getItem('otpf_unit'))setUnit(isCanada(lat,lon)?'km':'mi');
+  Promise.all([doFetch(lat,lon),fetchEV(lat,lon),fetchStreet(lat,lon)]).then(()=>{
+    btn.classList.remove('loading');
+    document.getElementById('findLabel').textContent='Refresh';
+    renderList();
+    if(view==='map')setTimeout(drawMap,50);
+    setStatus('Found '+spots.length+' parking · '+streetSpots.length+' street · '+evSpots.length+' EV near '+name.split(',')[0],'ok');
+    startAutoRefresh();
+    document.getElementById('welcomeState').classList.add('hide');
+  }).catch(()=>{btn.classList.remove('loading');setStatus('Search failed. Try again.','err');});
+}
+
+// Close suggestions when tapping outside
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.search-bar-wrap'))hideSuggestions();
+});
+
+// Show blocked banner when GPS fails with permission error
+const _origFindParking=findParking;
+findParking=function(){
+  document.getElementById('locBlockedBanner').classList.remove('show');
+  _origFindParking.apply(this,arguments);
+};
 </script>
 </body>
 </html>
