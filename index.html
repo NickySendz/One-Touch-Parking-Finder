@@ -1320,100 +1320,78 @@ function closePrivacy(){document.getElementById('privacyPanel').classList.remove
   <div class="privacy-header">
     <div class="privacy-back" onclick="closePrivacy()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></div>
     <div class="logo-mark">P</div>
-    <div class="brand-text">
-      <div class="brand-eyebrow">One Touch</div>
-      <div class="brand-name">Parking <span>Finder</span></div>
-    </div>
+    <div class="brand-text"><div class="brand-eyebrow">One Touch</div><div class="brand-name">Parking <span>Finder</span></div></div>
   </div>
   <div class="privacy-body">
     <div class="prv-hero">
-      <div class="prv-badge"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Legal</div>
+      <div class="prv-badge">&#x1F6E1; Legal</div>
       <h1 class="prv-title">Privacy <span>Policy</span></h1>
       <p class="prv-sub">What we collect, how we use it, and your choices.</p>
-      <div class="prv-updated"><div class="prv-updated-dot"></div>Effective January 1, 2025 &nbsp;&middot;&nbsp; v1.0</div>
+      <div class="prv-updated"><div class="prv-updated-dot"></div>Effective January 1, 2025 &middot; v1.0</div>
     </div>
     <div class="prv-content">
-      <div class="prv-ok-box">&#x2705; <strong>Short version:</strong> We do not sell your data. We do not store your location on our servers. Everything is processed locally on your device or fetched in real time and discarded.</div>
+      <div class="prv-ok-box">&#x2705; <strong>The short version:</strong> We do not sell your data. We do not store your location on our servers. Everything stays on your device or is fetched in real time and discarded.</div>
 
       <div class="prv-section">
-        <div class="prv-section-num">01</div>
-        <div class="prv-section-title"><div class="prv-icon p"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>Who We Are</div>
-        <p class="prv-p">One Touch Parking Finder is a mobile web app that helps drivers find parking and EV charging. It is operated independently and available as a Progressive Web App (PWA). Questions? See Section 09.</p>
-      </div>
-
-      <div class="prv-section">
-        <div class="prv-section-num">02</div>
-        <div class="prv-section-title"><div class="prv-icon p"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>What Data We Collect</div>
+        <div class="prv-section-num">01 &mdash; What We Collect</div>
         <table class="prv-table">
-          <thead><tr><th>Data</th><th>Collected?</th><th>Where It Goes</th></tr></thead>
+          <thead><tr><th>Data</th><th>Stored?</th><th>Details</th></tr></thead>
           <tbody>
             <tr><td>GPS Location</td><td><span class="prv-pill local">Device only</span></td><td>Used to fetch nearby results. Never stored on our servers.</td></tr>
-            <tr><td>Search Queries</td><td><span class="prv-pill local">Device only</span></td><td>Saved in browser localStorage for history. Never leaves your device.</td></tr>
+            <tr><td>Search History</td><td><span class="prv-pill local">Device only</span></td><td>Saved in browser localStorage. Never leaves your device.</td></tr>
             <tr><td>Saved Spots</td><td><span class="prv-pill local">Device only</span></td><td>localStorage only. Never synced to a server.</td></tr>
             <tr><td>Car Pin</td><td><span class="prv-pill local">Device only</span></td><td>localStorage only. Never transmitted.</td></tr>
             <tr><td>Name / Email</td><td><span class="prv-pill no">Not collected</span></td><td>No accounts, no sign-up, no login.</td></tr>
             <tr><td>Payment Info</td><td><span class="prv-pill no">Not collected</span></td><td>Payment buttons open third-party apps. We never handle payment data.</td></tr>
-            <tr><td>Analytics / Ads</td><td><span class="prv-pill no">Not collected</span></td><td>No analytics SDK, no trackers, no advertising.</td></tr>
+            <tr><td>Analytics / Ads</td><td><span class="prv-pill no">Not collected</span></td><td>No tracking, no analytics SDK, no advertising of any kind.</td></tr>
           </tbody>
         </table>
       </div>
 
       <div class="prv-section">
-        <div class="prv-section-num">03</div>
-        <div class="prv-section-title"><div class="prv-icon g"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>How We Use Your Data</div>
-        <p class="prv-p">Your location is used only to query our parking API for nearby results. Coordinates are sent over HTTPS and not logged or retained by our backend. All preferences are stored exclusively in your browser's localStorage.</p>
-        <div class="prv-warn">&#x26A0;&#xFE0F; If you clear your browser data or uninstall the app, all saved spots and preferences are permanently deleted — we have no server backup.</div>
+        <div class="prv-section-num">02 &mdash; How We Use It</div>
+        <p class="prv-p">Your location is passed over HTTPS to our parking API to return nearby results, then discarded. All preferences (saved spots, search history, car pin, units) live only in your browser's localStorage and are never transmitted.</p>
+        <div class="prv-warn">&#x26A0;&#xFE0F; Clearing your browser data permanently deletes all saved spots and preferences &mdash; we have no server backup.</div>
       </div>
 
       <div class="prv-section">
-        <div class="prv-section-num">04</div>
-        <div class="prv-section-title"><div class="prv-icon a"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>Third-Party Services</div>
+        <div class="prv-section-num">03 &mdash; Third-Party Services</div>
         <ul class="prv-ul">
-          <li><strong>OpenStreetMap / Nominatim</strong> — Address search &amp; reverse geocoding. Coordinates sent to their servers.</li>
-          <li><strong>OSRM</strong> — Walking and driving directions. Origin &amp; destination coordinates transmitted.</li>
-          <li><strong>CartoDB / Carto</strong> — Map tile provider. Approximate location inferred from tile requests.</li>
-          <li><strong>Open-Meteo</strong> — EV Planner weather auto-fill. Coordinates sent to retrieve local conditions.</li>
-          <li><strong>Google Maps / Apple Maps</strong> — Opened optionally via deep link. Only destination coordinates passed.</li>
-          <li><strong>Parking Operators</strong> — PayByPhone, HonkMobile etc. opened via deep link. No personal data shared.</li>
+          <li><strong>OpenStreetMap / Nominatim</strong> &mdash; Address search. Coordinates sent to their servers.</li>
+          <li><strong>OSRM</strong> &mdash; Directions. Origin &amp; destination coordinates transmitted.</li>
+          <li><strong>Carto</strong> &mdash; Map tiles. Approximate location may be inferred from tile requests.</li>
+          <li><strong>Open-Meteo</strong> &mdash; EV Planner weather. Coordinates sent for local conditions.</li>
+          <li><strong>Google / Apple Maps</strong> &mdash; Optional deep link. Only destination coordinates passed.</li>
+          <li><strong>Parking Operators</strong> &mdash; PayByPhone, HonkMobile etc. opened via deep link. No personal data shared.</li>
         </ul>
       </div>
 
       <div class="prv-section">
-        <div class="prv-section-num">05</div>
-        <div class="prv-section-title"><div class="prv-icon g"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>Your Rights &amp; Choices</div>
+        <div class="prv-section-num">04 &mdash; Your Rights</div>
         <ul class="prv-ul">
-          <li><strong>Location access</strong> — Deny or revoke at any time in device settings. The search bar works without GPS.</li>
-          <li><strong>Clear all local data</strong> — Clear browser site data for this app to erase everything instantly.</li>
-          <li><strong>Saved spots</strong> — Delete individually inside the app at any time.</li>
+          <li><strong>Location</strong> &mdash; Revoke at any time in device settings. Search bar works without GPS.</li>
+          <li><strong>Clear all data</strong> &mdash; Clear browser site data for this app to erase everything.</li>
+          <li><strong>Saved spots</strong> &mdash; Delete individually inside the app at any time.</li>
         </ul>
-        <p class="prv-p">Residents of the EU (GDPR), California (CCPA), and Canada (PIPEDA) have additional rights regarding personal data. As we store no personal data on our servers, these impose minimal obligations — but we are committed to full compliance. Contact us with any questions.</p>
+        <p class="prv-p">EU (GDPR), California (CCPA), and Canada (PIPEDA) residents have additional rights. As we store no personal data on our servers, we are committed to full compliance. Contact us with any questions.</p>
       </div>
 
       <div class="prv-section">
-        <div class="prv-section-num">06</div>
-        <div class="prv-section-title"><div class="prv-icon a"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>Children's Privacy</div>
-        <p class="prv-p">This app is not directed at children under 13. We do not knowingly collect information from children. Contact us immediately if you believe a child has submitted personal data.</p>
+        <div class="prv-section-num">05 &mdash; Children &amp; Changes</div>
+        <p class="prv-p">This app is not directed at children under 13. We do not knowingly collect information from children. We may update this policy periodically &mdash; the effective date above will always reflect the latest version.</p>
       </div>
 
       <div class="prv-section">
-        <div class="prv-section-num">07</div>
-        <div class="prv-section-title"><div class="prv-icon p"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>Changes to This Policy</div>
-        <p class="prv-p">We may update this policy from time to time. The effective date at the top will always reflect the latest version. For significant changes we will display a notice in the app. Continued use after changes constitutes acceptance.</p>
-      </div>
-
-      <div class="prv-section">
-        <div class="prv-section-num">08</div>
-        <div class="prv-section-title"><div class="prv-icon g"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21.2 8.4c.5.38.8.97.8 1.6v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V10a2 2 0 0 1 .8-1.6l8-6a2 2 0 0 1 2.4 0l8 6Z"/><path d="m22 10-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 10"/></svg></div>Contact Us</div>
+        <div class="prv-section-num">06 &mdash; Contact</div>
         <div class="prv-contact">
-          <div class="prv-contact-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21.2 8.4c.5.38.8.97.8 1.6v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V10a2 2 0 0 1 .8-1.6l8-6a2 2 0 0 1 2.4 0l8 6Z"/><path d="m22 10-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 10"/></svg></div>
+          <div class="prv-contact-icon">&#x2709;&#xFE0F;</div>
           <div>
             <div class="prv-contact-title">One Touch Parking Finder</div>
-            <div class="prv-contact-sub">We aim to respond within 5 business days.<br>Please include "Privacy" in the subject line.</div>
+            <div class="prv-contact-sub">Respond within 5 business days. Include "Privacy" in subject.</div>
             <div class="prv-contact-email">privacy@onetouchparking.app</div>
           </div>
         </div>
       </div>
-
     </div>
   </div>
 </div>
