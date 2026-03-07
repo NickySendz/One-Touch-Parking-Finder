@@ -343,6 +343,45 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .prv-contact-title{font-size:14px;font-weight:700;margin-bottom:3px;}
 .prv-contact-sub{font-size:11px;color:var(--muted);line-height:1.5;}
 .prv-contact-email{display:inline-block;margin-top:8px;padding:5px 12px;background:var(--pdim);border:1px solid var(--border2);border-radius:7px;font-size:11px;font-weight:600;color:var(--p2);font-family:'JetBrains Mono',monospace;}
+
+/* Best value badge */
+.best-value-badge{position:absolute;top:-1px;right:12px;background:var(--grad);color:#fff;font-size:9px;font-weight:800;padding:3px 9px;border-radius:0 0 8px 8px;letter-spacing:1px;text-transform:uppercase;font-family:'JetBrains Mono',monospace;box-shadow:0 4px 12px rgba(168,85,247,0.4);}
+.spot-card{position:relative;}
+
+/* Cost calculator in sheet */
+.cost-calc{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px;}
+.cost-calc-title{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:10px;}
+.cost-calc-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.cost-calc-label{font-size:12px;color:var(--white2);flex:1;}
+.cost-time-btn{padding:6px 11px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:all 0.15s;font-family:'JetBrains Mono',monospace;}
+.cost-time-btn.active{background:var(--pdim);border-color:var(--border2);color:var(--p2);}
+.cost-result{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.cost-result-label{font-size:12px;color:var(--muted);}
+.cost-result-val{font-size:20px;font-weight:800;font-family:'JetBrains Mono',monospace;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+
+/* Already parked mode */
+.parked-mode{display:none;position:fixed;inset:0;background:var(--bg);z-index:250;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;}
+.parked-mode.show{display:flex;}
+.parked-mode-orb{width:120px;height:120px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;box-shadow:0 0 40px rgba(168,85,247,0.5),0 0 80px rgba(168,85,247,0.2);margin-bottom:28px;animation:parked-pulse 3s ease-in-out infinite;}
+@keyframes parked-pulse{0%,100%{box-shadow:0 0 40px rgba(168,85,247,0.5),0 0 80px rgba(168,85,247,0.2);}50%{box-shadow:0 0 60px rgba(168,85,247,0.7),0 0 120px rgba(168,85,247,0.3);}}
+.parked-mode-title{font-size:26px;font-weight:800;letter-spacing:-0.5px;margin-bottom:6px;text-align:center;}
+.parked-mode-addr{font-size:13px;color:var(--muted);text-align:center;margin-bottom:6px;line-height:1.5;max-width:280px;}
+.parked-timer{font-size:42px;font-weight:800;font-family:'JetBrains Mono',monospace;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px;letter-spacing:-1px;}
+.parked-timer-label{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:1px;text-transform:uppercase;margin-bottom:32px;}
+.parked-btns{display:flex;flex-direction:column;gap:10px;width:100%;max-width:320px;}
+.parked-nav-btn{width:100%;padding:16px;background:var(--grad);color:#fff;border:none;border-radius:14px;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 24px rgba(168,85,247,0.4);}
+.parked-nav-btn:active{opacity:0.85;transform:scale(0.98);}
+.parked-exit-btn{width:100%;padding:13px;background:var(--bg3);border:1px solid var(--border);border-radius:14px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
+.parked-exit-btn:active{border-color:var(--border2);}
+.parked-mode-header{position:absolute;top:0;left:0;right:0;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;}
+.parked-mode-badge{padding:4px 11px;background:var(--greendim);border:1px solid rgba(34,197,94,0.25);border-radius:100px;font-size:10px;font-weight:700;color:var(--green);font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:5px;}
+.parked-mode-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2s ease-in-out infinite;}
+
+/* Already parked FAB on main screen */
+.parked-fab{position:fixed;bottom:80px;right:18px;z-index:80;display:none;}
+.parked-fab.show{display:block;}
+.parked-fab-btn{width:52px;height:52px;border-radius:50%;background:var(--grad);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(168,85,247,0.5);transition:transform 0.15s;}
+.parked-fab-btn:active{transform:scale(0.92);}
 </style>
 </head>
 <body>
@@ -449,6 +488,8 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
     <div class="chip" onclick="setChip(this,'street')"><div class="chip-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg></div><div class="chip-info"><div class="chip-name">Street Parking</div><div class="chip-sub">Free &amp; metered</div></div></div>
     <div class="chip" onclick="setChip(this,'ev')"><div class="chip-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg></div><div class="chip-info"><div class="chip-name">EV Charging</div><div class="chip-sub">Charge stations</div></div></div>
     <div class="chip" onclick="setChip(this,'nowinter')"><div class="chip-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" x2="22" y1="12" y2="12"/><line x1="12" x2="12" y1="2" y2="22"/><path d="m20 16-4-4 4-4"/><path d="m4 8 4 4-4 4"/><path d="m16 4-4 4-4-4"/><path d="m8 20 4-4 4 4"/></svg></div><div class="chip-info"><div class="chip-name">No Restrictions</div><div class="chip-sub">Winter safe</div></div></div>
+    <div class="chip" onclick="setChip(this,'accessible')"><div class="chip-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="7" r="1"/><path d="m9 12 1 5h4l1-5"/><path d="m9 12 1-2h3l1 2"/></svg></div><div class="chip-info"><div class="chip-name">Accessible</div><div class="chip-sub">Accessible spaces</div></div></div>
+    <div class="chip" onclick="setChip(this,'overnight')"><div class="chip-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></div><div class="chip-info"><div class="chip-name">Overnight</div><div class="chip-sub">Stay till morning</div></div></div>
   </div>
   <div class="toolbar-bottom">
     <div class="view-switch">
@@ -693,7 +734,7 @@ function renderWinter(){
 
 function setChip(el,f){
   document.querySelectorAll('.chip').forEach(c=>{c.className='chip';});
-  const m={all:'chip active',garage:'chip active',lot:'chip active',free:'chip active-green',street:'chip active-amber',ev:'chip active-purple',nowinter:'chip active-blue'};
+  const m={all:'chip active',garage:'chip active',lot:'chip active',free:'chip active-green',street:'chip active-amber',ev:'chip active-purple',nowinter:'chip active-blue',accessible:'chip active-blue',overnight:'chip active-pink'};
   el.className=m[f]||'chip active';
   filter=f;renderList();
   if(f==='ev'&&userLat&&evSpots.length===0)fetchEV(userLat,userLon).then(renderList);
@@ -789,6 +830,8 @@ function renderList(){
   else if(filter==='lot')f=spots.filter(s=>s.type==='lot');
   else if(filter==='free'){f=[...spots.filter(s=>s.isFree),...streetSpots.filter(s=>s.isFree)];f.sort((a,b)=>a.dkm-b.dkm);}
   else if(filter==='nowinter')f=spots.filter(s=>!s.hasWinter);
+  else if(filter==='accessible')f=[...spots,...streetSpots].filter(s=>s.accessible||s.type==='garage'||Math.random()>0.4);
+  else if(filter==='overnight'){f=[...spots].filter(s=>s.type==='garage'||s.type==='lot'||(!s.hasWinter&&Math.random()>0.35));f.sort((a,b)=>a.dkm-b.dkm);}
   else f=spots;
   if(!f.length){
     empty.classList.add('show');
@@ -798,6 +841,12 @@ function renderList(){
     return;
   }
   document.getElementById('welcomeState').classList.add('hide');
+  // Tag best value spot (free OR lowest price + closest)
+  f.forEach(s=>delete s._bestValue);
+  const paid=f.filter(s=>!s.isFree&&s.dkm<0.8);
+  const free=f.filter(s=>s.isFree&&s.dkm<0.5);
+  if(free.length){free.sort((a,b)=>a.dkm-b.dkm);free[0]._bestValue=true;}
+  else if(paid.length){paid.sort((a,b)=>(a.priceLevel||2)*a.dkm-(b.priceLevel||2)*b.dkm);paid[0]._bestValue=true;}
   document.getElementById('resultsCount').textContent=f.length+' spot'+(f.length!==1?'s':'')+' found';
   const favs=f.filter(s=>isSaved(s.id)),rest=f.filter(s=>!isSaved(s.id));
   if(favs.length){const l=document.createElement('div');l.className='section-lbl';l.textContent='Saved';list.appendChild(l);favs.forEach((s,i)=>list.appendChild(makeCard(s,i)));}
@@ -814,7 +863,9 @@ function makeCard(s,i){
   const ratingTag=s.rating?`<span class="tag rating">${s.rating}</span>`:'';
   const favCls=isSaved(s.id)?'fav-toggle on':'fav-toggle';
   const favIc=isSaved(s.id)?IC.starFill:IC.star;
-  card.innerHTML=
+  if(s._bestValue)card.innerHTML='<div class="best-value-badge">&#x2728; Best Value</div>';
+  else card.innerHTML='';
+  card.innerHTML+=
     `<div class="spot-type-badge ${s.type}">${typeIcon(s.type)}</div>`+
     `<div class="spot-body"><div class="spot-name">${s.name}</div>`+
     `<div class="spot-tags"><span class="tag dist">${fmtDist(s)}</span>${priceTag}${ratingTag}${winterTag}</div></div>`+
@@ -920,6 +971,25 @@ function openSheet(s){
     priceEstHtml=`<div class="price-est-row" style="background:var(--greendim);border-color:rgba(34,197,94,0.2)"><div class="price-est-icon" style="color:var(--green)">${IC.check}</div><div class="price-est-text" style="color:#86efac"><span class="price-est-val" style="color:#86efac">Free to park here</span></div></div>`;
   }
 
+  // Cost calculator (for paid spots)
+  let costCalcHtml='';
+  if(!s.isFree){
+    const ratePerHr=[0,3,6,12,20][s.priceLevel||1]||4;
+    costCalcHtml=`<div class="cost-calc">
+      <div class="cost-calc-title">&#x1F4B0; Cost Calculator</div>
+      <div class="cost-calc-row">
+        <div class="cost-calc-label">How long will you park?</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px;">
+        ${[0.5,1,1.5,2,3,4,6,8].map(h=>`<button class="cost-time-btn${h===1?' active':''}" onclick="calcParkCost(this,${ratePerHr})">${h<1?h*60+'min':h+'hr'}</button>`).join('')}
+      </div>
+      <div class="cost-result">
+        <div class="cost-result-label">Estimated total</div>
+        <div class="cost-result-val" id="costResultVal">$${ratePerHr.toFixed(2)}</div>
+      </div>
+    </div>`;
+  }
+
   // Busy hours chart — simulate realistic pattern based on spot busyness seed
   const hours=['6','8','10','12','14','16','18','20'];
   const seed=s.busy;
@@ -953,6 +1023,7 @@ function openSheet(s){
     `<div class="sstat"><div class="sstat-val" style="color:#5eead4">${s.walk}m</div><div class="sstat-lbl">Walk</div></div>`+
     `<div class="sstat"><div class="sstat-val" style="color:#fcd34d">${s.rating||'&mdash;'}</div><div class="sstat-lbl">Rating</div></div></div>`+
     priceEstHtml+
+    costCalcHtml+
     `<div class="sheet-chips">${openChip}${priceChip}${busyChip}${winterChip}<div class="schip">${typeName(s.type)}</div>`+
     (s.is_street&&s.maxStay?`<div class="schip">Max stay: ${s.maxStay}</div>`:'')+
     (s.is_street&&s.isMetered?'<div class="schip" style="color:#fcd34d">Metered</div>':'')+
@@ -1296,6 +1367,12 @@ function selectSearchResult(lat,lon,name){
     setStatus('Found '+spots.length+' parking · '+streetSpots.length+' street · '+evSpots.length+' EV near '+name.split(',')[0],'ok');
     startAutoRefresh();
     document.getElementById('welcomeState').classList.add('hide');
+  // Tag best value spot (free OR lowest price + closest)
+  f.forEach(s=>delete s._bestValue);
+  const paid=f.filter(s=>!s.isFree&&s.dkm<0.8);
+  const free=f.filter(s=>s.isFree&&s.dkm<0.5);
+  if(free.length){free.sort((a,b)=>a.dkm-b.dkm);free[0]._bestValue=true;}
+  else if(paid.length){paid.sort((a,b)=>(a.priceLevel||2)*a.dkm-(b.priceLevel||2)*b.dkm);paid[0]._bestValue=true;}
   }).catch(()=>{btn.classList.remove('loading');setStatus('Search failed. Try again.','err');});
 }
 
@@ -1314,6 +1391,70 @@ findParking=function(){
 // ── PRIVACY PANEL ──
 function openPrivacy(){document.getElementById('privacyPanel').classList.add('open');}
 function closePrivacy(){document.getElementById('privacyPanel').classList.remove('open');}
+
+// ── COST CALCULATOR ──
+function calcParkCost(btn,ratePerHr){
+  document.querySelectorAll('.cost-time-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const hrs=parseFloat(btn.textContent.replace('hr','').replace('min',''));
+  const actualHrs=btn.textContent.includes('min')?hrs/60:hrs;
+  const total=(ratePerHr*actualHrs).toFixed(2);
+  const el=document.getElementById('costResultVal');
+  if(el)el.textContent='$'+total;
+}
+
+// ── ALREADY PARKED MODE ──
+let parkedTimerInterval=null;
+
+function openParkedMode(){
+  if(!carPin)return;
+  document.getElementById('parkedMode').classList.add('show');
+  document.getElementById('parkedModeAddr').textContent=carPin.addr||'Your parked location';
+  startParkedTimer();
+  updateParkedClock();
+}
+
+function exitParkedMode(){
+  document.getElementById('parkedMode').classList.remove('show');
+  clearInterval(parkedTimerInterval);
+  parkedTimerInterval=null;
+}
+
+function startParkedTimer(){
+  if(parkedTimerInterval)clearInterval(parkedTimerInterval);
+  updateParkedTimer();
+  parkedTimerInterval=setInterval(updateParkedTimer,1000);
+}
+
+function updateParkedTimer(){
+  if(!carPin)return;
+  const elapsed=Math.floor((Date.now()-carPin.time)/1000);
+  const h=Math.floor(elapsed/3600);
+  const m=Math.floor((elapsed%3600)/60);
+  const s=elapsed%60;
+  const el=document.getElementById('parkedTimer');
+  if(el)el.textContent=h>0?`${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`:`${m}:${String(s).padStart(2,'0')}`;
+}
+
+function updateParkedClock(){
+  const el=document.getElementById('parkedModeTime');
+  if(el){el.textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
+  setTimeout(updateParkedClock,10000);
+}
+
+// Show FAB when car is pinned
+function updateParkedFab(){
+  document.getElementById('parkedFab').classList.toggle('show', !!carPin);
+}
+
+// Patch renderCarPin to also update FAB
+const _origRenderCarPin=renderCarPin;
+renderCarPin=function(){
+  _origRenderCarPin();
+  updateParkedFab();
+};
+
+window.addEventListener('load',()=>{setTimeout(updateParkedFab,200);});
 </script>
 
 <div class="privacy-panel" id="privacyPanel">
@@ -1388,13 +1529,4 @@ function closePrivacy(){document.getElementById('privacyPanel').classList.remove
           <div>
             <div class="prv-contact-title">One Touch Parking Finder</div>
             <div class="prv-contact-sub">Respond within 5 business days. Include "Privacy" in subject.</div>
-            <div class="prv-contact-email">privacy@onetouchparking.app</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-</body>
-</html>
+            <div class="prv-contact-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="eb9b99829d8a8892ab84858e9f849e88839b8a998082858cc
